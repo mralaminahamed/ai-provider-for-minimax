@@ -21,6 +21,7 @@ namespace AlAminAhamed\MiniMaxAiProvider;
 
 use WordPress\AiClient\AiClient;
 use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
+use AlAminAhamed\MiniMaxAiProvider\Settings\MiniMaxSettings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	return;
@@ -50,3 +51,16 @@ function register_provider(): void {
 }
 
 add_action( 'init', __NAMESPACE__ . '\\register_provider', 5 );
+
+/**
+ * Initialize settings page.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ */
+function init_settings(): void {
+	MiniMaxSettings::init();
+}
+
+add_action( 'admin_init', __NAMESPACE__ . '\\init_settings', 5 );
