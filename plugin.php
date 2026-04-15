@@ -65,4 +65,4 @@ function init_settings(): void {
 	MiniMaxSettings::init();
 }
 
-add_action( 'admin_init', __NAMESPACE__ . '\\init_settings', 5 );
+add_action( 'init', __NAMESPACE__ . '\\init_settings', 5 );
