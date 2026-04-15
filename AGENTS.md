@@ -2,15 +2,20 @@
 
 ## Overview
 
-This is a **WordPress AI Provider plugin** for MiniMax. It registers MiniMax as an AI provider using the [WordPress PHP AI Client](https://github.com/WordPress/wp-ai-client).
+This is a **WordPress AI Provider plugin** for MiniMax. It registers MiniMax as an AI provider using the [WordPress PHP AI Client SDK](https://github.com/WordPress/wp-ai-client).
+
+## Reference Repositories
+
+| Repository | URL |
+|-----------|-----|
+| Base SDK | https://github.com/WordPress/wp-ai-client |
+| Reference Provider | https://github.com/WordPress/ai-provider-for-anthropic |
+| OpenAI Provider | https://github.com/WordPress/ai-provider-for-openai |
+| Google Provider | https://github.com/WordPress/ai-provider-for-google |
 
 ## Architecture Pattern
 
-**Follow the official WordPress AI Provider structure** from these repositories:
-
-- **Reference Implementation**: https://github.com/WordPress/ai-provider-for-anthropic
-- **Base SDK**: https://github.com/WordPress/wp-ai-client
-- **Other Providers**: `ai-provider-for-openai`, `ai-provider-for-google`
+**Follow the official WordPress AI Provider structure** from these repositories.
 
 ### Correct Structure
 
@@ -91,9 +96,7 @@ new ModelMetadata(
 
 | File | Purpose |
 |------|---------|
-| `src/Provider/MiniMaxProvider.php` | Provider class pattern |
-| `src/Models/MiniMaxTextGenerationModel.php` | Model implementation pattern |
-| `src/Metadata/MiniMaxModelMetadataDirectory.php` | Metadata directory pattern |
-| `vendor/wordpress/php-ai-client/src/Providers/Models/DTO/ModelMetadata.php` | ModelMetadata DTO |
-| `vendor/wordpress/php-ai-client/src/Providers/Models/Enums/CapabilityEnum.php` | Capability enum |
-| `vendor/wordpress/php-ai-client/src/Providers/Models/Enums/OptionEnum.php` | Option enum |
+| `vendor/wordpress/wp-ai-client/src/Providers/Models/DTO/ModelMetadata.php` | ModelMetadata DTO |
+| `vendor/wordpress/wp-ai-client/src/Providers/Models/Enums/CapabilityEnum.php` | Capability enum |
+| `vendor/wordpress/wp-ai-client/src/Providers/Models/Enums/OptionEnum.php` | Option enum |
+| `vendor/wordpress/wp-ai-client/src/Providers/Contracts/ModelMetadataDirectoryInterface.php` | Interface |
