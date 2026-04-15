@@ -94,8 +94,8 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return array();
 		}
 
-		$body    = wp_remote_retrieve_body( $response );
-		$data    = json_decode( $body, true );
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
 
 		if ( ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
 			return array();
@@ -114,7 +114,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 					new TextGenerationCapability(
 						CapabilityEnum::text_generation(),
 						array(
-							'max_tokens'       => 204800,
+							'max_tokens'      => 204800,
 							'context_window'  => 204800,
 							'supports_vision' => false,
 						)
@@ -144,7 +144,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 					new TextGenerationCapability(
 						CapabilityEnum::text_generation(),
 						array(
-							'max_tokens'       => 204800,
+							'max_tokens'      => 204800,
 							'context_window'  => 204800,
 							'supports_vision' => false,
 						)
@@ -158,7 +158,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 					new TextGenerationCapability(
 						CapabilityEnum::text_generation(),
 						array(
-							'max_tokens'       => 204800,
+							'max_tokens'      => 204800,
 							'context_window'  => 204800,
 							'supports_vision' => false,
 						)
@@ -172,7 +172,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 					new TextGenerationCapability(
 						CapabilityEnum::text_generation(),
 						array(
-							'max_tokens'       => 204800,
+							'max_tokens'      => 204800,
 							'context_window'  => 204800,
 							'supports_vision' => false,
 						)
@@ -186,7 +186,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 					new TextGenerationCapability(
 						CapabilityEnum::text_generation(),
 						array(
-							'max_tokens'       => 204800,
+							'max_tokens'      => 204800,
 							'context_window'  => 204800,
 							'supports_vision' => false,
 						)

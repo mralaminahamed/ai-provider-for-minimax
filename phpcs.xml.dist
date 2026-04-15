@@ -10,11 +10,15 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
 	<rule ref="WordPress-Extra"/>
-	<rule ref="WordPress-Documentation"/>
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" value="ai-provider-for-minimax" type="array"/>
+			<property name="text_domain" type="array">
+				<element value="ai-provider-for-minimax"/>
+			</property>
 		</properties>
 	</rule>
 

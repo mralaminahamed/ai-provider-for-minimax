@@ -40,9 +40,14 @@ class MiniMaxProvider extends AbstractApiProvider {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Creates a model instance for the given metadata.
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param ModelMetadata    $model_metadata    Model metadata.
+	 * @param ProviderMetadata $provider_metadata Provider metadata.
+	 * @return ModelInterface The created model instance.
+	 * @throws RuntimeException If no supported capability is found.
 	 */
 	protected static function createModel(
 		ModelMetadata $model_metadata,
@@ -57,7 +62,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 		}
 
 		throw new RuntimeException(
-			'Unsupported model capabilities: ' . implode( ', ', $capabilities )
+			esc_html( 'Unsupported model capabilities: ' . implode( ', ', $capabilities ) )
 		);
 	}
 
