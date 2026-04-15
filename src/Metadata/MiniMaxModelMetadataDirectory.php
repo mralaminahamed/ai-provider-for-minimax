@@ -11,9 +11,10 @@ namespace AlAminAhamed\MiniMaxAiProvider\Metadata;
 
 use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
-use WordPress\AiClient\Providers\Models\Capabilities\TextGenerationCapability;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
+use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
 use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
+use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 
 /**
  * Model metadata directory for MiniMax.
@@ -23,13 +24,11 @@ use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 	/**
-	 * Get all model metadata.
+	 * {@inheritDoc}
 	 *
 	 * @since 1.0.0
-	 *
-	 * @return ModelMetadata[]
 	 */
-	public function get_all(): array {
+	public function listModelMetadata(): array {
 		$models = $this->fetch_models_from_api();
 
 		if ( ! empty( $models ) ) {
@@ -37,35 +36,6 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		}
 
 		return $this->get_fallback_models();
-	}
-
-	/**
-	 * Get model metadata by ID.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $model_id Model ID.
-	 * @return ModelMetadata|null
-	 */
-	public function get( string $model_id ): ?ModelMetadata {
-		$all_models = $this->get_all();
-
-		foreach ( $all_models as $model ) {
-			if ( $model->getId() === $model_id ) {
-				return $model;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since 1.0.0
-	 */
-	public function listModelMetadata(): array {
-		return $this->get_all();
 	}
 
 	/**
@@ -94,6 +64,26 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		}
 
 		return $model;
+	}
+
+	/**
+	 * Get model metadata by ID.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $model_id Model ID.
+	 * @return ModelMetadata|null
+	 */
+	private function get( string $model_id ): ?ModelMetadata {
+		$all_models = $this->listModelMetadata();
+
+		foreach ( $all_models as $model ) {
+			if ( $model->getId() === $model_id ) {
+				return $model;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -139,7 +129,14 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return array();
 		}
 
-		$models = array();
+		$models       = array();
+		$capabilities = array(
+			CapabilityEnum::textGeneration(),
+		);
+		$options      = array(
+			new SupportedOption( OptionEnum::maxTokens() ),
+		);
+
 		foreach ( $data['data'] as $model_data ) {
 			if ( ! isset( $model_data['id'] ) ) {
 				continue;
@@ -148,16 +145,8 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			$models[] = new ModelMetadata(
 				$model_data['id'],
 				$model_data['id'],
-				array(
-					new TextGenerationCapability(
-						CapabilityEnum::text_generation(),
-						array(
-							'max_tokens'      => 204800,
-							'context_window'  => 204800,
-							'supports_vision' => false,
-						)
-					),
-				)
+				$capabilities,
+				$options
 			);
 		}
 
@@ -174,62 +163,37 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 * @return ModelMetadata[]
 	 */
 	private function get_fallback_models(): array {
+		$capabilities = array(
+			CapabilityEnum::textGeneration(),
+		);
+		$options      = array(
+			new SupportedOption( OptionEnum::maxTokens() ),
+		);
+
 		return array(
 			new ModelMetadata(
 				'MiniMax-M2.7',
 				'MiniMax M2.7',
-				array(
-					new TextGenerationCapability(
-						CapabilityEnum::text_generation(),
-						array(
-							'max_tokens'      => 204800,
-							'context_window'  => 204800,
-							'supports_vision' => false,
-						)
-					),
-				)
+				$capabilities,
+				$options
 			),
 			new ModelMetadata(
 				'MiniMax-M2.5',
 				'MiniMax M2.5',
-				array(
-					new TextGenerationCapability(
-						CapabilityEnum::text_generation(),
-						array(
-							'max_tokens'      => 204800,
-							'context_window'  => 204800,
-							'supports_vision' => false,
-						)
-					),
-				)
+				$capabilities,
+				$options
 			),
 			new ModelMetadata(
 				'MiniMax-M2.1',
 				'MiniMax M2.1',
-				array(
-					new TextGenerationCapability(
-						CapabilityEnum::text_generation(),
-						array(
-							'max_tokens'      => 204800,
-							'context_window'  => 204800,
-							'supports_vision' => false,
-						)
-					),
-				)
+				$capabilities,
+				$options
 			),
 			new ModelMetadata(
 				'MiniMax-M2',
 				'MiniMax M2',
-				array(
-					new TextGenerationCapability(
-						CapabilityEnum::text_generation(),
-						array(
-							'max_tokens'      => 204800,
-							'context_window'  => 204800,
-							'supports_vision' => false,
-						)
-					),
-				)
+				$capabilities,
+				$options
 			),
 		);
 	}
