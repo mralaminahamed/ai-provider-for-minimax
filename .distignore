@@ -1,0 +1,28 @@
+# Git
+.git/
+.gitattributes
+.gitignore
+
+# Development
+.phpunit.result.cache
+phpunit.xml
+phpunit.xml.dist
+
+# Dependencies
+/vendor/
+composer.json
+composer.lock
+composer.phar
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
