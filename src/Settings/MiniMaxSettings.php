@@ -36,6 +36,21 @@ class MiniMaxSettings {
 	public static function init(): void {
 		add_action( 'admin_menu', array( self::class, 'add_settings_page' ) );
 		add_action( 'admin_init', array( self::class, 'register_settings' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( self::class, 'add_action_links' ) );
+	}
+
+	/**
+	 * Add action links to plugins page.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public static function add_action_links( array $links ): array {
+		$settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=minimax-settings' ) ) . '">' . esc_html__( 'Settings', 'ai-provider-for-minimax' ) . '</a>';
+		array_unshift( $links, $settings_link );
+		return $links;
 	}
 
 	/**
