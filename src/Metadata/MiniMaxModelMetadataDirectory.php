@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace AlAminAhamed\MiniMaxAiProvider\Metadata;
 
+use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\Capabilities\TextGenerationCapability;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
@@ -56,6 +57,43 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		}
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since 1.0.0
+	 */
+	public function listModelMetadata(): array {
+		return $this->get_all();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since 1.0.0
+	 */
+	public function hasModelMetadata( string $model_id ): bool {
+		return $this->get( $model_id ) !== null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since 1.0.0
+	 *
+	 * @throws InvalidArgumentException If model metadata not found.
+	 */
+	public function getModelMetadata( string $model_id ): ModelMetadata {
+		$model = $this->get( $model_id );
+
+		if ( null === $model ) {
+			throw new InvalidArgumentException(
+				esc_html( "Model metadata not found for model: {$model_id}" )
+			);
+		}
+
+		return $model;
 	}
 
 	/**
