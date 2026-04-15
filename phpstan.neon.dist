@@ -1,0 +1,19 @@
+parameters:
+	level: max
+	paths:
+		- ./src
+		- ./plugin.php
+	excludePaths:
+		- ./vendor
+		- ./tests
+	ignoreErrors:
+		- '#Function .* not found#'
+		- '#Class .* not found#'
+		- '#Method .* not found#'
+		- '#Property .* not found#'
+		- '#Constant .* not found#'
+		- '#Call to undefined function#'
+		- '#Call to an undefined method#'
+		- '#Access to an undefined property#'
+	reportUnmatchedIgnoredErrors: false
+	editorUrl: 'phpstorm://open?file=%file&line=%line'

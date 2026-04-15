@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+	<name>AI Provider for MiniMax</name>
+	<description>WordPress Coding Standards for AI Provider for MiniMax plugin.</description>
+
+	<file>./plugin.php</file>
+	<file>./src</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Documentation"/>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" value="ai-provider-for-minimax" type="array"/>
+		</properties>
+	</rule>
+
+	<ini name="memory_limit" value="256M"/>
+	<ini name="max_execution_time" value="120"/>
+</ruleset>

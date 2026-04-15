@@ -1,0 +1,38 @@
+{
+    "name": "mralaminahamed/ai-provider-for-minimax",
+    "description": "MiniMax AI provider for the WordPress AI Client.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Al Amin Ahamed",
+            "email": "mralaminahamed@gmail.com",
+            "homepage": "https://github.com/mralaminahamed"
+        }
+    ],
+    "require": {
+        "php": "^7.4",
+        "wordpress/ai-client": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpstan/phpstan": "^1.10",
+        "szepeviktor/phpstan-wordpress": "^1.3"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "phpcs": "phpcs -ps --standard=phpcs.xml.dist",
+        "phpcbf": "phpcs -ps --standard=phpcs.xml.dist --runtime-set testVersion 7.4-",
+        "phpstan": "phpstan analyse --configuration=phpstan.neon.dist",
+        "test": "phpunit"
+    }
+}
