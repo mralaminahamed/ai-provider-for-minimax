@@ -10,29 +10,42 @@ declare(strict_types=1);
 namespace AlAminAhamed\MiniMaxAiProvider\Models;
 
 use WordPress\AiClient\Providers\DTO\ProviderMetadata;
+use WordPress\AiClient\Providers\Http\DTO\Request;
+use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
-use WordPress\AiClient\Providers\Models\TextGenerationModel;
+use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;
 
 /**
  * Text generation model for MiniMax.
  *
  * @since 1.0.0
  */
-class MiniMaxTextGenerationModel extends TextGenerationModel {
+class MiniMaxTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationModel {
 
 	/**
-	 * Constructor.
+	 * Creates a request object for the provider's API.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param ModelMetadata    $model_metadata    Model metadata.
-	 * @param ProviderMetadata $provider_metadata Provider metadata.
+	 * @param HttpMethodEnum $method The HTTP method.
+	 * @param string         $path   The API endpoint path, relative to the base URI.
+	 * @param array<string, string|list<string>> $headers The request headers.
+	 * @param string|array<string, mixed>|null   $data   The request data.
+	 * @return Request The request object.
 	 */
-	public function __construct(
-		ModelMetadata $model_metadata,
-		ProviderMetadata $provider_metadata
-	) {
-		parent::__construct( $model_metadata, $provider_metadata );
+	protected function createRequest(
+		HttpMethodEnum $method,
+		string $path,
+		array $headers = [],
+		$data = null
+	): Request {
+		return new Request(
+			$method,
+			$path,
+			$headers,
+			$data,
+			$this->getRequestOptions()
+		);
 	}
 
 	/**

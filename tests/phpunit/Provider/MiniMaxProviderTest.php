@@ -42,7 +42,7 @@ class MiniMaxProviderTest extends TestCase {
 	 * @return void
 	 */
 	public function test_provider_metadata_has_correct_id(): void {
-		$metadata = MiniMaxProvider::getProviderMetadata();
+		$metadata = MiniMaxProvider::metadata();
 
 		$this->assertEquals( 'minimax', $metadata->getId() );
 	}
@@ -55,7 +55,7 @@ class MiniMaxProviderTest extends TestCase {
 	 * @return void
 	 */
 	public function test_provider_metadata_has_correct_name(): void {
-		$metadata = MiniMaxProvider::getProviderMetadata();
+		$metadata = MiniMaxProvider::metadata();
 
 		$this->assertEquals( 'MiniMax', $metadata->getName() );
 	}
@@ -68,7 +68,7 @@ class MiniMaxProviderTest extends TestCase {
 	 * @return void
 	 */
 	public function test_provider_metadata_has_correct_type(): void {
-		$metadata = MiniMaxProvider::getProviderMetadata();
+		$metadata = MiniMaxProvider::metadata();
 
 		$this->assertEquals( ProviderTypeEnum::cloud(), $metadata->getType() );
 	}
@@ -81,7 +81,7 @@ class MiniMaxProviderTest extends TestCase {
 	 * @return void
 	 */
 	public function test_provider_metadata_has_api_key_auth(): void {
-		$metadata = MiniMaxProvider::getProviderMetadata();
+		$metadata = MiniMaxProvider::metadata();
 
 		$this->assertEquals( RequestAuthenticationMethod::apiKey(), $metadata->getAuthenticationMethod() );
 	}

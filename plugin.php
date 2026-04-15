@@ -23,6 +23,8 @@ use WordPress\AiClient\AiClient;
 use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
 use AlAminAhamed\MiniMaxAiProvider\Settings\MiniMaxSettings;
 
+define( 'MINIMAX_PLUGIN_FILE', __FILE__ );
+
 if ( ! defined( 'ABSPATH' ) ) {
 	return;
 }

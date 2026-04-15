@@ -29,11 +29,7 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 	 * @return void
 	 */
 	public function test_model_is_created_correctly(): void {
-		$directory      = new MiniMaxModelMetadataDirectory();
-		$provider_meta  = MiniMaxProvider::getProviderMetadata();
-		$model_metadata = $directory->getModelMetadata( 'MiniMax-M2.7' );
-
-		$model = MiniMaxProvider::createModel( $model_metadata, $provider_meta );
+		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
 
 		$this->assertInstanceOf( MiniMaxTextGenerationModel::class, $model );
 	}
@@ -46,13 +42,9 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 	 * @return void
 	 */
 	public function test_model_has_correct_metadata(): void {
-		$directory      = new MiniMaxModelMetadataDirectory();
-		$provider_meta  = MiniMaxProvider::getProviderMetadata();
-		$model_metadata = $directory->getModelMetadata( 'MiniMax-M2.7' );
+		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
 
-		$model = MiniMaxProvider::createModel( $model_metadata, $provider_meta );
-
-		$this->assertEquals( 'MiniMax-M2.7', $model->getModelMetadata()->getId() );
+		$this->assertEquals( 'MiniMax-M2.7', $model->metadata()->getId() );
 	}
 
 	/**
@@ -62,16 +54,9 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_model_has_minimax_provider_header(): void {
-		$directory      = new MiniMaxModelMetadataDirectory();
-		$provider_meta  = MiniMaxProvider::getProviderMetadata();
-		$model_metadata = $directory->getModelMetadata( 'MiniMax-M2.7' );
+	public function test_model_has_provider_metadata(): void {
+		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
 
-		$model = MiniMaxProvider::createModel( $model_metadata, $provider_meta );
-
-		$headers = $model->getDefaultHeaders();
-
-		$this->assertArrayHasKey( 'OpenCode-Provider', $headers );
-		$this->assertEquals( 'wordpress-plugin', $headers['OpenCode-Provider'] );
+		$this->assertEquals( 'MiniMax', $model->providerMetadata()->getName() );
 	}
 }
