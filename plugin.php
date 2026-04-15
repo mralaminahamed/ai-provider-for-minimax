@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	return;
 }
 
-require_once __DIR__ . '/src/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 /**
  * Registers the AI Provider for MiniMax with the AI Client.
