@@ -119,6 +119,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			set_transient( $transient_key, array(), 5 * MINUTE_IN_SECONDS );
 			return array();
 		}
 
@@ -126,10 +127,10 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		$data = json_decode( $body, true );
 
 		if ( ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
+			set_transient( $transient_key, array(), 5 * MINUTE_IN_SECONDS );
 			return array();
 		}
 
-		$models       = array();
 		$capabilities = array(
 			CapabilityEnum::textGeneration(),
 		);
@@ -137,6 +138,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			new SupportedOption( OptionEnum::maxTokens() ),
 		);
 
+		$models = array();
 		foreach ( $data['data'] as $model_data ) {
 			if ( ! isset( $model_data['id'] ) ) {
 				continue;
@@ -144,7 +146,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 			$models[] = new ModelMetadata(
 				$model_data['id'],
-				$model_data['id'],
+				$model_data['name'] ?? $model_data['id'],
 				$capabilities,
 				$options
 			);

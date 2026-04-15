@@ -58,7 +58,7 @@ class MiniMaxTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationM
 	protected function getDefaultHeaders(): array {
 		$headers = parent::getDefaultHeaders();
 
-		$headers['OpenCode-Provider'] = 'wordpress-plugin';
+		$headers['MiniMax-Provider'] = 'wordpress-plugin';
 
 		return $headers;
 	}

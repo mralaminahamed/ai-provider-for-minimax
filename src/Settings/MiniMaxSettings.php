@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace AlAminAhamed\MiniMaxAiProvider\Settings;
 
 use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
-use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
 
 /**
  * Class MiniMaxSettings
