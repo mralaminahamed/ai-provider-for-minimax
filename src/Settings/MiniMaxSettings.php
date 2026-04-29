@@ -165,8 +165,9 @@ class MiniMaxSettings {
 		echo '<option value="">' . esc_html__( 'Select a model', 'alamin-ai-provider-for-minimax' ) . '</option>';
 
 		foreach ( $models as $model ) {
-			$selected = selected( $settings['default_model'] ?? '', $model->getId(), false );
-			echo '<option value="' . esc_attr( $model->getId() ) . '" ' . $selected . '>';
+			echo '<option value="' . esc_attr( $model->getId() ) . '"';
+			selected( $settings['default_model'] ?? '', $model->getId() );
+			echo '>';
 			echo esc_html( $model->getName() );
 			echo '</option>';
 		}

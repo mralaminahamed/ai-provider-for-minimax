@@ -15,8 +15,8 @@ phpstan.neon.dist
 # Tests
 tests/
 
-# Dependencies (rebuilt via composer install --no-dev in build)
-/vendor/
+# Composer manifests + cache (vendor/ ships with prod-only deps; release script
+# runs `composer install --no-dev --optimize-autoloader` before zipping)
 composer.json
 composer.lock
 composer.phar

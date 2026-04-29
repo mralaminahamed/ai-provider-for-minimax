@@ -42,6 +42,8 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 * {@inheritDoc}
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param string $model_id The model identifier.
 	 */
 	public function hasModelMetadata( string $model_id ): bool {
 		return $this->get( $model_id ) !== null;
@@ -52,6 +54,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param string $model_id The model identifier.
 	 * @throws InvalidArgumentException If model metadata not found.
 	 */
 	public function getModelMetadata( string $model_id ): ModelMetadata {
@@ -59,7 +62,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 		if ( null === $model ) {
 			throw new InvalidArgumentException(
-				sprintf( 'Model metadata not found for model: %s', $model_id )
+				sprintf( 'Model metadata not found for model: %s', $model_id ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			);
 		}
 
