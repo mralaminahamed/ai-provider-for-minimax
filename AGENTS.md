@@ -20,8 +20,8 @@ This is a **WordPress AI Provider plugin** for MiniMax. It registers MiniMax as 
 ### Correct Structure
 
 ```
-ai-provider-for-minimax/
-├── plugin.php                              # Entry point (registers provider on 'init')
+alamin-ai-provider-for-minimax/
+├── alamin-ai-provider-for-minimax.php      # Entry point (registers provider on 'init')
 ├── src/
 │   ├── Provider/
 │   │   └── MiniMaxProvider.php           # Extends AbstractApiProvider
@@ -31,7 +31,7 @@ ai-provider-for-minimax/
 │       └── MiniMaxModelMetadataDirectory.php
 ├── composer.json
 ├── readme.txt
-└── .wordpress-org/                         # Plugin assets (icon, banner)
+└── .wordpress-org/                         # Plugin assets (icon, banner) — excluded from prod zip
 ```
 
 ### Key Implementation Rules
@@ -41,7 +41,7 @@ ai-provider-for-minimax/
 3. **No hardcoded model lists** - use dynamic discovery via `/v1/models` API
 4. **API endpoint**: `https://api.minimax.io/v1` (OpenAI-compatible)
 5. **Namespace**: `AlAminAhamed\MiniMaxAiProvider`
-6. **Package name**: `mralaminahamed/ai-provider-for-minimax`
+6. **Package name**: `mralaminahamed/alamin-ai-provider-for-minimax`
 
 ### Required AbstractApiProvider Methods
 

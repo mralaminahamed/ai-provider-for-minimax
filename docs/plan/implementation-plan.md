@@ -1,4 +1,4 @@
-# Implementation Plan: AI Provider for MiniMax WordPress Plugin
+# Implementation Plan: Alamin AI Provider for MiniMax WordPress Plugin
 
 **Author**: Al Amin Ahamed
 **Date**: April 2026
@@ -7,8 +7,8 @@
 
 ## 1. Plugin Overview
 
-- **Plugin Name**: AI Provider for MiniMax
-- **Plugin Slug**: `ai-provider-for-minimax`
+- **Plugin Name**: Alamin AI Provider for MiniMax
+- **Plugin Slug**: `alamin-ai-provider-for-minimax`
 - **Description**: Registers MiniMax as a native AI provider using its OpenAI-compatible API endpoint. Enables chat completions and model selection through **Settings > Connectors**.
 - **Key Benefits**:
   - Automatic discovery in the WordPress AI ecosystem.
@@ -31,8 +31,8 @@ Base URL: `https://api.minimax.io/v1` (OpenAI-compatible)
 ## 3. Plugin Structure
 
 ```
-ai-provider-for-minimax/
-├── plugin.php                              # Main plugin file (entry point)
+alamin-ai-provider-for-minimax/
+├── alamin-ai-provider-for-minimax.php                              # Main plugin file (entry point)
 ├── composer.json                           # Dependencies
 ├── src/
 │   ├── autoload.php                       # Custom autoloader

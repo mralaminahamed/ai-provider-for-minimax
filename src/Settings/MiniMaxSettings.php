@@ -47,7 +47,7 @@ class MiniMaxSettings {
 	 * @return array
 	 */
 	public static function add_action_links( array $links ): array {
-		$settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=minimax-settings' ) ) . '">' . esc_html__( 'Settings', 'ai-provider-for-minimax' ) . '</a>';
+		$settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=minimax-settings' ) ) . '">' . esc_html__( 'Settings', 'alamin-ai-provider-for-minimax' ) . '</a>';
 		array_unshift( $links, $settings_link );
 		return $links;
 	}
@@ -61,8 +61,8 @@ class MiniMaxSettings {
 	 */
 	public static function add_settings_page(): void {
 		add_options_page(
-			__( 'MiniMax Settings', 'ai-provider-for-minimax' ),
-			__( 'MiniMax', 'ai-provider-for-minimax' ),
+			__( 'MiniMax Settings', 'alamin-ai-provider-for-minimax' ),
+			__( 'MiniMax', 'alamin-ai-provider-for-minimax' ),
 			'manage_options',
 			'minimax-settings',
 			array( self::class, 'render_settings_page' )
@@ -87,14 +87,14 @@ class MiniMaxSettings {
 
 		add_settings_section(
 			'minimax_general',
-			__( 'General Settings', 'ai-provider-for-minimax' ),
+			__( 'General Settings', 'alamin-ai-provider-for-minimax' ),
 			array( self::class, 'render_general_section' ),
 			'minimax-settings'
 		);
 
 		add_settings_field(
 			'default_model',
-			__( 'Default Model', 'ai-provider-for-minimax' ),
+			__( 'Default Model', 'alamin-ai-provider-for-minimax' ),
 			array( self::class, 'render_model_field' ),
 			'minimax-settings',
 			'minimax_general'
@@ -102,7 +102,7 @@ class MiniMaxSettings {
 
 		add_settings_field(
 			'temperature',
-			__( 'Temperature', 'ai-provider-for-minimax' ),
+			__( 'Temperature', 'alamin-ai-provider-for-minimax' ),
 			array( self::class, 'render_temperature_field' ),
 			'minimax-settings',
 			'minimax_general'
@@ -110,7 +110,7 @@ class MiniMaxSettings {
 
 		add_settings_field(
 			'max_tokens',
-			__( 'Max Tokens', 'ai-provider-for-minimax' ),
+			__( 'Max Tokens', 'alamin-ai-provider-for-minimax' ),
 			array( self::class, 'render_max_tokens_field' ),
 			'minimax-settings',
 			'minimax_general'
@@ -146,7 +146,7 @@ class MiniMaxSettings {
 	 * @return void
 	 */
 	public static function render_general_section(): void {
-		echo '<p>' . esc_html__( 'Configure default settings for the MiniMax AI provider.', 'ai-provider-for-minimax' ) . '</p>';
+		echo '<p>' . esc_html__( 'Configure default settings for the MiniMax AI provider.', 'alamin-ai-provider-for-minimax' ) . '</p>';
 	}
 
 	/**
@@ -162,7 +162,7 @@ class MiniMaxSettings {
 		$models    = $directory->listModelMetadata();
 
 		echo '<select name="' . esc_attr( self::OPTION_KEY ) . '[default_model]" id="minimax_default_model">';
-		echo '<option value="">' . esc_html__( 'Select a model', 'ai-provider-for-minimax' ) . '</option>';
+		echo '<option value="">' . esc_html__( 'Select a model', 'alamin-ai-provider-for-minimax' ) . '</option>';
 
 		foreach ( $models as $model ) {
 			$selected = selected( $settings['default_model'] ?? '', $model->getId(), false );
@@ -172,7 +172,7 @@ class MiniMaxSettings {
 		}
 
 		echo '</select>';
-		echo '<p class="description">' . esc_html__( 'The default model to use for text generation.', 'ai-provider-for-minimax' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'The default model to use for text generation.', 'alamin-ai-provider-for-minimax' ) . '</p>';
 	}
 
 	/**
@@ -191,7 +191,7 @@ class MiniMaxSettings {
 		echo ' id="minimax_temperature"';
 		echo ' value="' . esc_attr( $value ) . '"';
 		echo ' class="small-text" />';
-		echo '<p class="description">' . esc_html__( 'Controls randomness. Lower values make output more focused. Range: 0-2.', 'ai-provider-for-minimax' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Controls randomness. Lower values make output more focused. Range: 0-2.', 'alamin-ai-provider-for-minimax' ) . '</p>';
 	}
 
 	/**
@@ -210,7 +210,7 @@ class MiniMaxSettings {
 		echo ' id="minimax_max_tokens"';
 		echo ' value="' . esc_attr( $value ) . '"';
 		echo ' class="small-text" />';
-		echo '<p class="description">' . esc_html__( 'Maximum number of tokens to generate.', 'ai-provider-for-minimax' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Maximum number of tokens to generate.', 'alamin-ai-provider-for-minimax' ) . '</p>';
 	}
 
 	/**
@@ -227,7 +227,7 @@ class MiniMaxSettings {
 
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html__( 'MiniMax Settings', 'ai-provider-for-minimax' ); ?></h1>
+			<h1><?php echo esc_html__( 'MiniMax Settings', 'alamin-ai-provider-for-minimax' ); ?></h1>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( self::OPTION_KEY );

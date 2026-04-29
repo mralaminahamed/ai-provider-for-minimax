@@ -1,7 +1,8 @@
 {
-    "name": "mralaminahamed/ai-provider-for-minimax",
-    "description": "MiniMax AI provider for the WordPress AI Client.",
+    "name": "mralaminahamed/alamin-ai-provider-for-minimax",
+    "description": "Alamin AI Provider for MiniMax — an independent MiniMax integration for the WordPress AI Client.",
     "type": "wordpress-plugin",
+    "version": "1.0.0",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
@@ -10,31 +11,65 @@
             "homepage": "https://github.com/mralaminahamed"
         }
     ],
+    "minimum-stability": "stable",
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": ">=7.4",
+        "ext-json": "*",
         "wordpress/wp-ai-client": "^0.4"
     },
     "require-dev": {
+        "brain/monkey": "^2.7",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+        "php-stubs/wordpress-stubs": "^6.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1.8",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1.30",
         "phpunit/phpunit": "^9.6",
-        "wp-coding-standards/wpcs": "^3.0",
-        "phpstan/phpstan": "^1.10",
-        "szepeviktor/phpstan-wordpress": "^1.3"
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "wp-coding-standards/wpcs": "^3.3.0"
     },
     "autoload": {
         "psr-4": {
             "AlAminAhamed\\MiniMaxAiProvider\\": "src/"
         }
     },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        },
-        "sort-packages": true
+    "autoload-dev": {
+        "psr-4": {
+            "AlAminAhamed\\MiniMaxAiProvider\\Tests\\": "tests/phpunit/"
+        }
     },
     "scripts": {
-        "phpcs": "phpcs -ps --standard=phpcs.xml.dist",
-        "phpcbf": "phpcs -ps --standard=phpcs.xml.dist --runtime-set testVersion 7.4-",
-        "phpstan": "phpstan analyse --configuration=phpstan.neon.dist",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test-f": "phpunit --filter",
+        "lint": "vendor/bin/phpcs -p -s",
+        "lint:fix": "vendor/bin/phpcbf -p",
+        "lint:review": "phpcs ./src ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
+        "lint:fix:review": "phpcbf ./src ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
+        "analyze": "phpstan analyse --memory-limit=2G --configuration=phpstan.neon.dist",
+        "phpcs": "@lint",
+        "phpcbf": "@lint:fix",
+        "phpstan": "@analyze",
+        "makepot": "wp i18n make-pot . languages/alamin-ai-provider-for-minimax.pot --exclude=node_modules,vendor,docs,release,tests,.wordpress-org,.playwright-mcp,.claude,.remember",
+        "release": [
+            "rm -rf release vendor",
+            "@makepot",
+            "mkdir -p release",
+            "composer install --no-dev --optimize-autoloader",
+            "rsync -av --exclude-from=.distignore . release/alamin-ai-provider-for-minimax/",
+            "cd release && zip -r alamin-ai-provider-for-minimax.zip alamin-ai-provider-for-minimax/",
+            "rm -rf release/alamin-ai-provider-for-minimax/",
+            "composer install"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true,
+            "php-http/discovery": true
+        },
+        "sort-packages": true
     }
 }

@@ -82,7 +82,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 
 		if ( version_compare( AiClient::VERSION, '1.2.0', '>=' ) ) {
 			if ( function_exists( '__' ) ) {
-				$provider_metadata_args[] = __( 'High-performance AI models for coding and text generation.', 'ai-provider-for-minimax' );
+				$provider_metadata_args[] = __( 'High-performance AI models for coding and text generation.', 'alamin-ai-provider-for-minimax' );
 			} else {
 				$provider_metadata_args[] = 'High-performance AI models for coding and text generation.';
 			}

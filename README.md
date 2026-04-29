@@ -1,6 +1,6 @@
-# AI Provider for MiniMax
+# Alamin AI Provider for MiniMax
 
-A MiniMax provider for the [PHP AI Client](https://github.com/WordPress/php-ai-client) SDK. Works as both a Composer package and a WordPress plugin.
+An independent, third-party MiniMax provider for the [PHP AI Client](https://github.com/WordPress/php-ai-client) SDK. Works as both a Composer package and a WordPress plugin. Not affiliated with, endorsed by, or sponsored by MiniMax.
 
 ## Requirements
 
@@ -13,13 +13,13 @@ A MiniMax provider for the [PHP AI Client](https://github.com/WordPress/php-ai-c
 ### As a Composer Package
 
 ```bash
-composer require mralaminahamed/ai-provider-for-minimax
+composer require mralaminahamed/alamin-ai-provider-for-minimax
 ```
 
 ### As a WordPress Plugin
 
 1. Download the plugin files
-2. Upload to `/wp-content/plugins/ai-provider-for-minimax/`
+2. Upload to `/wp-content/plugins/alamin-ai-provider-for-minimax/`
 3. Ensure the PHP AI Client plugin is installed and activated
 4. Activate the plugin through the WordPress admin
 

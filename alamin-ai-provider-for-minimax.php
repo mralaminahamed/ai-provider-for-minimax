@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name: AI Provider for MiniMax
- * Plugin URI: https://github.com/mralaminahamed/ai-provider-for-minimax
- * Description: MiniMax AI provider for the WordPress AI Client.
- * Requires at least: 7.0
+ * Plugin Name: Alamin AI Provider for MiniMax
+ * Plugin URI: https://github.com/mralaminahamed/alamin-ai-provider-for-minimax
+ * Description: MiniMax AI provider for the WordPress AI Client. Not affiliated with MiniMax.
+ * Requires at least: 6.7
  * Requires PHP: 7.4
  * Version: 1.0.0
  * Author: Al Amin Ahamed
  * Author URI: https://github.com/mralaminahamed
  * License: GPL-2.0-or-later
  * License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
- * Text Domain: ai-provider-for-minimax
+ * Text Domain: alamin-ai-provider-for-minimax
  *
  * @package AlAminAhamed\MiniMaxAiProvider
  */
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/vendor/autoload.php';
 
 /**
- * Registers the AI Provider for MiniMax with the AI Client.
+ * Registers the MiniMax provider with the AI Client.
  *
  * @since 1.0.0
  *

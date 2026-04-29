@@ -26,7 +26,7 @@ composer phpstan
 
 ## Architecture
 
-Dual-purpose codebase: works as a standalone Composer package **and** a WordPress plugin. Entry point is `plugin.php`; `src/` contains all logic.
+Dual-purpose codebase: works as a standalone Composer package **and** a WordPress plugin. Entry point is `alamin-ai-provider-for-minimax.php` (file name matches plugin slug per WP.org convention); `src/` contains all logic.
 
 ### Class hierarchy (SDK pattern)
 
@@ -48,7 +48,7 @@ ModelMetadataDirectoryInterface  (SDK)
 
 ### Bootstrap flow (WordPress)
 
-1. `plugin.php` defines `MINIMAX_PLUGIN_FILE` constant and loads `vendor/autoload.php`
+1. `alamin-ai-provider-for-minimax.php` defines `MINIMAX_PLUGIN_FILE` constant and loads `vendor/autoload.php`
 2. `init` hook (priority 5): calls `register_provider()` → registers `MiniMaxProvider` with `AiClient::defaultRegistry()`
 3. `init` hook (priority 5): calls `init_settings()` → `MiniMaxSettings::init()` wires up `admin_menu` and `admin_init` hooks
 
@@ -59,7 +59,7 @@ ModelMetadataDirectoryInterface  (SDK)
 
 ### Coding standards
 
-- WordPress Coding Standards (`phpcs.xml.dist`) — text domain `ai-provider-for-minimax`
+- WordPress Coding Standards (`phpcs.xml.dist`) — text domain `alamin-ai-provider-for-minimax`
 - `declare(strict_types=1)` on every file
 - Namespace root: `AlAminAhamed\MiniMaxAiProvider\`
 - PHPStan at `level: max` (WP function stubs via `szepeviktor/phpstan-wordpress`)
