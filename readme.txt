@@ -30,10 +30,10 @@ This plugin is an independent, third-party integration and is not affiliated wit
 
 **API Key Configuration:**
 
-Set your API key in one of two ways:
+Set your MiniMax API key in one of two ways:
 
-1. `Settings > MiniMax` admin page
-2. `MINIMAX_API_KEY` environment variable (takes priority)
+1. WordPress AI Client settings — go to the WordPress AI Client configuration page and enter your MiniMax API key there
+2. `MINIMAX_API_KEY` environment variable on your server (takes priority over the database setting)
 
 == Installation ==
 
@@ -44,7 +44,8 @@ Set your API key in one of two ways:
 3. Upload the zip and click **Install Now**
 4. Ensure the **WordPress AI Client** plugin is installed and activated
 5. Activate **Alamin AI Provider for MiniMax**
-6. Go to **Settings > MiniMax** and enter your API key
+6. Enter your MiniMax API key via the WordPress AI Client settings
+7. Optionally go to **Settings > MiniMax** to configure the default model and generation parameters
 
 = Manual Installation =
 
@@ -71,7 +72,7 @@ Sign up at [minimax.io](https://www.minimax.io/) and generate an API key from yo
 
 = Is my API key stored securely? =
 
-Your API key is stored in the WordPress options table using WordPress's standard options API. For higher security, set the `MINIMAX_API_KEY` environment variable on your server instead.
+Your API key is stored by the WordPress AI Client plugin in the WordPress options table. For higher security, set the `MINIMAX_API_KEY` environment variable on your server instead — this bypasses the database entirely.
 
 == External Services ==
 

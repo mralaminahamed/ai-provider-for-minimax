@@ -62,7 +62,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 		}
 
 		throw new RuntimeException(
-			esc_html( 'Unsupported model capabilities: ' . implode( ', ', $capabilities ) )
+			sprintf( 'Unsupported model capabilities: %s', implode( ', ', $capabilities ) ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		);
 	}
 
