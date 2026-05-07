@@ -75,18 +75,19 @@ Your API key is stored in the WordPress options table using WordPress's standard
 
 == External Services ==
 
-This plugin connects to the **MiniMax API** to:
+This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to provide AI text generation.
 
-1. Retrieve the list of available AI models
-2. Send text generation requests using your configured AI model
+**What the service does:** MiniMax is a third-party AI platform that provides large language model APIs. This plugin uses it to retrieve available models and send text generation requests.
 
-**Service:** MiniMax
-**API endpoint:** `https://api.minimax.io` (or as configured)
-**When data is sent:** When generating AI text responses or refreshing the model list
-**Data sent:** Your API key (via Authorization header) and the text prompt/conversation
-**Provider site:** [minimax.io](https://www.minimax.io/) — refer to the MiniMax website for their current Terms of Service and Privacy Policy.
+**What data is sent and when:**
 
-No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
+* Your MiniMax API key is sent via the `Authorization` header on every request.
+* When a WordPress feature triggers AI text generation, the text prompt or conversation is sent to `https://api.minimax.io/v1`.
+* When the model list is refreshed (once per hour, cached via WordPress transients), a request is sent to `https://api.minimax.io/v1/models` with your API key.
+
+No data is sent until you enter an API key and a WordPress feature triggers a request.
+
+This service is provided by MiniMax: [Terms of Service](https://platform.minimax.io/protocol/terms-of-service), [Privacy Policy](https://platform.minimax.io/protocol/privacy-policy).
 
 == Changelog ==
 

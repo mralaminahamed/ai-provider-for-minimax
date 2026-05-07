@@ -25,3 +25,7 @@ composer.lock
 # WordPress
 /wp-content/
 /wp-config.php
+
+# Claude Code / AI tools
+.remember/
+.playwright-mcp/

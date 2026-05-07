@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Alamin AI Provider for MiniMax
- * Plugin URI: https://github.com/mralaminahamed/alamin-ai-provider-for-minimax
+ * Plugin URI: https://github.com/mralaminahamed/ai-provider-for-minimax
  * Description: MiniMax AI provider for the WordPress AI Client. Not affiliated with MiniMax.
  * Requires at least: 6.7
  * Requires PHP: 7.4
