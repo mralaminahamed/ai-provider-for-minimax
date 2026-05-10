@@ -16,6 +16,10 @@ use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
 use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Model metadata directory for MiniMax.
  *
@@ -32,10 +36,10 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		$models = $this->fetch_models_from_api();
 
 		if ( ! empty( $models ) ) {
-			return $models;
+			return array_values( $models );
 		}
 
-		return $this->get_fallback_models();
+		return array_values( $this->get_fallback_models() );
 	}
 
 	/**
@@ -106,8 +110,14 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		$transient_key = 'minimax_models_cache';
 		$cached        = get_transient( $transient_key );
 
-		if ( false !== $cached ) {
-			return $cached;
+		if ( is_array( $cached ) ) {
+			$valid = array();
+			foreach ( $cached as $item ) {
+				if ( $item instanceof ModelMetadata ) {
+					$valid[] = $item;
+				}
+			}
+			return $valid;
 		}
 
 		$response = wp_remote_get(
@@ -126,10 +136,16 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return array();
 		}
 
+		$status_code = wp_remote_retrieve_response_code( $response );
+		if ( $status_code < 200 || $status_code >= 300 ) {
+			set_transient( $transient_key, array(), 5 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
 
-		if ( ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
+		if ( ! is_array( $data ) || ! isset( $data['data'] ) || ! is_array( $data['data'] ) ) {
 			set_transient( $transient_key, array(), 5 * MINUTE_IN_SECONDS );
 			return array();
 		}
@@ -143,16 +159,19 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 		$models = array();
 		foreach ( $data['data'] as $model_data ) {
-			if ( ! isset( $model_data['id'] ) ) {
+			if ( ! is_array( $model_data ) ) {
 				continue;
 			}
 
-			$models[] = new ModelMetadata(
-				$model_data['id'],
-				$model_data['name'] ?? $model_data['id'],
-				$capabilities,
-				$options
-			);
+			$id = isset( $model_data['id'] ) && is_string( $model_data['id'] ) ? $model_data['id'] : '';
+			if ( '' === $id ) {
+				continue;
+			}
+
+			$name_raw = $model_data['name'] ?? $id;
+			$name     = is_string( $name_raw ) ? $name_raw : $id;
+
+			$models[] = new ModelMetadata( $id, $name, $capabilities, $options );
 		}
 
 		set_transient( $transient_key, $models, HOUR_IN_SECONDS );
@@ -219,7 +238,15 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 		if ( function_exists( 'get_option' ) ) {
 			$option = get_option( 'wp_ai_client_credentials', array() );
-			return $option['minimax']['api_key'] ?? '';
+			if ( ! is_array( $option ) ) {
+				return '';
+			}
+			$credentials = $option['minimax'] ?? array();
+			if ( ! is_array( $credentials ) ) {
+				return '';
+			}
+			$api_key_value = $credentials['api_key'] ?? '';
+			return is_string( $api_key_value ) ? $api_key_value : '';
 		}
 
 		return '';

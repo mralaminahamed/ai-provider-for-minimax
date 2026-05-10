@@ -23,6 +23,10 @@ use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
 use AlAminAhamed\MiniMaxAiProvider\Models\MiniMaxTextGenerationModel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class for the MiniMax provider.
  *
@@ -62,7 +66,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 		}
 
 		throw new RuntimeException(
-			sprintf( 'Unsupported model capabilities: %s', implode( ', ', $capabilities ) ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			'Unsupported model capabilities: ' . implode( ', ', $capabilities ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		);
 	}
 
@@ -80,7 +84,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 			RequestAuthenticationMethod::apiKey(),
 		);
 
-		if ( version_compare( AiClient::VERSION, '1.2.0', '>=' ) ) {
+		if ( version_compare( AiClient::VERSION, '1.2.0', '>=' ) ) { // @phpstan-ignore-line
 			if ( function_exists( '__' ) ) {
 				$provider_metadata_args[] = __( 'High-performance AI models for coding and text generation.', 'alamin-ai-provider-for-minimax' );
 			} else {

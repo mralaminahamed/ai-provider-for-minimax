@@ -9,11 +9,13 @@ declare(strict_types=1);
 
 namespace AlAminAhamed\MiniMaxAiProvider\Models;
 
-use WordPress\AiClient\Providers\DTO\ProviderMetadata;
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
-use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Text generation model for MiniMax.
@@ -39,6 +41,8 @@ class MiniMaxTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationM
 		array $headers = array(),
 		$data = null
 	): Request {
+		$headers['MiniMax-Provider'] = 'wordpress-plugin';
+
 		return new Request(
 			$method,
 			$path,
@@ -46,20 +50,5 @@ class MiniMaxTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationM
 			$data,
 			$this->getRequestOptions()
 		);
-	}
-
-	/**
-	 * Get the default headers for the model.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array<string, string>
-	 */
-	protected function getDefaultHeaders(): array {
-		$headers = parent::getDefaultHeaders();
-
-		$headers['MiniMax-Provider'] = 'wordpress-plugin';
-
-		return $headers;
 	}
 }
