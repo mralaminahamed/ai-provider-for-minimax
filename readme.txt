@@ -1,4 +1,5 @@
 === AI Provider for MiniMax ===
+Donate link: https://alaminahamed.com/donate
 Contributors: mralaminahamed
 Tags: ai, minimax, artificial intelligence, text generation
 Requires at least: 6.7

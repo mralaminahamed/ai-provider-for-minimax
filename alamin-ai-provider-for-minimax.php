@@ -2,6 +2,7 @@
 /**
  * Plugin Name: AI Provider for MiniMax
  * Plugin URI: https://github.com/mralaminahamed/ai-provider-for-minimax
+ * Donate link: https://alaminahamed.com/donate
  * Description: MiniMax AI provider for the WordPress AI Client. Not affiliated with MiniMax.
  * Requires at least: 6.7
  * Requires PHP: 7.4
