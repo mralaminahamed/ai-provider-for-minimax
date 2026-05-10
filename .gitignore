@@ -5,6 +5,7 @@
 /.phpunit.result.cache
 /phpunit.xml
 /coverage/
+/release/
 
 # IDE
 /.idea/
