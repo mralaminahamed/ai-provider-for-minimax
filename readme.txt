@@ -1,4 +1,4 @@
-=== Alamin AI Provider for MiniMax ===
+=== AI Provider for MiniMax ===
 Contributors: mralaminahamed
 Tags: ai, minimax, artificial intelligence, text generation
 Requires at least: 6.7
@@ -43,7 +43,7 @@ Set your MiniMax API key in one of two ways:
 2. Go to **Plugins > Add New > Upload Plugin** in your WordPress admin
 3. Upload the zip and click **Install Now**
 4. Ensure the **WordPress AI Client** plugin is installed and activated
-5. Activate **Alamin AI Provider for MiniMax**
+5. Activate **AI Provider for MiniMax**
 6. Enter your MiniMax API key via the WordPress AI Client settings
 7. Optionally go to **Settings > MiniMax** to configure the default model and generation parameters
 

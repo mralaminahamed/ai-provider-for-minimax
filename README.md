@@ -1,4 +1,4 @@
-# Alamin AI Provider for MiniMax
+# AI Provider for MiniMax
 
 An independent, third-party MiniMax provider for the [PHP AI Client](https://github.com/WordPress/php-ai-client) SDK. Works as both a Composer package and a WordPress plugin. Not affiliated with, endorsed by, or sponsored by MiniMax.
 

@@ -1,6 +1,6 @@
 {
     "name": "mralaminahamed/alamin-ai-provider-for-minimax",
-    "description": "Alamin AI Provider for MiniMax — an independent MiniMax integration for the WordPress AI Client.",
+    "description": "AI Provider for MiniMax — an independent MiniMax integration for the WordPress AI Client.",
     "type": "wordpress-plugin",
     "version": "1.0.0",
     "license": "GPL-2.0-or-later",
