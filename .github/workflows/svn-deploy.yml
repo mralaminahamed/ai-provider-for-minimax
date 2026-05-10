@@ -1,0 +1,240 @@
+name: Release Plugin to WP.org
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write # Required to create a GitHub release
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+# ---------------------------------------------------------------------------
+# Shared defaults applied to every job
+# ---------------------------------------------------------------------------
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  # -------------------------------------------------------------------------
+  # JOB 1 — meta
+  # Derives plugin identifiers and validates tag/version alignment.
+  # Outputs are consumed by every downstream job so nothing is re-computed.
+  # -------------------------------------------------------------------------
+  meta:
+    name: "Meta: Resolve plugin info & validate version"
+    runs-on: ubuntu-latest
+    outputs:
+      plugin_slug: ${{ steps.plugin_name.outputs.plugin_slug }}
+      plugin_file: ${{ steps.plugin_name.outputs.plugin_file }}
+      plugin_name: ${{ steps.plugin_name.outputs.plugin_name }}
+      version:     ${{ steps.version_check.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Derive plugin identifiers from repository name
+        id: plugin_name
+        run: |
+          # WP.org slug differs from the GitHub repository name
+          # (repo: ai-provider-for-minimax, WP.org: alamin-ai-provider-for-minimax).
+          # Hardcode the WP.org slug so SVN operations always target the correct plugin.
+          PLUGIN_SLUG="alamin-ai-provider-for-minimax"
+
+          PLUGIN_FILE="${PLUGIN_SLUG}.php"
+          # Convert kebab-case slug → Title Case display name
+          PLUGIN_NAME=$(echo "$PLUGIN_SLUG" | sed 's/-/ /g; s/\b\w/\U&/g')
+
+          echo "Resolved slug : $PLUGIN_SLUG"
+          echo "Resolved file : $PLUGIN_FILE"
+          echo "Resolved name : $PLUGIN_NAME"
+
+          echo "plugin_slug=$PLUGIN_SLUG" >> "$GITHUB_OUTPUT"
+          echo "plugin_file=$PLUGIN_FILE"  >> "$GITHUB_OUTPUT"
+          echo "plugin_name=$PLUGIN_NAME"  >> "$GITHUB_OUTPUT"
+
+      - name: Validate tag / plugin-header version alignment
+        id: version_check
+        run: |
+          TAG_REF="${GITHUB_REF#refs/tags/}"
+          # Strip an optional leading "v" (e.g. v1.2.3 → 1.2.3)
+          TAG_STRIPPED="${TAG_REF#v}"
+
+          PLUGIN_FILE="${{ steps.plugin_name.outputs.plugin_file }}"
+
+          if [ ! -f "$PLUGIN_FILE" ]; then
+            echo "::error::Plugin main file '$PLUGIN_FILE' not found in workspace. Ensure the repository name matches the plugin slug." >&2
+            exit 1
+          fi
+
+          PLUGIN_VERSION=$(
+            grep -E "^[[:space:]]*\*[[:space:]]*Version:" "$PLUGIN_FILE" \
+              | head -n1 \
+              | sed -E 's/.*Version:[[:space:]]*([^[:space:]]+).*/\1/'
+          )
+
+          echo "Tag          : $TAG_REF"
+          echo "Stripped tag : $TAG_STRIPPED"
+          echo "Plugin header: $PLUGIN_VERSION"
+
+          if [ -z "$PLUGIN_VERSION" ]; then
+            echo "::error::Could not extract Version from $PLUGIN_FILE" >&2
+            exit 1
+          fi
+
+          if [ "$PLUGIN_VERSION" != "$TAG_STRIPPED" ]; then
+            echo "::error::Version mismatch — tag ($TAG_STRIPPED) != plugin header ($PLUGIN_VERSION)" >&2
+            exit 1
+          fi
+
+          echo "version=$PLUGIN_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify composer.lock is committed
+        run: |
+          if [ ! -f composer.lock ]; then
+            echo "::error::composer.lock is missing. Commit it before tagging a release." >&2
+            exit 1
+          fi
+
+  # -------------------------------------------------------------------------
+  # JOB 2 — build
+  # Installs production PHP dependencies and uploads the built plugin tree
+  # as a workflow artifact consumed by the deploy job.
+  # -------------------------------------------------------------------------
+  build:
+    name: "Build: Install prod PHP deps"
+    runs-on: ubuntu-latest
+    needs: meta
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP 7.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php74-
+
+      - name: Install PHP dependencies (including dev — needed for build tooling)
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Guard — composer.lock must not change during build
+        run: |
+          if ! git diff --quiet --exit-code composer.lock; then
+            echo "::error::composer.lock was modified during the build. Commit the updated lock file before releasing." >&2
+            git --no-pager diff composer.lock | head -n 100
+            exit 1
+          fi
+
+      - name: Optimise Composer autoloader for production (strip dev deps)
+        run: composer install --no-dev --no-interaction --prefer-dist -o
+
+      - name: Upload built plugin as workflow artifact
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin-build-${{ needs.meta.outputs.version }}
+          path: |
+            .
+            !.git
+            !tests
+            !.github
+          retention-days: 1
+
+  # -------------------------------------------------------------------------
+  # JOB 3 — deploy
+  # Cleans SVN trunk, deploys the built plugin to WordPress.org, and creates
+  # the corresponding GitHub release with the generated ZIP attached.
+  # -------------------------------------------------------------------------
+  deploy:
+    name: "Deploy: Publish to WP.org & create GitHub release"
+    runs-on: ubuntu-latest
+    needs: [meta, build]
+
+    steps:
+      - name: Download built plugin artifact
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-build-${{ needs.meta.outputs.version }}
+          path: .
+
+      - name: Install Subversion
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y subversion
+
+      - name: Remove stale sample-data directory from SVN trunk (if present)
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          PLUGIN_SLUG:  ${{ needs.meta.outputs.plugin_slug }}
+        run: |
+          SVN_TRUNK="https://plugins.svn.wordpress.org/${PLUGIN_SLUG}/trunk"
+
+          svn checkout "$SVN_TRUNK" svn-trunk \
+            --username  "$SVN_USERNAME" \
+            --password  "$SVN_PASSWORD" \
+            --non-interactive --quiet
+
+          if [ -d "svn-trunk/sample-data" ]; then
+            echo "Removing stale sample-data directory from SVN trunk…"
+            svn delete svn-trunk/sample-data \
+              --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+              --non-interactive --quiet
+            svn commit svn-trunk \
+              -m "chore: remove incorrectly deployed sample-data directory" \
+              --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+              --non-interactive --quiet
+            echo "sample-data removed and committed."
+          else
+            echo "No sample-data directory found — nothing to clean up."
+          fi
+
+          rm -rf svn-trunk
+
+      - name: Deploy plugin to WordPress.org via SVN
+        id: deploy
+        uses: 10up/action-wordpress-plugin-deploy@v2.3.0
+        with:
+          generate-zip: true
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG:         ${{ needs.meta.outputs.plugin_slug }}
+          BUILD_DIR:    ${{ github.workspace }}
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ needs.meta.outputs.version }}"
+          body: |
+            ## ${{ needs.meta.outputs.plugin_name }} — v${{ needs.meta.outputs.version }}
+
+            Refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/trunk/CHANGELOG.md) for full details.
+          files: ${{ steps.deploy.outputs.zip-path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

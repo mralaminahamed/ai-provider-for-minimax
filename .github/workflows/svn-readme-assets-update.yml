@@ -1,0 +1,26 @@
+name: Plugin asset/readme update
+
+on:
+  push:
+    paths:
+      - '.wordpress-org/**'
+      - 'readme.txt'
+    branches:
+      - trunk
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: WordPress.org plugin asset/readme update
+        uses: 10up/action-wordpress-plugin-asset-update@v2.2.0
+        env:
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SLUG: alamin-ai-provider-for-minimax
+          IGNORE_OTHER_FILES: true
