@@ -1,5 +1,6 @@
 # Git + dist tooling (hidden files not permitted in WP.org plugin zip)
 .git/
+.github/
 .gitattributes
 .gitignore
 .distignore
