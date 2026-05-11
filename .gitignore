@@ -18,7 +18,6 @@ Thumbs.db
 
 # Composer
 composer.phar
-composer.lock
 
 # PHPStan
 .phpunit.result.cache
