@@ -13,7 +13,7 @@ An independent, third-party MiniMax provider for the [PHP AI Client](https://git
 ### As a Composer Package
 
 ```bash
-composer require mralaminahamed/alamin-ai-provider-for-minimax
+composer require mralaminahamed/ai-provider-for-minimax
 ```
 
 ### As a WordPress Plugin
