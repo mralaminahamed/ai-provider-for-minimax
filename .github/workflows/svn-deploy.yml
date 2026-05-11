@@ -186,7 +186,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y subversion
 
-      - name: Remove stale sample-data directory from SVN trunk (if present)
+      - name: Clear pre-existing SVN trunk files before deploy
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
@@ -199,18 +199,22 @@ jobs:
             --password  "$SVN_PASSWORD" \
             --non-interactive --quiet
 
-          if [ -d "svn-trunk/sample-data" ]; then
-            echo "Removing stale sample-data directory from SVN trunk…"
-            svn delete svn-trunk/sample-data \
-              --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
-              --non-interactive --quiet
-            svn commit svn-trunk \
-              -m "chore: remove incorrectly deployed sample-data directory" \
-              --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
-              --non-interactive --quiet
-            echo "sample-data removed and committed."
+          # Collect all versioned entries (files and dirs) at the top level and recursively
+          ITEMS=$(svn list svn-trunk | sed 's|/$||')
+
+          if [ -z "$ITEMS" ]; then
+            echo "SVN trunk is empty — nothing to clear."
           else
-            echo "No sample-data directory found — nothing to clean up."
+            echo "Clearing existing SVN trunk contents: $ITEMS"
+            for item in $ITEMS; do
+              svn delete "svn-trunk/${item}" --force --quiet
+            done
+            svn commit svn-trunk \
+              -m "chore: clear trunk before deploying v${{ needs.meta.outputs.version }}" \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              --non-interactive --quiet
+            echo "Trunk cleared."
           fi
 
           rm -rf svn-trunk
