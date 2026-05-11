@@ -1,5 +1,5 @@
 {
-    "name": "mralaminahamed/alamin-ai-provider-for-minimax",
+    "name": "mralaminahamed/ai-provider-for-minimax",
     "description": "AI Provider for MiniMax — an independent MiniMax integration for the WordPress AI Client.",
     "type": "wordpress-plugin",
     "version": "1.0.0",
