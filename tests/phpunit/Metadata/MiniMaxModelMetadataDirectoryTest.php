@@ -158,4 +158,106 @@ class MiniMaxModelMetadataDirectoryTest extends TestCase {
 		$this->assertNotEmpty( $caps );
 		$this->assertTrue( $caps[0]->isTextGeneration() );
 	}
+
+	/**
+	 * Test fallback model list contains exactly 9 models.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_fallback_model_count(): void {
+		$this->assertCount( 9, $this->directory->listModelMetadata() );
+	}
+
+	/**
+	 * Test all 9 fallback model IDs are present.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_all_fallback_model_ids_present(): void {
+		$ids = array_map(
+			static fn( $m ) => $m->getId(),
+			$this->directory->listModelMetadata()
+		);
+
+		$expected = array(
+			'MiniMax-M2.7',
+			'MiniMax-M2.7-highspeed',
+			'MiniMax-M2.5',
+			'MiniMax-M2.5-highspeed',
+			'MiniMax-M2.1',
+			'MiniMax-M2.1-highspeed',
+			'MiniMax-M2',
+			'MiniMax-M1',
+			'MiniMax-Text-01',
+		);
+
+		foreach ( $expected as $model_id ) {
+			$this->assertContains( $model_id, $ids, "Missing model: {$model_id}" );
+		}
+	}
+
+	/**
+	 * Test highspeed variants are included in the model list.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_highspeed_variants_present(): void {
+		$this->assertTrue( $this->directory->hasModelMetadata( 'MiniMax-M2.7-highspeed' ) );
+		$this->assertTrue( $this->directory->hasModelMetadata( 'MiniMax-M2.5-highspeed' ) );
+		$this->assertTrue( $this->directory->hasModelMetadata( 'MiniMax-M2.1-highspeed' ) );
+	}
+
+	/**
+	 * Test all fallback models have non-empty display names.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_all_fallback_models_have_names(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$this->assertNotEmpty( $model->getName(), "Empty name for model: {$model->getId()}" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the maxTokens option.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_max_tokens_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$option_names = array_map(
+				static fn( $opt ) => (string) $opt->getName(),
+				$model->getSupportedOptions()
+			);
+			$this->assertContains(
+				'maxTokens',
+				$option_names,
+				"Model {$model->getId()} does not support maxTokens option"
+			);
+		}
+	}
+
+	/**
+	 * Test model names match expected display strings.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_get_model_metadata_correct_names(): void {
+		$this->assertEquals( 'MiniMax M2.7', $this->directory->getModelMetadata( 'MiniMax-M2.7' )->getName() );
+		$this->assertEquals( 'MiniMax M2.7 Highspeed', $this->directory->getModelMetadata( 'MiniMax-M2.7-highspeed' )->getName() );
+		$this->assertEquals( 'MiniMax M1', $this->directory->getModelMetadata( 'MiniMax-M1' )->getName() );
+		$this->assertEquals( 'MiniMax Text-01', $this->directory->getModelMetadata( 'MiniMax-Text-01' )->getName() );
+	}
 }

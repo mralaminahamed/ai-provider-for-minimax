@@ -59,4 +59,31 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 
 		$this->assertEquals( 'MiniMax', $model->providerMetadata()->getName() );
 	}
+
+	/**
+	 * Test all 9 fallback models can be instantiated.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function test_all_fallback_models_are_creatable(): void {
+		$model_ids = array(
+			'MiniMax-M2.7',
+			'MiniMax-M2.7-highspeed',
+			'MiniMax-M2.5',
+			'MiniMax-M2.5-highspeed',
+			'MiniMax-M2.1',
+			'MiniMax-M2.1-highspeed',
+			'MiniMax-M2',
+			'MiniMax-M1',
+			'MiniMax-Text-01',
+		);
+
+		foreach ( $model_ids as $model_id ) {
+			$model = MiniMaxProvider::model( $model_id );
+			$this->assertInstanceOf( MiniMaxTextGenerationModel::class, $model );
+			$this->assertEquals( $model_id, $model->metadata()->getId() );
+		}
+	}
 }
