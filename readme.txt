@@ -9,7 +9,7 @@ Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-Independent MiniMax provider integration for the WordPress AI Client. Enables MiniMax-M2 model access for coding and text generation.
+Independent MiniMax provider integration for the WordPress AI Client. Enables access to 9 MiniMax models including M2.7, M2.5, M2.1, M1, Text-01, and highspeed variants.
 
 == Description ==
 
@@ -23,6 +23,12 @@ This plugin is an independent, third-party integration and is not affiliated wit
 * Dynamic model discovery from the MiniMax API
 * Support for text generation with all MiniMax-M2 and M1 series models including highspeed variants
 * Secure API key management via WordPress settings or environment variable
+
+**Supported Models (fallback list):**
+
+MiniMax-M2.7, MiniMax-M2.7 Highspeed, MiniMax-M2.5, MiniMax-M2.5 Highspeed, MiniMax-M2.1, MiniMax-M2.1 Highspeed, MiniMax-M2, MiniMax-M1, MiniMax-Text-01
+
+When an API key is configured, the live model list is fetched directly from the MiniMax API.
 
 **Requirements:**
 
@@ -108,6 +114,9 @@ This service is provided by MiniMax: [Terms of Service](https://platform.minimax
 * Support for `MINIMAX_API_KEY` environment variable
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Expanded fallback model list to 9 models. No database changes or manual steps required.
 
 = 1.0.0 =
 Initial release. No upgrade steps required.
