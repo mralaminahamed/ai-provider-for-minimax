@@ -76,3 +76,60 @@ function init_settings(): void {
 }
 
 add_action( 'init', __NAMESPACE__ . '\\init_settings', 5 );
+
+/**
+ * Declare credential availability to the AI plugin.
+ *
+ * The AI plugin's has_ai_credentials() only checks connectors that store an
+ * API key as a flat WP option. MiniMax stores its key under the nested
+ * wp_ai_client_credentials option or the WP 7.0 Connectors page option, so
+ * we must hook this filter explicitly.
+ *
+ * @since 1.2.0
+ *
+ * @param bool $has_credentials Current credential status.
+ * @return bool
+ */
+function declare_credentials( bool $has_credentials ): bool {
+	if ( $has_credentials ) {
+		return true;
+	}
+
+	$api_key = getenv( 'MINIMAX_API_KEY' );
+	if ( ! empty( $api_key ) ) {
+		return true;
+	}
+
+	// Key stored by WordPress Connectors page (WP 7.0+).
+	$connectors_key = get_option( 'connectors_ai_minimax_api_key', '' );
+	if ( ! empty( $connectors_key ) ) {
+		return true;
+	}
+
+	// Key stored via legacy wp_ai_client_credentials option.
+	$option      = get_option( 'wp_ai_client_credentials', array() );
+	$credentials = is_array( $option ) ? ( $option['minimax'] ?? array() ) : array();
+	$key         = is_array( $credentials ) ? ( $credentials['api_key'] ?? '' ) : '';
+
+	return ! empty( $key );
+}
+
+add_filter( 'wpai_has_ai_credentials', __NAMESPACE__ . '\\declare_credentials' );
+
+/**
+ * Short-circuit the valid credentials check when MiniMax key is configured.
+ *
+ * @since 1.2.0
+ *
+ * @param bool|null $valid Current validity status; null means "use default check".
+ * @return bool|null
+ */
+function declare_valid_credentials( $valid ) {
+	if ( true === $valid ) {
+		return true;
+	}
+
+	return declare_credentials( false ) ? true : null;
+}
+
+add_filter( 'wpai_pre_has_valid_credentials_check', __NAMESPACE__ . '\\declare_valid_credentials' );
