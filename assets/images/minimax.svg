@@ -1,0 +1,15 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="mmGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#E2177F"/>
+      <stop offset="50%"  stop-color="#F13D5D"/>
+      <stop offset="100%" stop-color="#FF613A"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="8" fill="url(#mmGrad)"/>
+  <!-- Soundwave / waveform mark centred on badge -->
+  <rect x="11" y="18" width="3" height="4"  rx="1.5" fill="#FFFFFF"/>
+  <rect x="16" y="13" width="3" height="14" rx="1.5" fill="#FFFFFF"/>
+  <rect x="21" y="16" width="3" height="8"  rx="1.5" fill="#FFFFFF"/>
+  <rect x="26" y="11" width="3" height="18" rx="1.5" fill="#FFFFFF"/>
+</svg>

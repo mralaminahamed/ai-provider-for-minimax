@@ -92,6 +92,10 @@ class MiniMaxProvider extends AbstractApiProvider {
 			}
 		}
 
+		if ( version_compare( AiClient::VERSION, '1.3.0', '>=' ) ) { // @phpstan-ignore-line
+			$provider_metadata_args[] = dirname( __DIR__, 2 ) . '/assets/images/minimax.svg';
+		}
+
 		return new ProviderMetadata( ...$provider_metadata_args );
 	}
 
