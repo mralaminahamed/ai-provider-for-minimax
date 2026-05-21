@@ -1,11 +1,11 @@
 === AI Provider for MiniMax ===
 Donate link: https://alaminahamed.com/donate
 Contributors: mralaminahamed
-Tags: ai, minimax, artificial intelligence, text generation
+Tags: ai, minimax, llm, text generation, artificial intelligence
 Requires at least: 6.7
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
@@ -21,7 +21,7 @@ This plugin is an independent, third-party integration and is not affiliated wit
 
 * Seamless integration with the WordPress AI Client plugin
 * Dynamic model discovery from the MiniMax API
-* Support for text generation with the MiniMax-M2 series
+* Support for text generation with all MiniMax-M2 and M1 series models including highspeed variants
 * Secure API key management via WordPress settings or environment variable
 
 **Requirements:**
@@ -92,6 +92,13 @@ No data is sent until you enter an API key and a WordPress feature triggers a re
 This service is provided by MiniMax: [Terms of Service](https://platform.minimax.io/protocol/terms-of-service), [Privacy Policy](https://platform.minimax.io/protocol/privacy-policy).
 
 == Changelog ==
+
+= 1.1.0 =
+* Updated fallback model list to include all current MiniMax text generation models: M2.7, M2.7 Highspeed, M2.5, M2.5 Highspeed, M2.1, M2.1 Highspeed, M2, M1, and Text-01
+* Added Domain Path header field to plugin file
+* Improved plugin file header field ordering and alignment per WordPress.org standard
+* Added file-level PHPDoc block to plugin bootstrap file
+* Updated tested up to WordPress 7.0
 
 = 1.0.0 =
 * Initial release

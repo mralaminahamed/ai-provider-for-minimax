@@ -194,32 +194,24 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			new SupportedOption( OptionEnum::maxTokens() ),
 		);
 
-		return array(
-			new ModelMetadata(
-				'MiniMax-M2.7',
-				'MiniMax M2.7',
-				$capabilities,
-				$options
-			),
-			new ModelMetadata(
-				'MiniMax-M2.5',
-				'MiniMax M2.5',
-				$capabilities,
-				$options
-			),
-			new ModelMetadata(
-				'MiniMax-M2.1',
-				'MiniMax M2.1',
-				$capabilities,
-				$options
-			),
-			new ModelMetadata(
-				'MiniMax-M2',
-				'MiniMax M2',
-				$capabilities,
-				$options
-			),
+		$model_list = array(
+			array( 'MiniMax-M2.7', 'MiniMax M2.7' ),
+			array( 'MiniMax-M2.7-highspeed', 'MiniMax M2.7 Highspeed' ),
+			array( 'MiniMax-M2.5', 'MiniMax M2.5' ),
+			array( 'MiniMax-M2.5-highspeed', 'MiniMax M2.5 Highspeed' ),
+			array( 'MiniMax-M2.1', 'MiniMax M2.1' ),
+			array( 'MiniMax-M2.1-highspeed', 'MiniMax M2.1 Highspeed' ),
+			array( 'MiniMax-M2', 'MiniMax M2' ),
+			array( 'MiniMax-M1', 'MiniMax M1' ),
+			array( 'MiniMax-Text-01', 'MiniMax Text-01' ),
 		);
+
+		$models = array();
+		foreach ( $model_list as $item ) {
+			$models[] = new ModelMetadata( $item[0], $item[1], $capabilities, $options );
+		}
+
+		return $models;
 	}
 
 	/**
