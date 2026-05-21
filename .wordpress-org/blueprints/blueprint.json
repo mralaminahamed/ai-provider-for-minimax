@@ -13,18 +13,9 @@
     },
     {
       "step": "installPlugin",
-      "pluginZipFile": {
+      "pluginData": {
         "resource": "wordpress.org/plugins",
         "slug": "alamin-ai-provider-for-minimax"
-      },
-      "options": {
-        "activate": true
-      }
-    },
-    {
-      "step": "setSiteOptions",
-      "options": {
-        "blogname": "AI Provider for MiniMax — Demo"
       }
     }
   ]
