@@ -151,16 +151,19 @@ jobs:
       - name: Optimise Composer autoloader for production (strip dev deps)
         run: composer install --no-dev --no-interaction --prefer-dist -o
 
+      - name: Prepare release files (apply .distignore)
+        run: |
+          rsync -a --delete-excluded \
+            --filter="P .svn" \
+            --exclude-from=.distignore \
+            ./ dist/
+
       - name: Upload built plugin as workflow artifact
         if: ${{ env.ACT != 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: plugin-build-${{ needs.meta.outputs.version }}
-          path: |
-            .
-            !.git
-            !tests
-            !.github
+          path: dist/
           retention-days: 1
 
   # -------------------------------------------------------------------------
