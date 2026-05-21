@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1] - 2026-05-21
+
+### Fixed
+
+- Connector no longer shows as "Connected" on the WordPress Connectors page before any API key is entered — replaced `ListModelsApiBasedProviderAvailability` with a custom availability class that checks for an actual API key (env var, WP Connectors option, or legacy credentials option)
+
 ## [1.2.0] - 2026-05-21
 
 ### Added

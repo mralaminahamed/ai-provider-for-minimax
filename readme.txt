@@ -5,11 +5,11 @@ Tags: ai, minimax, llm, text generation, artificial intelligence
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-Independent MiniMax provider integration for the WordPress AI Client. Enables access to 9 MiniMax models including M2.7, M2.5, M2.1, M1, Text-01, and highspeed variants.
+MiniMax AI provider for WordPress AI Client. Access 9 models: M2.7, M2.5, M2.1, M1, Text-01, and highspeed variants.
 
 == Description ==
 
@@ -98,6 +98,9 @@ No data is sent until you enter an API key and a WordPress feature triggers a re
 This service is provided by MiniMax: [Terms of Service](https://platform.minimax.io/protocol/terms-of-service), [Privacy Policy](https://platform.minimax.io/protocol/privacy-policy).
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed connector showing as "Connected" before any API key is entered — provider availability now correctly checks for a configured API key
 
 = 1.2.0 =
 * Added provider logo displayed on the WordPress Connectors page

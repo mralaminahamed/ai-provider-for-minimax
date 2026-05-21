@@ -14,7 +14,7 @@
  * Plugin Name:       AI Provider for MiniMax
  * Plugin URI:        https://github.com/mralaminahamed/ai-provider-for-minimax
  * Description:       MiniMax AI provider for the WordPress AI Client. Not affiliated with MiniMax.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Al Amin Ahamed
