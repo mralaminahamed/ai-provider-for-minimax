@@ -5,7 +5,7 @@ Tags: ai, minimax, llm, text generation, artificial intelligence
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
@@ -99,6 +99,11 @@ This service is provided by MiniMax: [Terms of Service](https://platform.minimax
 
 == Changelog ==
 
+= 1.2.0 =
+* Added provider logo displayed on the WordPress Connectors page
+* Fixed false "no valid connector" warning on the AI admin page when API key is set via the Connectors page
+* Expanded test suite from 33 to 44 tests covering all model IDs, highspeed variants, provider logo path, and settings edge cases
+
 = 1.1.0 =
 * Updated fallback model list to include all current MiniMax text generation models: M2.7, M2.7 Highspeed, M2.5, M2.5 Highspeed, M2.1, M2.1 Highspeed, M2, M1, and Text-01
 * Added Domain Path header field to plugin file
@@ -114,6 +119,9 @@ This service is provided by MiniMax: [Terms of Service](https://platform.minimax
 * Support for `MINIMAX_API_KEY` environment variable
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Fixes a false "no valid connector" warning on the AI admin page. No database changes required.
 
 = 1.1.0 =
 Expanded fallback model list to 9 models. No database changes or manual steps required.

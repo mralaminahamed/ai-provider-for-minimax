@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0] - 2026-05-21
+
+### Added
+
+- Provider logo SVG displayed on the WordPress Connectors page
+
+### Fixed
+
+- Declared credential availability via `wpai_has_ai_credentials` and `wpai_pre_has_valid_credentials_check` filters so the WordPress AI admin page no longer shows a false "no valid connector" warning when an API key is configured via the Connectors page
+
+### Changed
+
+- Expanded test suite from 33 to 44 tests covering full model list, provider logo path, highspeed variants, settings edge cases, and all 9 model IDs
+
 ## [1.1.0] - 2026-05-21
 
 ### Changed
