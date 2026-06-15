@@ -154,7 +154,14 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			CapabilityEnum::textGeneration(),
 		);
 		$options      = array(
+			new SupportedOption( OptionEnum::temperature() ),
 			new SupportedOption( OptionEnum::maxTokens() ),
+			new SupportedOption( OptionEnum::topP() ),
+			new SupportedOption( OptionEnum::presencePenalty() ),
+			new SupportedOption( OptionEnum::frequencyPenalty() ),
+			new SupportedOption( OptionEnum::stopSequences() ),
+			new SupportedOption( OptionEnum::systemInstruction() ),
+			new SupportedOption( OptionEnum::functionDeclarations() ),
 		);
 
 		$models = array();
@@ -191,7 +198,14 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			CapabilityEnum::textGeneration(),
 		);
 		$options      = array(
+			new SupportedOption( OptionEnum::temperature() ),
 			new SupportedOption( OptionEnum::maxTokens() ),
+			new SupportedOption( OptionEnum::topP() ),
+			new SupportedOption( OptionEnum::presencePenalty() ),
+			new SupportedOption( OptionEnum::frequencyPenalty() ),
+			new SupportedOption( OptionEnum::stopSequences() ),
+			new SupportedOption( OptionEnum::systemInstruction() ),
+			new SupportedOption( OptionEnum::functionDeclarations() ),
 		);
 
 		$model_list = array(

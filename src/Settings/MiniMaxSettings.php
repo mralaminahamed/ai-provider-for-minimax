@@ -119,6 +119,30 @@ class MiniMaxSettings {
 			'minimax-settings',
 			'minimax_general'
 		);
+
+		add_settings_field(
+			'top_p',
+			__( 'Top P', 'alamin-ai-provider-for-minimax' ),
+			array( self::class, 'render_top_p_field' ),
+			'minimax-settings',
+			'minimax_general'
+		);
+
+		add_settings_field(
+			'presence_penalty',
+			__( 'Presence Penalty', 'alamin-ai-provider-for-minimax' ),
+			array( self::class, 'render_presence_penalty_field' ),
+			'minimax-settings',
+			'minimax_general'
+		);
+
+		add_settings_field(
+			'frequency_penalty',
+			__( 'Frequency Penalty', 'alamin-ai-provider-for-minimax' ),
+			array( self::class, 'render_frequency_penalty_field' ),
+			'minimax-settings',
+			'minimax_general'
+		);
 	}
 
 	/**
@@ -145,8 +169,20 @@ class MiniMaxSettings {
 		$max_tokens_raw          = $input['max_tokens'] ?? 4096;
 		$sanitized['max_tokens'] = is_numeric( $max_tokens_raw ) ? (int) $max_tokens_raw : 4096;
 
-		$sanitized['temperature'] = max( 0, min( 2, $sanitized['temperature'] ) );
-		$sanitized['max_tokens']  = max( 1, min( 200000, $sanitized['max_tokens'] ) );
+		$top_p_raw          = $input['top_p'] ?? 1.0;
+		$sanitized['top_p'] = is_numeric( $top_p_raw ) ? (float) $top_p_raw : 1.0;
+
+		$presence_penalty_raw          = $input['presence_penalty'] ?? 0.0;
+		$sanitized['presence_penalty'] = is_numeric( $presence_penalty_raw ) ? (float) $presence_penalty_raw : 0.0;
+
+		$frequency_penalty_raw          = $input['frequency_penalty'] ?? 0.0;
+		$sanitized['frequency_penalty'] = is_numeric( $frequency_penalty_raw ) ? (float) $frequency_penalty_raw : 0.0;
+
+		$sanitized['temperature']       = max( 0, min( 2, $sanitized['temperature'] ) );
+		$sanitized['max_tokens']        = max( 1, min( 200000, $sanitized['max_tokens'] ) );
+		$sanitized['top_p']             = max( 0, min( 1, $sanitized['top_p'] ) );
+		$sanitized['presence_penalty']  = max( -2, min( 2, $sanitized['presence_penalty'] ) );
+		$sanitized['frequency_penalty'] = max( -2, min( 2, $sanitized['frequency_penalty'] ) );
 
 		return $sanitized;
 	}
@@ -229,6 +265,66 @@ class MiniMaxSettings {
 	}
 
 	/**
+	 * Render top p field.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return void
+	 */
+	public static function render_top_p_field(): void {
+		$settings = self::get_settings();
+		$raw      = $settings['top_p'] ?? 1.0;
+		$value    = is_numeric( $raw ) ? (float) $raw : 1.0;
+
+		echo '<input type="number" step="0.01" min="0" max="1"';
+		echo ' name="' . esc_attr( self::OPTION_KEY ) . '[top_p]"';
+		echo ' id="minimax_top_p"';
+		echo ' value="' . esc_attr( (string) $value ) . '"';
+		echo ' class="small-text" />';
+		echo '<p class="description">' . esc_html__( 'Nucleus sampling threshold. 1.0 disables top-p sampling. Range: 0-1.', 'alamin-ai-provider-for-minimax' ) . '</p>';
+	}
+
+	/**
+	 * Render presence penalty field.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return void
+	 */
+	public static function render_presence_penalty_field(): void {
+		$settings = self::get_settings();
+		$raw      = $settings['presence_penalty'] ?? 0.0;
+		$value    = is_numeric( $raw ) ? (float) $raw : 0.0;
+
+		echo '<input type="number" step="0.1" min="-2" max="2"';
+		echo ' name="' . esc_attr( self::OPTION_KEY ) . '[presence_penalty]"';
+		echo ' id="minimax_presence_penalty"';
+		echo ' value="' . esc_attr( (string) $value ) . '"';
+		echo ' class="small-text" />';
+		echo '<p class="description">' . esc_html__( 'Penalizes tokens that have appeared in the output so far. Range: -2 to 2.', 'alamin-ai-provider-for-minimax' ) . '</p>';
+	}
+
+	/**
+	 * Render frequency penalty field.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return void
+	 */
+	public static function render_frequency_penalty_field(): void {
+		$settings = self::get_settings();
+		$raw      = $settings['frequency_penalty'] ?? 0.0;
+		$value    = is_numeric( $raw ) ? (float) $raw : 0.0;
+
+		echo '<input type="number" step="0.1" min="-2" max="2"';
+		echo ' name="' . esc_attr( self::OPTION_KEY ) . '[frequency_penalty]"';
+		echo ' id="minimax_frequency_penalty"';
+		echo ' value="' . esc_attr( (string) $value ) . '"';
+		echo ' class="small-text" />';
+		echo '<p class="description">' . esc_html__( 'Penalizes tokens based on their frequency in the output so far. Range: -2 to 2.', 'alamin-ai-provider-for-minimax' ) . '</p>';
+	}
+
+	/**
 	 * Render settings page.
 	 *
 	 * @since 1.0.0
@@ -273,15 +369,24 @@ class MiniMaxSettings {
 		}
 
 		return array(
-			'default_model' => isset( $saved['default_model'] ) && is_string( $saved['default_model'] )
+			'default_model'     => isset( $saved['default_model'] ) && is_string( $saved['default_model'] )
 				? $saved['default_model']
 				: '',
-			'temperature'   => isset( $saved['temperature'] ) && is_numeric( $saved['temperature'] )
+			'temperature'       => isset( $saved['temperature'] ) && is_numeric( $saved['temperature'] )
 				? (float) $saved['temperature']
 				: $defaults['temperature'],
-			'max_tokens'    => isset( $saved['max_tokens'] ) && is_int( $saved['max_tokens'] )
+			'max_tokens'        => isset( $saved['max_tokens'] ) && is_int( $saved['max_tokens'] )
 				? $saved['max_tokens']
 				: $defaults['max_tokens'],
+			'top_p'             => isset( $saved['top_p'] ) && is_numeric( $saved['top_p'] )
+				? (float) $saved['top_p']
+				: 1.0,
+			'presence_penalty'  => isset( $saved['presence_penalty'] ) && is_numeric( $saved['presence_penalty'] )
+				? (float) $saved['presence_penalty']
+				: 0.0,
+			'frequency_penalty' => isset( $saved['frequency_penalty'] ) && is_numeric( $saved['frequency_penalty'] )
+				? (float) $saved['frequency_penalty']
+				: 0.0,
 		);
 	}
 }

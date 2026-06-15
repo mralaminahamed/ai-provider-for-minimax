@@ -80,7 +80,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 			'minimax',
 			'MiniMax',
 			ProviderTypeEnum::cloud(),
-			'https://platform.minimax.io',
+			'https://platform.minimax.io/user-center/basic-information/interface-key',
 			RequestAuthenticationMethod::apiKey(),
 		);
 
