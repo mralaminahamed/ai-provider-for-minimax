@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "AlAminAhamed\\MiniMaxAiProvider\\": "src/"
+            "AlAminAhamed\\MiniMaxAiProvider\\": "includes/"
         }
     },
     "autoload-dev": {
@@ -43,8 +43,8 @@
         "test-f": "phpunit --filter",
         "lint": "vendor/bin/phpcs -p -s",
         "lint:fix": "vendor/bin/phpcbf -p",
-        "lint:review": "phpcs ./src ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
-        "lint:fix:review": "phpcbf ./src ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
+        "lint:review": "phpcs ./includes ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
+        "lint:fix:review": "phpcbf ./includes ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
         "analyze": "phpstan analyse --memory-limit=2G --configuration=phpstan.neon.dist",
         "phpcs": "@lint",
         "phpcbf": "@lint:fix",
