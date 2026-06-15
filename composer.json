@@ -14,13 +14,13 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.4",
-        "ext-json": "*",
-        "wordpress/wp-ai-client": "^0.4"
+        "ext-json": "*"
     },
     "require-dev": {
+        "wordpress/wp-ai-client": "^0.4",
         "brain/monkey": "^2.7",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
-        "php-stubs/wordpress-stubs": "^6.0",
+        "php-stubs/wordpress-stubs": "^6.9",
         "phpcompatibility/phpcompatibility-wp": "^2.1.8",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1.30",
