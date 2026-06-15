@@ -1,14 +1,20 @@
 # AI Provider for MiniMax
 
-An independent, third-party MiniMax provider for the [PHP AI Client](https://github.com/WordPress/php-ai-client) SDK. Works as both a Composer package and a WordPress plugin. Not affiliated with, endorsed by, or sponsored by MiniMax.
+An independent, third-party MiniMax provider for the [WordPress PHP AI Client](https://github.com/WordPress/php-ai-client) SDK. Works as both a Composer package and a WordPress plugin. Not affiliated with, endorsed by, or sponsored by MiniMax.
 
 ## Requirements
 
 - PHP 7.4 or higher
-- When using with WordPress, requires WordPress 7.0 or higher
-    - If using an older WordPress release, the [wordpress/php-ai-client](https://github.com/WordPress/php-ai-client) package must be installed
+- WordPress 7.0 or higher (AI Client SDK is included in WordPress core)
+  - On older WordPress releases, the [WordPress AI Client](https://wordpress.org/plugins/wp-ai-client/) plugin must be installed separately
 
 ## Installation
+
+### As a WordPress Plugin
+
+1. Download the plugin zip
+2. Go to **Plugins > Add New > Upload Plugin** in your WordPress admin
+3. Upload and activate
 
 ### As a Composer Package
 
@@ -16,43 +22,59 @@ An independent, third-party MiniMax provider for the [PHP AI Client](https://git
 composer require mralaminahamed/ai-provider-for-minimax
 ```
 
-### As a WordPress Plugin
+## Configuration
 
-1. Download the plugin files
-2. Upload to `/wp-content/plugins/alamin-ai-provider-for-minimax/`
-3. Ensure the PHP AI Client plugin is installed and activated
-4. Activate the plugin through the WordPress admin
+### WordPress Admin
+
+Go to **Settings > MiniMax** to configure:
+
+| Setting | Description | Default |
+|---|---|---|
+| API Key | Your MiniMax API key | — |
+| Default Model | Model used when none is specified | First available |
+| Temperature | Output randomness (0.0–2.0) | 1.0 |
+| Max Tokens | Maximum response length | 2048 |
+| Top P | Nucleus sampling threshold (0.0–1.0) | 1.0 |
+| Presence Penalty | Penalise repeated topics (-2.0–2.0) | 0.0 |
+| Frequency Penalty | Penalise repeated tokens (-2.0–2.0) | 0.0 |
+
+### Environment Variable
+
+`MINIMAX_API_KEY` takes priority over the database setting:
+
+```bash
+export MINIMAX_API_KEY=your-api-key
+```
+
+Get your API key at [platform.minimax.io/user-center/basic-information/interface-key](https://platform.minimax.io/user-center/basic-information/interface-key).
 
 ## Usage
 
-### With WordPress
+### With WordPress (automatic)
 
-The provider automatically registers itself with the PHP AI Client on the `init` hook. Simply ensure both plugins are active and configure your API key:
+The provider registers itself on the `init` hook. No manual setup required beyond entering your API key.
 
 ```php
-// Set your MiniMax API key (or use the MINIMAX_API_KEY environment variable)
-putenv('MINIMAX_API_KEY=your-api-key');
+use WordPress\AiClient\AiClient;
 
-// Use the provider
-$result = AiClient::prompt('Hello, world!')
+$result = AiClient::prompt('Explain quantum computing')
     ->usingProvider('minimax')
     ->generateTextResult();
+
+echo $result->toText();
 ```
 
-### As a Standalone Package
+### As a Standalone Composer Package
 
 ```php
 use WordPress\AiClient\AiClient;
 use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
 
-// Register the provider
 $registry = AiClient::defaultRegistry();
 $registry->registerProvider(MiniMaxProvider::class);
 
-// Set your API key
 putenv('MINIMAX_API_KEY=your-api-key');
 
-// Generate text
 $result = AiClient::prompt('Explain quantum computing')
     ->usingProvider('minimax')
     ->generateTextResult();
@@ -62,15 +84,64 @@ echo $result->toText();
 
 ## Supported Models
 
-Available models are dynamically discovered from the MiniMax API. This includes MiniMax-M2 series models for text generation. The provider falls back to a default model list when the API is unavailable.
+Models are discovered dynamically from the MiniMax API (cached for 1 hour). The fallback list includes 9 models:
 
-## Configuration
+- MiniMax-M2.7, MiniMax-M2.7 Highspeed
+- MiniMax-M2.5, MiniMax-M2.5 Highspeed
+- MiniMax-M2.1, MiniMax-M2.1 Highspeed
+- MiniMax-M2
+- MiniMax-M1
+- MiniMax-Text-01
 
-The provider uses the `MINIMAX_API_KEY` environment variable for authentication. You can set this in your environment or via PHP:
+## Architecture
 
-```php
-putenv('MINIMAX_API_KEY=your-api-key');
 ```
+includes/
+  Provider/
+    MiniMaxProvider.php              # Registers provider ID "minimax", base URL https://api.minimax.io/v1
+    MiniMaxTextGenerationModel.php   # OpenAI-compatible text generation
+  Metadata/
+    MiniMaxModelMetadataDirectory.php  # API model discovery + transient cache
+  Settings/
+    MiniMaxSettings.php              # WP admin settings page (logic only)
+templates/
+  admin/
+    settings-page.php                # <form> wrapper
+    section-general.php              # Section description
+    field-model.php                  # Model <select>
+    field-temperature.php            # Temperature <input>
+    field-max-tokens.php             # Max tokens <input>
+    field-top-p.php                  # Top P <input>
+    field-presence-penalty.php       # Presence penalty <input>
+    field-frequency-penalty.php      # Frequency penalty <input>
+```
+
+Settings page: `options-general.php?page=minimax-settings`
+Option key: `minimax_settings`
+
+## Development
+
+```bash
+# Install dependencies
+composer install
+
+# Run tests
+composer test
+
+# Lint
+composer phpcs
+
+# Auto-fix lint issues
+composer phpcbf
+
+# Static analysis
+composer phpstan
+
+# Build release zip
+composer release
+```
+
+The release script runs `composer install --no-dev --optimize-autoloader` so only the plugin's own classmap is in the vendor directory — the AI Client SDK is excluded entirely (it is provided by WordPress 7.0+ at runtime).
 
 ## License
 

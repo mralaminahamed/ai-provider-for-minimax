@@ -5,11 +5,11 @@ Tags: ai, minimax, llm, text generation, artificial intelligence
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-MiniMax AI provider for WordPress AI Client. Access 9 models: M2.7, M2.5, M2.1, M1, Text-01, and highspeed variants.
+MiniMax AI provider for WordPress AI Client. Access MiniMax-M2 and M1 series models for high-performance text generation.
 
 == Description ==
 
@@ -20,9 +20,11 @@ This plugin is an independent, third-party integration and is not affiliated wit
 **Features:**
 
 * Seamless integration with the WordPress AI Client plugin
-* Dynamic model discovery from the MiniMax API
-* Support for text generation with all MiniMax-M2 and M1 series models including highspeed variants
+* Dynamic model discovery from the MiniMax API with hourly caching
+* Support for MiniMax-M2 and M1 series models including highspeed variants
 * Secure API key management via WordPress settings or environment variable
+* Full generation parameter control: temperature, max tokens, top P, presence penalty, and frequency penalty
+* Fallback to a hardcoded model list when the API is unavailable
 
 **Supported Models (fallback list):**
 
@@ -32,15 +34,20 @@ When an API key is configured, the live model list is fetched directly from the 
 
 **Requirements:**
 
-* WordPress AI Client plugin (or WordPress 7.0+ with built-in AI Client)
+* WordPress 7.0 or higher (the AI Client SDK is built into WordPress core)
 * A [MiniMax](https://www.minimax.io/) account and API key
 
-**API Key Configuration:**
+**Settings:**
 
-Set your MiniMax API key in one of two ways:
+Go to **Settings > MiniMax** to configure:
 
-1. WordPress AI Client settings — go to the WordPress AI Client configuration page and enter your MiniMax API key there
-2. `MINIMAX_API_KEY` environment variable on your server (takes priority over the database setting)
+* **API Key** — your MiniMax API key (or set the `MINIMAX_API_KEY` environment variable)
+* **Default Model** — the model used when no explicit model is requested
+* **Temperature** — controls output randomness (0.0–2.0, default 1.0)
+* **Max Tokens** — maximum tokens in the generated response (default 2048)
+* **Top P** — nucleus sampling threshold (0.0–1.0, default 1.0)
+* **Presence Penalty** — penalises repeated topics (-2.0–2.0, default 0.0)
+* **Frequency Penalty** — penalises repeated tokens (-2.0–2.0, default 0.0)
 
 == Installation ==
 
@@ -49,19 +56,19 @@ Set your MiniMax API key in one of two ways:
 1. Download the plugin zip file
 2. Go to **Plugins > Add New > Upload Plugin** in your WordPress admin
 3. Upload the zip and click **Install Now**
-4. Ensure the **WordPress AI Client** plugin is installed and activated
-5. Activate **AI Provider for MiniMax**
-6. Enter your MiniMax API key via the WordPress AI Client settings
-7. Optionally go to **Settings > MiniMax** to configure the default model and generation parameters
+4. Activate **AI Provider for MiniMax**
+5. Go to **Settings > MiniMax** and enter your API key
+
+**Note:** WordPress 7.0 includes the AI Client SDK natively — no additional AI Client plugin is required. If you are running an older WordPress version, you must install the WordPress AI Client plugin separately first.
 
 = Manual Installation =
 
 1. Upload the `alamin-ai-provider-for-minimax` folder to `/wp-content/plugins/`
-2. Follow steps 4–6 above
+2. Follow steps 4–5 above
 
 = As a Composer Package =
 
-`composer require mralaminahamed/alamin-ai-provider-for-minimax`
+`composer require mralaminahamed/ai-provider-for-minimax`
 
 == Frequently Asked Questions ==
 
@@ -69,35 +76,55 @@ Set your MiniMax API key in one of two ways:
 
 MiniMax is an AI company that provides high-performance language models, including the MiniMax-M2 series known for their coding and text generation capabilities. Learn more at [minimax.io](https://www.minimax.io/).
 
-= Do I need the WordPress AI Client? =
+= Do I need a separate AI Client plugin? =
 
-Yes. This plugin is a provider add-on for the WordPress AI Client. Install and activate that plugin first.
+Not on WordPress 7.0 or higher — the AI Client SDK is built into WordPress core. On older versions you will need the WordPress AI Client plugin.
 
 = Where do I get an API key? =
 
-Sign up at [minimax.io](https://www.minimax.io/) and generate an API key from your account dashboard.
+Sign up at [platform.minimax.io](https://platform.minimax.io/user-center/basic-information/interface-key) and generate an API key from the interface key section.
 
 = Is my API key stored securely? =
 
-Your API key is stored by the WordPress AI Client plugin in the WordPress options table. For higher security, set the `MINIMAX_API_KEY` environment variable on your server instead — this bypasses the database entirely.
+Your API key is stored in the WordPress options table using WordPress's standard options API. For higher security, set the `MINIMAX_API_KEY` environment variable on your server instead — this bypasses the database entirely.
+
+= What happens if the MiniMax API is unreachable? =
+
+The plugin falls back to a hardcoded list of 9 MiniMax models so the AI Client continues to function.
+
+= What generation parameters are supported? =
+
+Temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations are all declared as supported options.
 
 == External Services ==
 
-This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to provide AI text generation.
+This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to:
 
-**What the service does:** MiniMax is a third-party AI platform that provides large language model APIs. This plugin uses it to retrieve available models and send text generation requests.
+1. Retrieve the list of available AI models (cached for 1 hour via WordPress transients)
+2. Send text generation requests using your configured AI model
 
-**What data is sent and when:**
+**Service:** MiniMax
+**API endpoint:** `https://api.minimax.io/v1`
+**When data is sent:** When generating AI text responses or refreshing the model list
+**Data sent:** Your API key (via Authorization header) and the text prompt/conversation
+**Terms of Service:** [platform.minimax.io/protocol/terms-of-service](https://platform.minimax.io/protocol/terms-of-service)
+**Privacy Policy:** [platform.minimax.io/protocol/privacy-policy](https://platform.minimax.io/protocol/privacy-policy)
 
-* Your MiniMax API key is sent via the `Authorization` header on every request.
-* When a WordPress feature triggers AI text generation, the text prompt or conversation is sent to `https://api.minimax.io/v1`.
-* When the model list is refreshed (once per hour, cached via WordPress transients), a request is sent to `https://api.minimax.io/v1/models` with your API key.
+No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
 
-No data is sent until you enter an API key and a WordPress feature triggers a request.
+== Screenshots ==
 
-This service is provided by MiniMax: [Terms of Service](https://platform.minimax.io/protocol/terms-of-service), [Privacy Policy](https://platform.minimax.io/protocol/privacy-policy).
+1. The MiniMax settings page where you configure your API key, default model, and generation parameters.
 
 == Changelog ==
+
+= 1.3.0 =
+* Added Top P, Presence Penalty, and Frequency Penalty settings fields to the admin settings page
+* Declared full SupportedOptions coverage: temperature, top P, presence penalty, frequency penalty, stop sequences, system instruction, function declarations, and max tokens
+* Extracted all admin HTML markup to `templates/admin/` for cleaner separation of logic and presentation
+* Renamed plugin class directory from `src/` to `includes/` per WordPress plugin conventions
+* Removed AI Client SDK from Composer production dependencies — WordPress 7.0+ provides it natively at runtime
+* Requires at least: updated to reflect WordPress 7.0 native AI Client support
 
 = 1.2.1 =
 * Fixed connector showing as "Connected" before any API key is entered — provider availability now correctly checks for a configured API key
@@ -117,11 +144,14 @@ This service is provided by MiniMax: [Terms of Service](https://platform.minimax
 = 1.0.0 =
 * Initial release
 * MiniMax provider registration with WordPress AI Client
-* Dynamic model discovery
+* Dynamic model discovery with transient caching and fallback list
 * Settings page for API key and default model configuration
 * Support for `MINIMAX_API_KEY` environment variable
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Adds Top P, Presence Penalty, and Frequency Penalty settings. No database changes or manual steps required. Requires WordPress 7.0 or higher.
 
 = 1.2.0 =
 Fixes a false "no valid connector" warning on the AI admin page. No database changes required.
