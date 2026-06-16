@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -116,7 +116,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -128,7 +128,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.composer/cache
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload built plugin as workflow artifact
         if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: plugin-build-${{ needs.meta.outputs.version }}
           path: dist/
@@ -179,7 +179,7 @@ jobs:
     steps:
       - name: Download built plugin artifact
         if: ${{ env.ACT != 'true' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: plugin-build-${{ needs.meta.outputs.version }}
           path: .
@@ -196,7 +196,7 @@ jobs:
           BUILD_DIR:    ${{ github.workspace }}
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ needs.meta.outputs.version }}"
