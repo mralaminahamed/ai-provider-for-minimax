@@ -9,82 +9,35 @@ declare(strict_types=1);
 
 namespace AlAminAhamed\MiniMaxAiProvider\Tests\Models;
 
-use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
 use AlAminAhamed\MiniMaxAiProvider\Models\MiniMaxTextGenerationModel;
 use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
-use Brain\Monkey;
-use Brain\Monkey\Functions;
-use PHPUnit\Framework\TestCase;
+use AlAminAhamed\MiniMaxAiProvider\Tests\AbstractTextGenerationModelTest;
 
 /**
  * Class MiniMaxTextGenerationModelTest
  *
  * @since 1.0.0
  */
-class MiniMaxTextGenerationModelTest extends TestCase {
+class MiniMaxTextGenerationModelTest extends AbstractTextGenerationModelTest {
 
-	/**
-	 * Set up Brain Monkey before each test.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	protected function setUp(): void {
-		parent::setUp();
-		Monkey\setUp();
-		Functions\when( 'get_option' )->justReturn( array() );
+	protected function getModelClass(): string {
+		return MiniMaxTextGenerationModel::class;
 	}
 
-	/**
-	 * Tear down Brain Monkey after each test.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	protected function tearDown(): void {
-		Monkey\tearDown();
-		parent::tearDown();
+	protected function getProviderModelId(): string {
+		return 'MiniMax-M2.7';
 	}
 
-	/**
-	 * Test model is created correctly.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function test_model_is_created_correctly(): void {
-		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
-
-		$this->assertInstanceOf( MiniMaxTextGenerationModel::class, $model );
+	protected function getProviderName(): string {
+		return 'MiniMax';
 	}
 
-	/**
-	 * Test model has correct metadata.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function test_model_has_correct_metadata(): void {
-		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
-
-		$this->assertEquals( 'MiniMax-M2.7', $model->metadata()->getId() );
+	protected function getCustomHeaderName(): string {
+		return 'MiniMax-Provider';
 	}
 
-	/**
-	 * Test model has MiniMax provider header.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function test_model_has_provider_metadata(): void {
-		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
-
-		$this->assertEquals( 'MiniMax', $model->providerMetadata()->getName() );
+	protected function createModel( string $modelId ): object {
+		return MiniMaxProvider::model( $modelId );
 	}
 
 	/**
@@ -112,30 +65,5 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 			$this->assertInstanceOf( MiniMaxTextGenerationModel::class, $model );
 			$this->assertEquals( $model_id, $model->metadata()->getId() );
 		}
-	}
-
-	/**
-	 * Test model injects MiniMax-Provider header via createRequest.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_model_injects_minimax_provider_header(): void {
-		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
-
-		$reflection = new \ReflectionMethod( MiniMaxTextGenerationModel::class, 'createRequest' );
-		$reflection->setAccessible( true );
-
-		$request = $reflection->invoke(
-			$model,
-			\WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum::POST(),
-			'chat/completions',
-			array( 'Content-Type' => 'application/json' ),
-			null
-		);
-
-		$this->assertTrue( $request->hasHeader( 'MiniMax-Provider' ) );
-		$this->assertEquals( 'wordpress-plugin', $request->getHeaderAsString( 'MiniMax-Provider' ) );
 	}
 }
