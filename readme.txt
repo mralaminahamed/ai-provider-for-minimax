@@ -8,62 +8,181 @@ Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-MiniMax provider for the WordPress AI Client.
+MiniMax provider for the WordPress AI Client. Access MiniMax M2 and M1 series models for high-performance text generation.
 
 == Description ==
 
-This plugin provides [MiniMax](https://www.minimax.io/) integration for the WordPress AI Client. It enables WordPress sites to use MiniMax's high-performance AI models for text generation and other AI capabilities through an OpenAI-compatible API.
+This plugin provides [MiniMax](https://www.minimax.io/) integration for the WordPress AI Client. It enables WordPress sites to use MiniMax's high-performance large language models for text generation, content creation, and other AI capabilities through an OpenAI-compatible API.
 
 This plugin is an independent, third-party integration and is not affiliated with, endorsed by, or sponsored by MiniMax.
 
-**Features:**
+= Why MiniMax? =
 
-* Text generation with MiniMax M2 and M1 series models
-* Automatic model discovery from the MiniMax API with hourly caching
-* Fallback to a hardcoded model list when the API is unavailable
-* Full generation parameter control: temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations
-* Settings page for default model and generation parameters
-* API key configured via **Settings > Connectors** or the `MINIMAX_API_KEY` environment variable
+MiniMax is an AI company known for its high-performance, cost-effective language models. The **MiniMax M2 series** delivers frontier-level text generation quality — competitive with top models from OpenAI and Anthropic — while offering attractive pricing for high-volume WordPress use cases.
 
-**Supported Models (fallback list):**
+MiniMax models are particularly strong at:
 
-MiniMax-M2.7, MiniMax-M2.7 Highspeed, MiniMax-M2.5, MiniMax-M2.5 Highspeed, MiniMax-M2.1, MiniMax-M2.1 Highspeed, MiniMax-M2, MiniMax-M1, MiniMax-Text-01
+* **Long-context tasks** — handling large documents, long conversations, and extended content generation
+* **Instruction following** — precise, structured output generation suitable for automated pipelines
+* **Multilingual content** — strong performance in English, Chinese, and other languages
+* **Creative writing** — rich, nuanced prose generation for blogs, marketing copy, and storytelling
 
-When an API key is configured, the live model list is fetched directly from the MiniMax API.
+= Features =
 
-**Requirements:**
+* **MiniMax M2 and M1 series models** — including Highspeed variants optimised for faster responses
+* **Automatic model discovery** — live model list fetched from the MiniMax API and cached hourly; falls back to a hardcoded list when offline
+* **Full parameter control** — temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations
+* **Settings page** — configure default model and generation parameters without touching code
+* **API key via Connectors** — enter your key once in **Settings > Connectors**; all AI-enabled plugins share it automatically
+* **Environment variable support** — `MINIMAX_API_KEY` for server-level configuration, bypassing the database entirely
+* **OpenAI-compatible API** — uses the standard OpenAI API protocol for broad compatibility
+* **Highspeed variants** — M2.7 Highspeed, M2.5 Highspeed, and M2.1 Highspeed for latency-sensitive applications
+
+= What Can You Do With AI in WordPress? =
+
+Once this provider is configured, any WordPress plugin or theme that integrates with the WordPress AI Client can use it:
+
+* **Block editor (Gutenberg)** — AI writing assistance, rephrasing, summarising, and expanding content
+* **WooCommerce** — generate product descriptions, SEO meta titles, customer review summaries, and category descriptions
+* **SEO plugins** — generate meta descriptions, focus keyphrases, and Open Graph content
+* **Customer support** — power AI chatbots and automate FAQ responses
+* **Translation and localisation** — translate and adapt content for English, Chinese, and other markets
+* **Content marketing** — generate blog post drafts, social media copy, and email newsletters
+* **Image alt text** — generate accessible alt attributes for media library images
+
+= Supported Models =
+
+When an API key is configured, the live model list is fetched from the MiniMax API. The built-in fallback list includes:
+
+* **MiniMax-M2.7** — latest generation, highest capability
+* **MiniMax-M2.7 Highspeed** — M2.7 performance at lower latency
+* **MiniMax-M2.5** — balanced performance and cost
+* **MiniMax-M2.5 Highspeed** — M2.5 with faster response times
+* **MiniMax-M2.1** — cost-effective mid-tier model
+* **MiniMax-M2.1 Highspeed** — M2.1 with reduced latency
+* **MiniMax-M2** — previous generation, widely supported
+* **MiniMax-M1** — foundation model
+* **MiniMax-Text-01** — specialised text generation model
+
+= Requirements =
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher
+* A [MiniMax](https://www.minimax.io/) account and API key
+
+= How the WordPress AI Provider System Works =
+
+WordPress 7.0 introduced a built-in AI Client SDK. Plugins and themes call a standard API (e.g. "generate text from this prompt") without knowing which AI provider is active. Provider plugins like this one register themselves with WordPress and handle the actual API calls.
+
+This means:
+
+1. Install this plugin → MiniMax is registered as an AI provider
+2. Enter your API key in **Settings > Connectors**
+3. Every AI-enabled plugin on your site can now use MiniMax automatically
+
+You can also install multiple provider plugins and switch between them from the Connectors screen — no re-configuration of individual plugins needed.
+
+= Settings =
+
+Go to **Settings > MiniMax** to configure:
+
+* **Default Model** — the model used when no explicit model is requested by a plugin
+* **Temperature** — controls output randomness (0.0–2.0, default 0.7)
+* **Max Tokens** — maximum tokens in the response (1–200,000, default 4096)
+* **Top P** — nucleus sampling threshold (0.0–1.0, default 1.0)
+* **Presence Penalty** — penalises repeated topics (-2.0–2.0, default 0.0)
+* **Frequency Penalty** — penalises repeated tokens (-2.0–2.0, default 0.0)
+
+= For Developers =
+
+This plugin follows the official WordPress AI Provider pattern and is fully compatible with any plugin built on the WordPress AI Client SDK.
+
+**Supported SupportedOptions:** `temperature`, `maxTokens`, `topP`, `presencePenalty`, `frequencyPenalty`, `stopSequences`, `systemInstruction`, `functionDeclarations`
+
+**Provider ID:** `minimax`
+
+**Base URL:** `https://api.minimax.io/v1`
+
+**API key resolution order:**
+1. `MINIMAX_API_KEY` environment variable
+2. WordPress option `connectors_ai_minimax_api_key` (Settings > Connectors)
+3. WordPress option `wp_ai_client_credentials['minimax']['api_key']` (legacy)
 
 == Installation ==
 
 1. Upload the plugin files to `/wp-content/plugins/alamin-ai-provider-for-minimax/`.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Enter your MiniMax API key via **Settings > Connectors**.
-4. Go to **Settings > MiniMax** to configure the default model and generation parameters.
+2. Activate the plugin through the **Plugins** menu in WordPress.
+3. Go to **Settings > Connectors** and enter your MiniMax API key.
+4. Go to **Settings > MiniMax** to choose a default model and tune generation parameters.
+5. Install any AI-enabled plugin (e.g. the [AI Experiments](https://wordpress.org/plugins/ai/) plugin) to start using AI features.
+
+= Getting Your API Key =
+
+1. Sign up at [platform.minimax.io](https://platform.minimax.io)
+2. Go to the [Interface Key section](https://platform.minimax.io/user-center/basic-information/interface-key)
+3. Create a new API key and copy it
+4. Paste it into **Settings > Connectors** in your WordPress admin
+
+= WP-CLI Installation =
+
+`wp plugin install alamin-ai-provider-for-minimax --activate`
 
 == Frequently Asked Questions ==
 
-= How do I get a MiniMax API key? =
+= What is MiniMax? =
 
-Visit [platform.minimax.io](https://platform.minimax.io/user-center/basic-information/interface-key) to create an account and generate an API key from the interface key section.
+MiniMax is an AI company building high-performance large language models. Their MiniMax M2 series offers frontier-level text generation capabilities with strong multilingual support and competitive pricing. Learn more at [minimax.io](https://www.minimax.io/).
 
 = Where do I enter my API key? =
 
-Go to **Settings > Connectors** in your WordPress admin and enter the key there. Alternatively, set the `MINIMAX_API_KEY` environment variable on your server.
+Go to **Settings > Connectors** in your WordPress admin and enter your MiniMax API key there. All AI-enabled plugins on your site will automatically use it. Alternatively, set the `MINIMAX_API_KEY` environment variable on your server.
 
-= Does this plugin work without the PHP AI Client? =
+= Do I need to install a separate AI Client plugin? =
 
-WordPress 7.0 and higher include the AI Client SDK natively — no additional plugin is required.
+No. WordPress 7.0 and higher include the AI Client SDK natively — no additional plugin is required.
+
+= Which MiniMax model should I choose as the default? =
+
+* **Best quality** — MiniMax-M2.7 for the highest capability tasks
+* **Speed + quality** — MiniMax-M2.7 Highspeed or MiniMax-M2.5 Highspeed for fast responses without much quality loss
+* **Cost-effective** — MiniMax-M2.1 or MiniMax-M2.1 Highspeed for high-volume, lower-cost use cases
+* **General use** — MiniMax-M2.5 is a well-rounded choice for most WordPress content tasks
 
 = What happens if the MiniMax API is unreachable? =
 
-The plugin falls back to a hardcoded list of 9 MiniMax models so text generation continues to work.
+The plugin falls back to a hardcoded list of 9 MiniMax models so the AI Client continues to function and AI-enabled plugins stay operational.
 
-= What generation parameters are supported? =
+= Can I use multiple AI provider plugins at the same time? =
 
-Temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations.
+Yes. WordPress lets you install multiple provider plugins. You can switch the active provider from **Settings > Connectors** at any time without reconfiguring any plugin.
+
+= Is my API key stored securely? =
+
+Your API key is stored in the WordPress options table, which is protected by your database credentials. For higher security, set the `MINIMAX_API_KEY` environment variable on your server — this keeps the key entirely out of the database.
+
+= How does billing work? =
+
+Billing is handled entirely by MiniMax. Your usage is billed according to [MiniMax's pricing](https://platform.minimax.io) based on tokens consumed. WordPress and this plugin do not charge anything.
+
+= What generation parameters does this provider support? =
+
+Temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations — the full set of options supported by the WordPress AI Client SDK.
+
+= Is MiniMax good for multilingual content? =
+
+Yes. MiniMax models perform well across multiple languages, particularly English and Chinese. They are a strong choice for WordPress sites targeting multilingual or Chinese-language audiences.
+
+= Can I use this for WooCommerce product descriptions? =
+
+Yes, if you have a WooCommerce plugin that integrates with the WordPress AI Client. Once this provider is active and your API key is set, any AI-enabled WooCommerce plugin can generate product descriptions, SEO meta, and more.
+
+= Does this work with the Gutenberg block editor? =
+
+Yes. Any Gutenberg plugin or block that uses the WordPress AI Client will automatically use this provider once configured.
+
+= Do you have a developer API? =
+
+This plugin implements the standard WordPress AI Client provider interface. Developers building plugins or themes on top of the WordPress AI Client do not need to do anything special — if this provider is active, it will be available automatically.
 
 == External Services ==
 
@@ -121,8 +240,7 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 - Domain Path header field to plugin file.
 
 **Changed**
-- Improved plugin file header field ordering and alignment per WordPress.org standard.
-- Added file-level PHPDoc block to plugin bootstrap file.
+- Improved plugin file header field ordering per WordPress.org standard.
 - Updated tested up to WordPress 7.0.
 
 = 1.0.0 - 2026-01-01 =
