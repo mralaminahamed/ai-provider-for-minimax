@@ -3,7 +3,7 @@ Contributors:      mralaminahamed
 Tags:              ai, minimax, llm, connector, artificial-intelligence
 Requires at least: 7.0
 Tested up to:      7.0
-Stable tag:        1.3.0
+Stable tag:        1.3.1
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -207,6 +207,12 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 
 == Changelog ==
 
+= 1.3.1 - 2026-06-16 =
+
+**Fixed**
+- API key stored via Settings > Connectors (`connectors_ai_minimax_api_key`) now correctly used for live model list fetching — previously fell back to the hardcoded model list even when the Connectors key was set.
+- Settings `get_settings()` now returns all 6 default fields when the saved option is corrupt or missing; previously returned only `temperature` and `max_tokens`.
+
 = 1.3.0 - 2026-06-16 =
 
 **Added**
@@ -252,6 +258,9 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 * Support for `MINIMAX_API_KEY` environment variable.
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+Fixes live model list not loading when API key is set via Settings > Connectors. No database changes required.
 
 = 1.3.0 =
 Adds Top P, Presence Penalty, and Frequency Penalty settings. No database changes required. Requires WordPress 7.0 or higher.
