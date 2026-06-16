@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -116,7 +116,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -128,14 +128,14 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: |
             ~/.composer/cache
             vendor
           key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            composer-${{ runner.os }}-php74-
+            composer-${{ runner.os }}-
 
       - name: Install PHP dependencies (including dev — needed for build tooling)
         run: composer install --no-interaction --prefer-dist
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload built plugin as workflow artifact
         if: ${{ env.ACT != 'true' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: plugin-build-${{ needs.meta.outputs.version }}
           path: dist/
@@ -179,52 +179,14 @@ jobs:
     steps:
       - name: Download built plugin artifact
         if: ${{ env.ACT != 'true' }}
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: plugin-build-${{ needs.meta.outputs.version }}
           path: .
 
-      - name: Install Subversion
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y subversion
-
-      - name: Clear pre-existing SVN trunk files before deploy
-        env:
-          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          PLUGIN_SLUG:  ${{ needs.meta.outputs.plugin_slug }}
-        run: |
-          SVN_TRUNK="https://plugins.svn.wordpress.org/${PLUGIN_SLUG}/trunk"
-
-          svn checkout "$SVN_TRUNK" svn-trunk \
-            --username  "$SVN_USERNAME" \
-            --password  "$SVN_PASSWORD" \
-            --non-interactive --quiet
-
-          # Collect all versioned entries (files and dirs) at the top level and recursively
-          ITEMS=$(svn list svn-trunk | sed 's|/$||')
-
-          if [ -z "$ITEMS" ]; then
-            echo "SVN trunk is empty — nothing to clear."
-          else
-            echo "Clearing existing SVN trunk contents: $ITEMS"
-            for item in $ITEMS; do
-              svn delete "svn-trunk/${item}" --force --quiet
-            done
-            svn commit svn-trunk \
-              -m "chore: clear trunk before deploying v${{ needs.meta.outputs.version }}" \
-              --username "$SVN_USERNAME" \
-              --password "$SVN_PASSWORD" \
-              --non-interactive --quiet
-            echo "Trunk cleared."
-          fi
-
-          rm -rf svn-trunk
-
       - name: Deploy plugin to WordPress.org via SVN
         id: deploy
-        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        uses: 10up/action-wordpress-plugin-deploy@stable
         with:
           generate-zip: true
         env:
@@ -234,7 +196,7 @@ jobs:
           BUILD_DIR:    ${{ github.workspace }}
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ needs.meta.outputs.version }}"
