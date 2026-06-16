@@ -242,19 +242,26 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return $api_key;
 		}
 
-		if ( function_exists( 'get_option' ) ) {
-			$option = get_option( 'wp_ai_client_credentials', array() );
-			if ( ! is_array( $option ) ) {
-				return '';
-			}
-			$credentials = $option['minimax'] ?? array();
-			if ( ! is_array( $credentials ) ) {
-				return '';
-			}
-			$api_key_value = $credentials['api_key'] ?? '';
-			return is_string( $api_key_value ) ? $api_key_value : '';
+		if ( ! function_exists( 'get_option' ) ) {
+			return '';
 		}
 
-		return '';
+		// Key stored by WordPress Connectors page (WP 7.0+).
+		$connectors_key = get_option( 'connectors_ai_minimax_api_key', '' );
+		if ( is_string( $connectors_key ) && '' !== $connectors_key ) {
+			return $connectors_key;
+		}
+
+		// Key stored via legacy wp_ai_client_credentials option.
+		$option = get_option( 'wp_ai_client_credentials', array() );
+		if ( ! is_array( $option ) ) {
+			return '';
+		}
+		$credentials = $option['minimax'] ?? array();
+		if ( ! is_array( $credentials ) ) {
+			return '';
+		}
+		$api_key_value = $credentials['api_key'] ?? '';
+		return is_string( $api_key_value ) ? $api_key_value : '';
 	}
 }

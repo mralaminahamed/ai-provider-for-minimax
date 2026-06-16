@@ -321,8 +321,12 @@ class MiniMaxSettings {
 	 */
 	public static function get_settings(): array {
 		$defaults = array(
-			'temperature' => 0.7,
-			'max_tokens'  => 4096,
+			'default_model'     => '',
+			'temperature'       => 0.7,
+			'max_tokens'        => 4096,
+			'top_p'             => 1.0,
+			'presence_penalty'  => 0.0,
+			'frequency_penalty' => 0.0,
 		);
 
 		$saved = get_option( self::OPTION_KEY, array() );
