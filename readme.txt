@@ -1,7 +1,7 @@
 === AI Provider for MiniMax ===
 Donate link: https://alaminahamed.com/donate
 Contributors: mralaminahamed
-Tags: ai, minimax, llm, text generation, artificial intelligence
+Tags: ai, minimax, llm, text generation, artificial intelligence, connector
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 7.4
