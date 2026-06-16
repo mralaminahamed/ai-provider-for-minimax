@@ -1,7 +1,7 @@
 parameters:
 	level: max
 	paths:
-		- ./src
+		- ./includes
 		- ./alamin-ai-provider-for-minimax.php
 	excludePaths:
 		- ./vendor
