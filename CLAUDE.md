@@ -166,8 +166,56 @@ new ModelMetadata(
 - **Do NOT** add `wordpress/php-ai-client` to Composer production deps — the SDK is provided by WordPress core (WP 7.0+)
 - **Do NOT** use `TextGenerationCapability` class — use `CapabilityEnum::textGeneration()`
 - **Do NOT** omit the `connectors_ai_minimax_api_key` option check from any code that reads the API key
-- **Do NOT** use `@v6` or `@v5` for GitHub Actions — latest stable is `actions/checkout@v4`, `actions/cache@v4`
+- **Do NOT** downgrade GitHub Actions versions — current baseline: `actions/checkout@v6`, `actions/cache@v5`, `actions/upload-artifact@v7`, `actions/download-artifact@v8`, `softprops/action-gh-release@v3`
 - **Do NOT** hardcode only a subset of `SupportedOption` entries — declare all options the API actually supports
+
+## CI / Release Workflows
+
+### Release pipeline (`.github/workflows/svn-deploy.yml`)
+
+Five-job DAG triggered on any tag push:
+
+```
+meta ──┬── lint ─────┐
+       └── phpstan ───┴── package ── deploy
+```
+
+| Job | Purpose | Blocks |
+|---|---|---|
+| `meta` | Validate tag == plugin header version; detect prerelease (`alpha`/`beta`/`rc`) | all |
+| `lint` | Sensitive-file scan + PHP syntax lint + PHPCS | `package` |
+| `phpstan` | PHPStan level max, 2G memory | `package` |
+| `package` | `composer --no-dev --classmap-authoritative` + distignore rsync into `dist/<slug>/` + clean-dist guard + zip | `deploy` |
+| `deploy` | 10up SVN (`BUILD_DIR: dist/<slug>`, `ASSETS_DIR: .wordpress-org`) + GH release with prerelease flag + job summary | — |
+
+**Action versions (verified 2026-06):** `checkout@v6`, `cache@v5`, `upload-artifact@v7`, `download-artifact@v8`, `setup-php@v2`, `10up/action-wordpress-plugin-deploy@stable`, `softprops/action-gh-release@v3`
+
+**Per-job Composer caches** — `composer-lint-*`, `composer-phpstan-*` (separate keys prevent cross-job cache poisoning).
+
+**Distributable guard** — `package` job exits 1 if `.git`, `.github`, `tests`, `CLAUDE.md`, `phpcs*.xml*`, `.DS_Store` etc appear inside `dist/<slug>/` after the rsync step.
+
+### Asset/readme sync (`.github/workflows/svn-readme-assets-update.yml`)
+
+Triggered on push to `trunk` when `.wordpress-org/**` or `readme.txt` changes, or manually via `workflow_dispatch`. Uses `10up/action-wordpress-plugin-asset-update@stable`.
+
+### CI (`.github/workflows/ci.yml`)
+
+Three jobs run on push/PR to `trunk`/`main`: `lint` (PHPCS), `analyze` (PHPStan), `test` (PHPUnit across PHP 7.4–8.3 matrix with MySQL service). Cache keys are per-PHP-version (`composer-${{ runner.os }}-php${{ matrix.php }}-*`).
+
+### Tagging a release
+
+```bash
+# 1. Bump version in plugin .php header and readme.txt Stable tag
+# 2. Add changelog entry to readme.txt == Changelog ==
+# 3. Commit and push to trunk
+git add alamin-ai-provider-for-minimax.php readme.txt
+git commit -m "chore: bump version to X.Y.Z"
+git push
+
+# 4. Tag and push — this triggers svn-deploy.yml
+git tag X.Y.Z
+git push origin X.Y.Z
+```
 
 ## Key SDK Classes
 
