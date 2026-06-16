@@ -375,4 +375,437 @@ class MiniMaxSettingsTest extends TestCase {
 
 		$this->assertEquals( 4096, $result['max_tokens'] );
 	}
+
+	/**
+	 * Test sanitize settings clamps top_p below 0 to 0.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_top_p_below_zero(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model' => '',
+				'temperature'   => 1.0,
+				'max_tokens'    => 100,
+				'top_p'         => -1.0,
+			)
+		);
+
+		$this->assertEquals( 0.0, $result['top_p'] );
+	}
+
+	/**
+	 * Test sanitize settings clamps top_p above 1 to 1.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_top_p_above_one(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model' => '',
+				'temperature'   => 1.0,
+				'max_tokens'    => 100,
+				'top_p'         => 5.0,
+			)
+		);
+
+		$this->assertEquals( 1.0, $result['top_p'] );
+	}
+
+	/**
+	 * Test sanitize settings accepts a valid top_p value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_accepts_valid_top_p(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model' => '',
+				'temperature'   => 1.0,
+				'max_tokens'    => 100,
+				'top_p'         => 0.5,
+			)
+		);
+
+		$this->assertEquals( 0.5, $result['top_p'] );
+	}
+
+	/**
+	 * Test sanitize settings falls back to default top_p for non-numeric value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_defaults_for_non_numeric_top_p(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model' => '',
+				'temperature'   => 1.0,
+				'max_tokens'    => 100,
+				'top_p'         => 'high',
+			)
+		);
+
+		$this->assertEquals( 1.0, $result['top_p'] );
+	}
+
+	/**
+	 * Test sanitize settings clamps presence_penalty below -2 to -2.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_presence_penalty_below_minus_two(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'    => '',
+				'temperature'      => 1.0,
+				'max_tokens'       => 100,
+				'presence_penalty' => -5.0,
+			)
+		);
+
+		$this->assertEquals( -2.0, $result['presence_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings clamps presence_penalty above 2 to 2.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_presence_penalty_above_two(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'    => '',
+				'temperature'      => 1.0,
+				'max_tokens'       => 100,
+				'presence_penalty' => 5.0,
+			)
+		);
+
+		$this->assertEquals( 2.0, $result['presence_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings accepts a valid presence_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_accepts_valid_presence_penalty(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'    => '',
+				'temperature'      => 1.0,
+				'max_tokens'       => 100,
+				'presence_penalty' => 1.5,
+			)
+		);
+
+		$this->assertEquals( 1.5, $result['presence_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings falls back to default presence_penalty for non-numeric value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_defaults_for_non_numeric_presence_penalty(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'    => '',
+				'temperature'      => 1.0,
+				'max_tokens'       => 100,
+				'presence_penalty' => 'high',
+			)
+		);
+
+		$this->assertEquals( 0.0, $result['presence_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings clamps frequency_penalty below -2 to -2.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_frequency_penalty_below_minus_two(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'     => '',
+				'temperature'       => 1.0,
+				'max_tokens'        => 100,
+				'frequency_penalty' => -5.0,
+			)
+		);
+
+		$this->assertEquals( -2.0, $result['frequency_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings clamps frequency_penalty above 2 to 2.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_clamps_frequency_penalty_above_two(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'     => '',
+				'temperature'       => 1.0,
+				'max_tokens'        => 100,
+				'frequency_penalty' => 5.0,
+			)
+		);
+
+		$this->assertEquals( 2.0, $result['frequency_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings accepts a valid frequency_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_accepts_valid_frequency_penalty(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'     => '',
+				'temperature'       => 1.0,
+				'max_tokens'        => 100,
+				'frequency_penalty' => 0.8,
+			)
+		);
+
+		$this->assertEquals( 0.8, $result['frequency_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings falls back to default frequency_penalty for non-numeric value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_defaults_for_non_numeric_frequency_penalty(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'     => '',
+				'temperature'       => 1.0,
+				'max_tokens'        => 100,
+				'frequency_penalty' => 'high',
+			)
+		);
+
+		$this->assertEquals( 0.0, $result['frequency_penalty'] );
+	}
+
+	/**
+	 * Test sanitize settings result contains all six expected keys.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_settings_returns_all_six_keys(): void {
+		Functions\when( 'sanitize_text_field' )->returnArg();
+
+		$result = MiniMaxSettings::sanitize_settings(
+			array(
+				'default_model'     => 'MiniMax-M2.7',
+				'temperature'       => 1.0,
+				'max_tokens'        => 2048,
+				'top_p'             => 0.9,
+				'presence_penalty'  => 0.0,
+				'frequency_penalty' => 0.0,
+			)
+		);
+
+		$this->assertArrayHasKey( 'default_model', $result );
+		$this->assertArrayHasKey( 'temperature', $result );
+		$this->assertArrayHasKey( 'max_tokens', $result );
+		$this->assertArrayHasKey( 'top_p', $result );
+		$this->assertArrayHasKey( 'presence_penalty', $result );
+		$this->assertArrayHasKey( 'frequency_penalty', $result );
+	}
+
+	/**
+	 * Test get settings returns default top_p value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_default_top_p(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 1.0, $settings['top_p'] );
+	}
+
+	/**
+	 * Test get settings returns default presence_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_default_presence_penalty(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 0.0, $settings['presence_penalty'] );
+	}
+
+	/**
+	 * Test get settings returns default frequency_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_default_frequency_penalty(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 0.0, $settings['frequency_penalty'] );
+	}
+
+	/**
+	 * Test get settings returns default_model as empty string by default.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_default_model_is_empty_string(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertSame( '', $settings['default_model'] );
+	}
+
+	/**
+	 * Test get settings returns saved top_p value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_saved_top_p(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'top_p' => 0.9 ) );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 0.9, $settings['top_p'] );
+	}
+
+	/**
+	 * Test get settings returns saved presence_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_saved_presence_penalty(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'presence_penalty' => -1.0 ) );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( -1.0, $settings['presence_penalty'] );
+	}
+
+	/**
+	 * Test get settings returns saved frequency_penalty value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_saved_frequency_penalty(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'frequency_penalty' => 0.5 ) );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 0.5, $settings['frequency_penalty'] );
+	}
+
+	/**
+	 * Test get settings returns saved default_model value.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_saved_default_model(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'default_model' => 'MiniMax-M2.7' ) );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertEquals( 'MiniMax-M2.7', $settings['default_model'] );
+	}
+
+	/**
+	 * Test get settings result contains all six expected keys.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_get_settings_returns_all_six_keys(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
+		$settings = MiniMaxSettings::get_settings();
+
+		$this->assertArrayHasKey( 'default_model', $settings );
+		$this->assertArrayHasKey( 'temperature', $settings );
+		$this->assertArrayHasKey( 'max_tokens', $settings );
+		$this->assertArrayHasKey( 'top_p', $settings );
+		$this->assertArrayHasKey( 'presence_penalty', $settings );
+		$this->assertArrayHasKey( 'frequency_penalty', $settings );
+	}
 }

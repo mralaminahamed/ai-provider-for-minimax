@@ -12,6 +12,8 @@ namespace AlAminAhamed\MiniMaxAiProvider\Tests\Models;
 use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
 use AlAminAhamed\MiniMaxAiProvider\Models\MiniMaxTextGenerationModel;
 use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
+use Brain\Monkey;
+use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,6 +22,31 @@ use PHPUnit\Framework\TestCase;
  * @since 1.0.0
  */
 class MiniMaxTextGenerationModelTest extends TestCase {
+
+	/**
+	 * Set up Brain Monkey before each test.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	protected function setUp(): void {
+		parent::setUp();
+		Monkey\setUp();
+		Functions\when( 'get_option' )->justReturn( array() );
+	}
+
+	/**
+	 * Tear down Brain Monkey after each test.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		Monkey\tearDown();
+		parent::tearDown();
+	}
 
 	/**
 	 * Test model is created correctly.
@@ -85,5 +112,30 @@ class MiniMaxTextGenerationModelTest extends TestCase {
 			$this->assertInstanceOf( MiniMaxTextGenerationModel::class, $model );
 			$this->assertEquals( $model_id, $model->metadata()->getId() );
 		}
+	}
+
+	/**
+	 * Test model injects MiniMax-Provider header via createRequest.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_model_injects_minimax_provider_header(): void {
+		$model = MiniMaxProvider::model( 'MiniMax-M2.7' );
+
+		$reflection = new \ReflectionMethod( MiniMaxTextGenerationModel::class, 'createRequest' );
+		$reflection->setAccessible( true );
+
+		$request = $reflection->invoke(
+			$model,
+			\WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum::POST(),
+			'chat/completions',
+			array( 'Content-Type' => 'application/json' ),
+			null
+		);
+
+		$this->assertTrue( $request->hasHeader( 'MiniMax-Provider' ) );
+		$this->assertEquals( 'wordpress-plugin', $request->getHeaderAsString( 'MiniMax-Provider' ) );
 	}
 }

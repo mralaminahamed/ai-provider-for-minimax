@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace AlAminAhamed\MiniMaxAiProvider\Tests\Metadata;
 
 use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
+use Brain\Monkey;
+use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -33,7 +35,21 @@ class MiniMaxModelMetadataDirectoryTest extends TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		Monkey\setUp();
+		Functions\when( 'get_option' )->justReturn( array() );
 		$this->directory = new MiniMaxModelMetadataDirectory();
+	}
+
+	/**
+	 * Tear down Brain Monkey after each test.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		Monkey\tearDown();
+		parent::tearDown();
 	}
 
 	/**
@@ -259,5 +275,146 @@ class MiniMaxModelMetadataDirectoryTest extends TestCase {
 		$this->assertEquals( 'MiniMax M2.7 Highspeed', $this->directory->getModelMetadata( 'MiniMax-M2.7-highspeed' )->getName() );
 		$this->assertEquals( 'MiniMax M1', $this->directory->getModelMetadata( 'MiniMax-M1' )->getName() );
 		$this->assertEquals( 'MiniMax Text-01', $this->directory->getModelMetadata( 'MiniMax-Text-01' )->getName() );
+	}
+
+	/**
+	 * Test all fallback models support the temperature option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_temperature_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'temperature', $names, "Model {$model->getId()} missing temperature option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the topP option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_top_p_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'topP', $names, "Model {$model->getId()} missing topP option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the presencePenalty option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_presence_penalty_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'presencePenalty', $names, "Model {$model->getId()} missing presencePenalty option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the frequencyPenalty option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_frequency_penalty_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'frequencyPenalty', $names, "Model {$model->getId()} missing frequencyPenalty option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the stopSequences option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_stop_sequences_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'stopSequences', $names, "Model {$model->getId()} missing stopSequences option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the systemInstruction option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_system_instruction_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'systemInstruction', $names, "Model {$model->getId()} missing systemInstruction option" );
+		}
+	}
+
+	/**
+	 * Test all fallback models support the functionDeclarations option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_function_declarations_option(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			$this->assertContains( 'functionDeclarations', $names, "Model {$model->getId()} missing functionDeclarations option" );
+		}
+	}
+
+	/**
+	 * Test all fallback model IDs are unique.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_model_ids_are_unique(): void {
+		$ids = array_map( static fn( $m ) => $m->getId(), $this->directory->listModelMetadata() );
+
+		$this->assertCount( count( $ids ), array_unique( $ids ) );
+	}
+
+	/**
+	 * Test all fallback model IDs are non-empty strings.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_model_ids_are_non_empty_strings(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$this->assertIsString( $model->getId() );
+			$this->assertNotEmpty( $model->getId() );
+		}
+	}
+
+	/**
+	 * Test all fallback models are ModelMetadata instances.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return void
+	 */
+	public function test_all_models_are_model_metadata_instances(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$this->assertInstanceOf(
+				\WordPress\AiClient\Providers\Models\DTO\ModelMetadata::class,
+				$model
+			);
+		}
 	}
 }
