@@ -12,179 +12,207 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
-# ---------------------------------------------------------------------------
-# Shared defaults applied to every job
-# ---------------------------------------------------------------------------
 defaults:
   run:
     shell: bash
 
+# ---------------------------------------------------------------------------
+# Pipeline DAG (MiniMax — PHP-only, no frontend build):
+#
+#   meta ──┬── lint ─────┐
+#          └── phpstan ───┴── package ── deploy
+#
+#   meta     : resolve slug, validate tag == header version, prerelease flag
+#   lint     : PHP syntax + sensitive scan + PHPCS (WPCS)  — gate, parallel
+#   phpstan  : PHPStan (level max)                         — gate, parallel
+#   package  : composer --no-dev + .distignore rsync -> dist/<slug>, zip
+#   deploy   : 10up SVN deploy (BUILD_DIR) + .wordpress-org assets + GH release
+# ---------------------------------------------------------------------------
 jobs:
 
   # -------------------------------------------------------------------------
-  # JOB 1 — meta
-  # Derives plugin identifiers and validates tag/version alignment.
-  # Outputs are consumed by every downstream job so nothing is re-computed.
+  # JOB 1 — meta: resolve plugin identifiers and validate tag/version.
   # -------------------------------------------------------------------------
   meta:
-    name: "Meta: Resolve plugin info & validate version"
+    name: "Meta: validate version"
     runs-on: ubuntu-latest
     outputs:
-      plugin_slug: ${{ steps.plugin_name.outputs.plugin_slug }}
-      plugin_file: ${{ steps.plugin_name.outputs.plugin_file }}
-      plugin_name: ${{ steps.plugin_name.outputs.plugin_name }}
-      version:     ${{ steps.version_check.outputs.version }}
-
+      plugin_slug: ${{ steps.info.outputs.plugin_slug }}
+      version:     ${{ steps.info.outputs.version }}
+      prerelease:  ${{ steps.info.outputs.prerelease }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Derive plugin identifiers from repository name
-        id: plugin_name
+      - uses: actions/checkout@v6
+      - name: Resolve slug + validate tag matches plugin header
+        id: info
         run: |
-          # WP.org slug differs from the GitHub repository name
-          # (repo: ai-provider-for-minimax, WP.org: alamin-ai-provider-for-minimax).
-          # Hardcode the WP.org slug so SVN operations always target the correct plugin.
-          PLUGIN_SLUG="alamin-ai-provider-for-minimax"
-
-          PLUGIN_FILE="${PLUGIN_SLUG}.php"
-          # Convert kebab-case slug → Title Case display name
-          PLUGIN_NAME=$(echo "$PLUGIN_SLUG" | sed 's/-/ /g; s/\b\w/\U&/g')
-
-          echo "Resolved slug : $PLUGIN_SLUG"
-          echo "Resolved file : $PLUGIN_FILE"
-          echo "Resolved name : $PLUGIN_NAME"
-
-          echo "plugin_slug=$PLUGIN_SLUG" >> "$GITHUB_OUTPUT"
-          echo "plugin_file=$PLUGIN_FILE"  >> "$GITHUB_OUTPUT"
-          echo "plugin_name=$PLUGIN_NAME"  >> "$GITHUB_OUTPUT"
-
-      - name: Validate tag / plugin-header version alignment
-        id: version_check
-        run: |
-          TAG_REF="${GITHUB_REF#refs/tags/}"
-          # Strip an optional leading "v" (e.g. v1.2.3 → 1.2.3)
-          TAG_STRIPPED="${TAG_REF#v}"
-
-          PLUGIN_FILE="${{ steps.plugin_name.outputs.plugin_file }}"
-
-          if [ ! -f "$PLUGIN_FILE" ]; then
-            echo "::error::Plugin main file '$PLUGIN_FILE' not found in workspace. Ensure the repository name matches the plugin slug." >&2
-            exit 1
-          fi
-
-          PLUGIN_VERSION=$(
-            grep -E "^[[:space:]]*\*[[:space:]]*Version:" "$PLUGIN_FILE" \
-              | head -n1 \
-              | sed -E 's/.*Version:[[:space:]]*([^[:space:]]+).*/\1/'
-          )
-
-          echo "Tag          : $TAG_REF"
-          echo "Stripped tag : $TAG_STRIPPED"
-          echo "Plugin header: $PLUGIN_VERSION"
-
-          if [ -z "$PLUGIN_VERSION" ]; then
-            echo "::error::Could not extract Version from $PLUGIN_FILE" >&2
-            exit 1
-          fi
-
-          if [ "$PLUGIN_VERSION" != "$TAG_STRIPPED" ]; then
-            echo "::error::Version mismatch — tag ($TAG_STRIPPED) != plugin header ($PLUGIN_VERSION)" >&2
-            exit 1
-          fi
-
-          echo "version=$PLUGIN_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Verify composer.lock is committed
-        run: |
-          if [ ! -f composer.lock ]; then
-            echo "::error::composer.lock is missing. Commit it before tagging a release." >&2
-            exit 1
-          fi
+          # WP.org slug differs from the GitHub repository name.
+          SLUG="alamin-ai-provider-for-minimax"
+          FILE="${SLUG}.php"
+          [ -f "$FILE" ] || { echo "::error::Plugin main file '$FILE' not found."; exit 1; }
+          [ -f composer.lock ] || { echo "::error::composer.lock is missing. Commit it before tagging."; exit 1; }
+          TAG="${GITHUB_REF#refs/tags/}"; TAG="${TAG#v}"
+          VER=$(grep -E "^[[:space:]]*\*[[:space:]]*Version:" "$FILE" | head -n1 | sed -E 's/.*Version:[[:space:]]*([^[:space:]]+).*/\1/')
+          echo "tag=$TAG  header=$VER"
+          [ -n "$VER" ] || { echo "::error::Could not read Version from $FILE."; exit 1; }
+          [ "$VER" = "$TAG" ] || { echo "::error::Version mismatch — tag ($TAG) != plugin header ($VER)."; exit 1; }
+          PRE=false
+          echo "$TAG" | grep -qE "(alpha|beta|rc)" && PRE=true
+          {
+            echo "plugin_slug=$SLUG"
+            echo "version=$VER"
+            echo "prerelease=$PRE"
+          } >> "$GITHUB_OUTPUT"
 
   # -------------------------------------------------------------------------
-  # JOB 2 — build
-  # Installs production PHP dependencies and uploads the built plugin tree
-  # as a workflow artifact consumed by the deploy job.
+  # JOB 2 — lint: PHP syntax + sensitive-file scan + PHPCS. (parallel gate)
   # -------------------------------------------------------------------------
-  build:
-    name: "Build: Install prod PHP deps"
+  lint:
+    name: "Lint: PHPCS"
     runs-on: ubuntu-latest
     needs: meta
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup PHP 7.4
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: "7.4"
           coverage: none
           tools: composer:v2
-
-      - name: Cache Composer dependencies
+      - name: Cache Composer
+        if: ${{ env.ACT != 'true' }}
         uses: actions/cache@v5
         with:
           path: |
             ~/.composer/cache
             vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            composer-${{ runner.os }}-
-
-      - name: Install PHP dependencies (including dev — needed for build tooling)
+          key: composer-lint-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-lint-${{ runner.os }}-
+      - name: Composer install
         run: composer install --no-interaction --prefer-dist
-
-      - name: Guard — composer.lock must not change during build
+      - name: Sensitive-file scan
         run: |
-          if ! git diff --quiet --exit-code composer.lock; then
-            echo "::error::composer.lock was modified during the build. Commit the updated lock file before releasing." >&2
-            git --no-pager diff composer.lock | head -n 100
+          for pat in ".env" ".env.local" "*.key" "*.pem" "wp-config.php" "config.php"; do
+            compgen -G "$pat" > /dev/null && { echo "::error::Sensitive file: $pat"; exit 1; } || true
+          done
+          echo "No sensitive files."
+      - name: PHP syntax lint
+        run: |
+          ERR=0
+          while IFS= read -r -d $'\0' f; do
+            php -l "$f" > /dev/null 2>&1 || { php -l "$f"; ERR=$((ERR+1)); }
+          done < <(find . -type f -name "*.php" \
+                     -not -path "./vendor/*" -not -path "./node_modules/*" \
+                     -not -path "./build/*"  -not -path "./release/*" -not -path "./dist/*" -print0)
+          [ "$ERR" -eq 0 ] || { echo "::error::PHP lint: $ERR error(s)."; exit 1; }
+      - name: PHPCS (WordPress Coding Standards)
+        run: composer phpcs
+
+  # -------------------------------------------------------------------------
+  # JOB 3 — phpstan: static analysis. (parallel gate)
+  # -------------------------------------------------------------------------
+  phpstan:
+    name: "PHPStan: static analysis"
+    runs-on: ubuntu-latest
+    needs: meta
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+          tools: composer:v2
+      - name: Cache Composer
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: composer-phpstan-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-phpstan-${{ runner.os }}-
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist
+      - name: PHPStan (level max, 2G)
+        run: composer phpstan
+
+  # -------------------------------------------------------------------------
+  # JOB 4 — package: assemble the shippable distributable and zip it.
+  # Barrier: needs both gate jobs (lint, phpstan).
+  # -------------------------------------------------------------------------
+  package:
+    name: "Package: assemble + zip"
+    runs-on: ubuntu-latest
+    needs: [meta, lint, phpstan]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+          tools: composer:v2
+      - name: Install production dependencies (lock-faithful, reproducible)
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --no-scripts --optimize-autoloader
+          composer dump-autoload --no-dev --optimize --classmap-authoritative
+      - name: Assemble distributable (.distignore-filtered)
+        run: |
+          SLUG="${{ needs.meta.outputs.plugin_slug }}"
+          rm -rf dist release
+          mkdir -p "dist/$SLUG"
+          rsync -a \
+            --exclude-from='.distignore' \
+            --exclude='/dist' \
+            --exclude='/release' \
+            ./ "dist/$SLUG/"
+          [ -f "dist/$SLUG/$SLUG.php" ] || { echo "::error::Main file missing from distributable."; ls -R "dist/$SLUG" | head; exit 1; }
+      - name: Verify distributable is clean (defense-in-depth)
+        run: |
+          DIR="dist/${{ needs.meta.outputs.plugin_slug }}"
+          ANY=$(find "$DIR" \( \
+                 -name ".git"          -o -name ".github"       -o -name ".wordpress-org" \
+              -o -name "tests"         -o -name "node_modules"  -o -name "release" \
+              -o -name ".claude"       -o -name ".remember"     -o -name ".playwright-mcp" \
+              -o -name ".idea"         -o -name ".vscode" \
+              -o -name "phpcs*.xml*"   -o -name "phpstan.neon*" -o -name "phpunit.xml*" \
+              -o -name "*.zip"         -o -name "*.map"         -o -name ".DS_Store" -o -name "Thumbs.db" \
+              -o -name "CLAUDE.md"     -o -name "AGENTS.md" \
+            \) -print)
+          if [ -n "$ANY" ]; then
+            echo "::error::Distributable contains files that must not ship to WordPress.org:"
+            echo "$ANY"
             exit 1
           fi
-
-      - name: Optimise Composer autoloader for production (strip dev deps)
-        run: composer install --no-dev --no-interaction --prefer-dist -o
-
-      - name: Prepare release files (apply .distignore)
+          echo "Distributable is clean."
+      - name: Create release zip
         run: |
-          rsync -a --delete-excluded \
-            --filter="P .svn" \
-            --exclude-from=.distignore \
-            ./ dist/
-
-      - name: Upload built plugin as workflow artifact
-        if: ${{ env.ACT != 'true' }}
+          SLUG="${{ needs.meta.outputs.plugin_slug }}"
+          ( cd dist && zip -rq "${SLUG}-${{ needs.meta.outputs.version }}.zip" "$SLUG" )
+      - name: Upload dist/
         uses: actions/upload-artifact@v7
         with:
-          name: plugin-build-${{ needs.meta.outputs.version }}
-          path: dist/
+          name: plugin-dist-${{ needs.meta.outputs.version }}
+          path: dist
           retention-days: 1
 
   # -------------------------------------------------------------------------
-  # JOB 3 — deploy
-  # Cleans SVN trunk, deploys the built plugin to WordPress.org, and creates
-  # the corresponding GitHub release with the generated ZIP attached.
+  # JOB 5 — deploy: publish to WordPress.org SVN + create GitHub release.
+  #
+  # The repo is checked out so the 10up action can find .wordpress-org at the
+  # root and push banners/icons/screenshots to SVN assets/. Trunk content comes
+  # from the pre-built, guard-verified dist/<slug> tree via BUILD_DIR.
   # -------------------------------------------------------------------------
   deploy:
-    name: "Deploy: Publish to WP.org & create GitHub release"
+    name: "Deploy: WP.org SVN + GitHub release"
     runs-on: ubuntu-latest
-    needs: [meta, build]
-
+    needs: [meta, lint, phpstan, package]
     steps:
-      - name: Download built plugin artifact
-        if: ${{ env.ACT != 'true' }}
+      - name: Checkout (provides .wordpress-org for SVN assets/)
+        uses: actions/checkout@v6
+      - name: Download dist/
         uses: actions/download-artifact@v8
         with:
-          name: plugin-build-${{ needs.meta.outputs.version }}
-          path: .
-
-      - name: Deploy plugin to WordPress.org via SVN
+          name: plugin-dist-${{ needs.meta.outputs.version }}
+          path: dist
+      - name: Deploy to WordPress.org via SVN
         id: deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
@@ -193,17 +221,27 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG:         ${{ needs.meta.outputs.plugin_slug }}
-          BUILD_DIR:    ${{ github.workspace }}
-
+          BUILD_DIR:    ./dist/${{ needs.meta.outputs.plugin_slug }}
+          ASSETS_DIR:   .wordpress-org
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "Release ${{ needs.meta.outputs.version }}"
+          tag_name:   ${{ github.ref_name }}
+          name:       "Release ${{ needs.meta.outputs.version }}"
+          prerelease: ${{ needs.meta.outputs.prerelease == 'true' }}
+          files:      dist/${{ needs.meta.outputs.plugin_slug }}-${{ needs.meta.outputs.version }}.zip
           body: |
-            ## ${{ needs.meta.outputs.plugin_name }} — v${{ needs.meta.outputs.version }}
-
-            Refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/trunk/CHANGELOG.md) for full details.
-          files: ${{ steps.deploy.outputs.zip-path }}
+            ## ${{ needs.meta.outputs.plugin_slug }} — v${{ needs.meta.outputs.version }}
+            See the `== Changelog ==` section of [readme.txt](https://github.com/${{ github.repository }}/blob/trunk/readme.txt) for full details.
+            - Deployed to https://wordpress.org/plugins/${{ needs.meta.outputs.plugin_slug }}/
+          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Release ${{ needs.meta.outputs.version }}"
+            echo "- WordPress.org: https://wordpress.org/plugins/${{ needs.meta.outputs.plugin_slug }}/"
+            echo "- GitHub release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"
