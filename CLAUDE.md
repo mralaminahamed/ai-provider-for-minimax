@@ -22,45 +22,167 @@ composer phpcbf
 
 # Static analysis
 composer phpstan
+
+# Build production release (strips dev deps, optimises autoloader)
+composer install --no-dev --no-interaction --prefer-dist -o
+```
+
+## Reference Repositories
+
+| Repository | URL |
+|---|---|
+| Base SDK | https://github.com/WordPress/wp-ai-client |
+| Reference Provider | https://github.com/WordPress/ai-provider-for-anthropic |
+| OpenAI Provider | https://github.com/WordPress/ai-provider-for-openai |
+| Google Provider | https://github.com/WordPress/ai-provider-for-google |
+
+## Directory Structure
+
+```
+alamin-ai-provider-for-minimax/
+├── alamin-ai-provider-for-minimax.php        # Plugin entry point
+├── includes/
+│   ├── Availability/
+│   │   └── MiniMaxProviderAvailability.php
+│   ├── Metadata/
+│   │   └── MiniMaxModelMetadataDirectory.php
+│   ├── Models/
+│   │   └── MiniMaxTextGenerationModel.php
+│   ├── Provider/
+│   │   └── MiniMaxProvider.php
+│   └── Settings/
+│       └── MiniMaxSettings.php
+├── templates/
+│   └── admin/
+│       ├── field-frequency-penalty.php
+│       ├── field-max-tokens.php
+│       ├── field-model.php
+│       ├── field-presence-penalty.php
+│       ├── field-temperature.php
+│       ├── field-top-p.php
+│       ├── section-general.php
+│       └── settings-page.php
+├── assets/
+│   └── images/
+│       └── minimax.svg
+├── .wordpress-org/          # WP.org assets (icon, banner, screenshots)
+├── composer.json
+├── composer.lock
+└── readme.txt
 ```
 
 ## Architecture
 
-Dual-purpose codebase: works as a standalone Composer package **and** a WordPress plugin. Entry point is `alamin-ai-provider-for-minimax.php` (file name matches plugin slug per WP.org convention); `src/` contains all logic.
+Dual-purpose codebase: works as a standalone Composer package **and** a WordPress plugin. Entry point is `alamin-ai-provider-for-minimax.php`; all PHP logic lives under `includes/`; admin UI templates live under `templates/admin/`.
 
 ### Class hierarchy (SDK pattern)
 
-All classes extend from `wordpress/wp-ai-client` (SDK):
+All classes extend from `wordpress/wp-ai-client` (provided by WordPress core on WP 7.0+):
 
 ```
 AbstractApiProvider  (SDK)
-  └── MiniMaxProvider              # registers provider ID "minimax", base URL https://api.minimax.io/v1
+  └── MiniMaxProvider              # provider ID "minimax", base URL https://api.minimax.io/v1
 
 AbstractOpenAiCompatibleTextGenerationModel  (SDK)
-  └── MiniMaxTextGenerationModel   # adds MiniMax-Provider header, createRequest override
+  └── MiniMaxTextGenerationModel   # adds MiniMax-Provider header via createRequest()
 
 ModelMetadataDirectoryInterface  (SDK)
-  └── MiniMaxModelMetadataDirectory  # fetches models from API, caches via WP transients (1hr success,
-                                      # 5min on failure), falls back to hardcoded model list
+  └── MiniMaxModelMetadataDirectory  # fetches /v1/models, caches via WP transients
+                                      # (1hr on success, 5min on failure),
+                                      # falls back to hardcoded model list when API unavailable
+
+ProviderAvailabilityInterface  (SDK)
+  └── MiniMaxProviderAvailability    # checks all 3 API key sources (see below)
 ```
 
-`MiniMaxSettings` — standalone WP settings page. Registers wp-admin options page at `options-general.php?page=minimax-settings`, stores settings under option key `minimax_settings`.
+`MiniMaxSettings` — standalone WP settings page (not in SDK hierarchy). Option key: `minimax_settings`. Settings page: `options-general.php?page=minimax-settings`.
 
 ### Bootstrap flow (WordPress)
 
-1. `alamin-ai-provider-for-minimax.php` defines `MINIMAX_PLUGIN_FILE` constant and loads `vendor/autoload.php`
-2. `init` hook (priority 5): calls `register_provider()` → registers `MiniMaxProvider` with `AiClient::defaultRegistry()`
-3. `init` hook (priority 5): calls `init_settings()` → `MiniMaxSettings::init()` wires up `admin_menu` and `admin_init` hooks
+1. Plugin file defines `MINIMAX_PLUGIN_FILE` constant and loads `vendor/autoload.php`
+2. `init` hook (priority 5): `register_provider()` → registers `MiniMaxProvider` with `AiClient::defaultRegistry()`
+3. `init` hook (priority 5): `init_settings()` → `MiniMaxSettings::init()` → wires up `admin_menu` and `admin_init` hooks
 
 ### API key resolution (priority order)
 
-1. `MINIMAX_API_KEY` environment variable
-2. WordPress option `wp_ai_client_credentials['minimax']['api_key']`
+All three sources are checked by `ProviderAvailability::isConfigured()`, the `wpai_has_ai_credentials` filter, and `get_api_key()` in `MiniMaxModelMetadataDirectory`:
 
-### Coding standards
+1. `MINIMAX_API_KEY` environment variable
+2. WordPress option `connectors_ai_minimax_api_key` (WP 7.0+ Connectors page)
+3. WordPress option `wp_ai_client_credentials['minimax']['api_key']` (legacy)
+
+**Important:** all three sources must be consistent across `ProviderAvailability`, `ModelMetadataDirectory::get_api_key()`, and the `wpai_has_ai_credentials` / `wpai_pre_has_valid_credentials_check` filter callbacks in the plugin bootstrap.
+
+### Required AbstractApiProvider methods
+
+```php
+protected static function baseUrl(): string
+protected static function createModel(ModelMetadata $model_metadata, ProviderMetadata $provider_metadata): ModelInterface
+protected static function createProviderMetadata(): ProviderMetadata
+protected static function createProviderAvailability(): ProviderAvailabilityInterface
+protected static function createModelMetadataDirectory(): ModelMetadataDirectoryInterface
+```
+
+### Required ModelMetadataDirectoryInterface methods
+
+```php
+public function listModelMetadata(): array           // returns ModelMetadata[]
+public function hasModelMetadata(string $model_id): bool
+public function getModelMetadata(string $model_id): ModelMetadata  // throws InvalidArgumentException
+```
+
+### ModelMetadata constructor
+
+```php
+new ModelMetadata(
+    $model_id,                                       // string
+    $model_name,                                     // string
+    [ CapabilityEnum::textGeneration() ],            // array<CapabilityEnum>
+    [                                                // array<SupportedOption>
+        new SupportedOption( OptionEnum::temperature() ),
+        new SupportedOption( OptionEnum::maxTokens() ),
+        new SupportedOption( OptionEnum::topP() ),
+        new SupportedOption( OptionEnum::presencePenalty() ),
+        new SupportedOption( OptionEnum::frequencyPenalty() ),
+        new SupportedOption( OptionEnum::stopSequences() ),
+        new SupportedOption( OptionEnum::systemInstruction() ),
+        new SupportedOption( OptionEnum::functionDeclarations() ),
+    ]
+)
+```
+
+## Coding Standards
 
 - WordPress Coding Standards (`phpcs.xml.dist`) — text domain `alamin-ai-provider-for-minimax`
-- `declare(strict_types=1)` on every file
+- `declare(strict_types=1)` on every PHP file
 - Namespace root: `AlAminAhamed\MiniMaxAiProvider\`
 - PHPStan at `level: max` (WP function stubs via `szepeviktor/phpstan-wordpress`)
-- All output escaped with `esc_html()`, `esc_attr()`, `esc_url()`; all text wrapped with `__()` / `esc_html__()`
+- All output escaped: `esc_html()`, `esc_attr()`, `esc_url()`
+- All strings wrapped: `__()` / `esc_html__()`
+- Templates set variables then `require` the template file — no logic inside template files
+
+## Common Mistakes to Avoid
+
+- **Do NOT** add `wordpress/php-ai-client` to Composer production deps — the SDK is provided by WordPress core (WP 7.0+)
+- **Do NOT** use `TextGenerationCapability` class — use `CapabilityEnum::textGeneration()`
+- **Do NOT** omit the `connectors_ai_minimax_api_key` option check from any code that reads the API key
+- **Do NOT** use `@v6` or `@v5` for GitHub Actions — latest stable is `actions/checkout@v4`, `actions/cache@v4`
+- **Do NOT** hardcode only a subset of `SupportedOption` entries — declare all options the API actually supports
+
+## Key SDK Classes
+
+The SDK is provided by **WordPress core** (WP 7.0+) — not bundled via Composer. These classes are autoloaded by WordPress at runtime:
+
+| Class | Namespace |
+|---|---|
+| `ModelMetadata` | `WordPress\AiClient\Providers\Models\DTO` |
+| `SupportedOption` | `WordPress\AiClient\Providers\Models\DTO` |
+| `CapabilityEnum` | `WordPress\AiClient\Providers\Models\Enums` |
+| `OptionEnum` | `WordPress\AiClient\Providers\Models\Enums` |
+| `ModelMetadataDirectoryInterface` | `WordPress\AiClient\Providers\Contracts` |
+| `ProviderAvailabilityInterface` | `WordPress\AiClient\Providers\Contracts` |
+| `ProviderMetadata` | `WordPress\AiClient\Providers\DTO` |
+| `AbstractApiProvider` | `WordPress\AiClient\Providers\ApiBasedImplementation` |
+| `AbstractOpenAiCompatibleTextGenerationModel` | `WordPress\AiClient\Providers\OpenAiCompatibleImplementation` |
+| `ApiKeyRequestAuthentication` | `WordPress\AiClient\Providers\Http\DTO` |
+| `AiClient` | `WordPress\AiClient` |
