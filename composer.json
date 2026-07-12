@@ -12,6 +12,9 @@
         }
     ],
     "minimum-stability": "stable",
+    "replace": {
+        "wordpress/php-ai-client": "*"
+    },
     "require": {
         "php": ">=7.4",
         "ext-json": "*"
