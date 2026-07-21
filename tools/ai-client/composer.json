@@ -1,0 +1,12 @@
+{
+    "name": "alamin/minimax-ai-client-devstubs",
+    "description": "Dev-only install of wordpress/php-ai-client, used solely for PHPStan and PHPUnit. It is NEVER shipped and is NOT registered on the plugin's own autoloader — WordPress core provides WordPress\\AiClient\\* at runtime, and the root composer.json `replace` keeps the plugin from bundling a colliding copy. See phpstan.neon.dist `bootstrapFiles` and tests/bootstrap.php.",
+    "require": {
+        "wordpress/php-ai-client": "^1.2"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    }
+}

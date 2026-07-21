@@ -1,6 +1,10 @@
 # Dependencies
 /vendor/
 
+# Dev-only side install of wordpress/php-ai-client for PHPStan + PHPUnit
+# (composer.json + composer.lock are tracked; the installed tree is not).
+/tools/ai-client/vendor/
+
 # Build artifacts
 /.phpunit.result.cache
 /phpunit.xml

@@ -18,6 +18,9 @@ phpstan.neon
 # Tests
 tests/
 
+# Dev-only tooling (php-ai-client side install for PHPStan/PHPUnit) — never ships
+tools/
+
 # Composer (phar only; composer.json + composer.lock ship with the plugin)
 composer.phar
 

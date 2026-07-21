@@ -1,4 +1,11 @@
 parameters:
+	# WordPress\AiClient\* is provided by WordPress core at runtime and is kept
+	# out of the plugin's own vendor/ by the root composer.json `replace` (so the
+	# plugin never registers a colliding copy of that namespace). For static
+	# analysis only, load a dev-only side install of wordpress/php-ai-client so
+	# PHPStan can resolve those classes. Populated by `composer stubs:install`.
+	bootstrapFiles:
+		- tools/ai-client/vendor/autoload.php
 	level: max
 	paths:
 		- ./includes
