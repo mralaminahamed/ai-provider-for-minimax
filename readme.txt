@@ -3,12 +3,12 @@ Contributors:      mralaminahamed
 Tags:              ai, minimax, llm, connector, artificial-intelligence
 Requires at least: 7.0
 Tested up to:      7.0
-Stable tag:        1.3.1
+Stable tag:        1.4.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-MiniMax provider for the WordPress AI Client. Access MiniMax M2 and M1 series models for high-performance text generation.
+MiniMax provider for the WordPress AI Client. Access MiniMax M3 and M2 series models for high-performance text generation.
 
 == Description ==
 
@@ -18,7 +18,7 @@ This plugin is an independent, third-party integration and is not affiliated wit
 
 = Why MiniMax? =
 
-MiniMax is an AI company known for its high-performance, cost-effective language models. The **MiniMax M2 series** delivers frontier-level text generation quality — competitive with top models from OpenAI and Anthropic — while offering attractive pricing for high-volume WordPress use cases.
+MiniMax is an AI company known for its high-performance, cost-effective language models. The **MiniMax M2 and M3 series** deliver frontier-level text generation quality — competitive with top models from OpenAI and Anthropic — while offering attractive pricing for high-volume WordPress use cases.
 
 MiniMax models are particularly strong at:
 
@@ -29,7 +29,7 @@ MiniMax models are particularly strong at:
 
 = Features =
 
-* **MiniMax M2 and M1 series models** — including Highspeed variants optimised for faster responses
+* **MiniMax M2 and M3 series models** — including Highspeed variants optimised for faster responses
 * **Automatic model discovery** — live model list fetched from the MiniMax API and cached hourly; falls back to a hardcoded list when offline
 * **Full parameter control** — temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations
 * **Settings page** — configure default model and generation parameters without touching code
@@ -54,15 +54,14 @@ Once this provider is configured, any WordPress plugin or theme that integrates 
 
 When an API key is configured, the live model list is fetched from the MiniMax API. The built-in fallback list includes:
 
-* **MiniMax-M2.7** — latest generation, highest capability
+* **MiniMax-M3** — latest generation, highest capability with long-context support
+* **MiniMax-M2.7** — high-capability general model
 * **MiniMax-M2.7 Highspeed** — M2.7 performance at lower latency
 * **MiniMax-M2.5** — balanced performance and cost
 * **MiniMax-M2.5 Highspeed** — M2.5 with faster response times
 * **MiniMax-M2.1** — cost-effective mid-tier model
 * **MiniMax-M2.1 Highspeed** — M2.1 with reduced latency
 * **MiniMax-M2** — previous generation, widely supported
-* **MiniMax-M1** — foundation model
-* **MiniMax-Text-01** — specialised text generation model
 
 = Requirements =
 
@@ -131,7 +130,7 @@ This plugin follows the official WordPress AI Provider pattern and is fully comp
 
 = What is MiniMax? =
 
-MiniMax is an AI company building high-performance large language models. Their MiniMax M2 series offers frontier-level text generation capabilities with strong multilingual support and competitive pricing. Learn more at [minimax.io](https://www.minimax.io/).
+MiniMax is an AI company building high-performance large language models. Their MiniMax M2 and M3 series offer frontier-level text generation capabilities with strong multilingual support and competitive pricing. Learn more at [minimax.io](https://www.minimax.io/).
 
 = Where do I enter my API key? =
 
@@ -143,14 +142,14 @@ No. WordPress 7.0 and higher include the AI Client SDK natively — no additiona
 
 = Which MiniMax model should I choose as the default? =
 
-* **Best quality** — MiniMax-M2.7 for the highest capability tasks
+* **Best quality** — MiniMax-M3 for the highest capability and long-context tasks
 * **Speed + quality** — MiniMax-M2.7 Highspeed or MiniMax-M2.5 Highspeed for fast responses without much quality loss
 * **Cost-effective** — MiniMax-M2.1 or MiniMax-M2.1 Highspeed for high-volume, lower-cost use cases
 * **General use** — MiniMax-M2.5 is a well-rounded choice for most WordPress content tasks
 
 = What happens if the MiniMax API is unreachable? =
 
-The plugin falls back to a hardcoded list of 9 MiniMax models so the AI Client continues to function and AI-enabled plugins stay operational.
+The plugin falls back to a hardcoded list of 8 MiniMax models so the AI Client continues to function and AI-enabled plugins stay operational.
 
 = Can I use multiple AI provider plugins at the same time? =
 
@@ -207,6 +206,19 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 
 == Changelog ==
 
+= 1.4.0 - 2026-07-21 =
+
+**Added**
+- Connection status on the settings page — shows whether a MiniMax API key is configured, with a link to the Connectors screen.
+- "Connectors" quick link on the Plugins screen, next to Settings.
+
+**Changed**
+- Synced the built-in fallback model list to the official MiniMax catalogue — added MiniMax-M3 and removed the retired MiniMax-M1 and MiniMax-Text-01 (8 models).
+- Default model is now MiniMax-M3, pre-selected out of the box instead of an empty choice.
+
+**Fixed**
+- Autoloader collision with WordPress core's bundled AI Client that could cause a TypeError on AI requests — the plugin no longer ships a conflicting copy of php-ai-client (WordPress core provides it at runtime).
+
 = 1.3.1 - 2026-06-16 =
 
 **Fixed**
@@ -258,6 +270,9 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 * Support for `MINIMAX_API_KEY` environment variable.
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Adds a connection-status indicator, defaults to MiniMax-M3, and syncs the fallback model list with the official MiniMax catalogue. Fixes a possible AI Client TypeError. No database changes required.
 
 = 1.3.1 =
 Fixes live model list not loading when API key is set via Settings > Connectors. No database changes required.
