@@ -42,13 +42,20 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
+        "stubs:install": "@composer install --working-dir=tools/ai-client --no-interaction",
+        "test": [
+            "@stubs:install",
+            "phpunit"
+        ],
         "test-f": "phpunit --filter",
         "lint": "vendor/bin/phpcs -p -s",
         "lint:fix": "vendor/bin/phpcbf -p",
         "lint:review": "phpcs ./includes ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
         "lint:fix:review": "phpcbf ./includes ./alamin-ai-provider-for-minimax.php --standard=phpcs.plugin-review.xml",
-        "analyze": "phpstan analyse --memory-limit=2G --configuration=phpstan.neon.dist",
+        "analyze": [
+            "@stubs:install",
+            "phpstan analyse --memory-limit=2G --configuration=phpstan.neon.dist"
+        ],
         "phpcs": "@lint",
         "phpcbf": "@lint:fix",
         "phpstan": "@analyze",
