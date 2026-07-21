@@ -25,15 +25,15 @@ class MiniMaxModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTe
 	}
 
 	protected function getKnownModelId(): string {
-		return 'MiniMax-M2.7';
+		return 'MiniMax-M3';
 	}
 
 	protected function getExpectedModelCount(): int {
-		return 9;
+		return 8;
 	}
 
 	/**
-	 * Test all 9 fallback model IDs are present.
+	 * Test all 8 fallback model IDs are present.
 	 *
 	 * @since 1.1.0
 	 *
@@ -46,6 +46,7 @@ class MiniMaxModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTe
 		);
 
 		$expected = array(
+			'MiniMax-M3',
 			'MiniMax-M2.7',
 			'MiniMax-M2.7-highspeed',
 			'MiniMax-M2.5',
@@ -53,8 +54,6 @@ class MiniMaxModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTe
 			'MiniMax-M2.1',
 			'MiniMax-M2.1-highspeed',
 			'MiniMax-M2',
-			'MiniMax-M1',
-			'MiniMax-Text-01',
 		);
 
 		foreach ( $expected as $model_id ) {
@@ -83,9 +82,9 @@ class MiniMaxModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTe
 	 * @return void
 	 */
 	public function test_get_model_metadata_correct_names(): void {
+		$this->assertEquals( 'MiniMax M3', $this->directory->getModelMetadata( 'MiniMax-M3' )->getName() );
 		$this->assertEquals( 'MiniMax M2.7', $this->directory->getModelMetadata( 'MiniMax-M2.7' )->getName() );
 		$this->assertEquals( 'MiniMax M2.7 Highspeed', $this->directory->getModelMetadata( 'MiniMax-M2.7-highspeed' )->getName() );
-		$this->assertEquals( 'MiniMax M1', $this->directory->getModelMetadata( 'MiniMax-M1' )->getName() );
-		$this->assertEquals( 'MiniMax Text-01', $this->directory->getModelMetadata( 'MiniMax-Text-01' )->getName() );
+		$this->assertEquals( 'MiniMax M2', $this->directory->getModelMetadata( 'MiniMax-M2' )->getName() );
 	}
 }

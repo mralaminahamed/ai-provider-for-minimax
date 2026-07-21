@@ -9,7 +9,8 @@
 
 ### Changed
 
-- A default model (`MiniMax-M2.7`) is now selected out of the box instead of an empty choice, so generation works before the live model list loads.
+- Synced the built-in fallback model list to the official MiniMax catalogue — added `MiniMax-M3` and removed the retired `MiniMax-M1` and `MiniMax-Text-01` (8 models total).
+- A default model (`MiniMax-M3`) is now selected out of the box instead of an empty choice, so generation works before the live model list loads.
 
 ### Fixed
 

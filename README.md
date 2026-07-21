@@ -84,14 +84,13 @@ echo $result->toText();
 
 ## Supported Models
 
-Models are discovered dynamically from the MiniMax API (cached for 1 hour). The fallback list includes 9 models:
+Models are discovered dynamically from the MiniMax API (cached for 1 hour). The fallback list mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-reference/api-overview) — 8 models:
 
+- MiniMax-M3
 - MiniMax-M2.7, MiniMax-M2.7 Highspeed
 - MiniMax-M2.5, MiniMax-M2.5 Highspeed
 - MiniMax-M2.1, MiniMax-M2.1 Highspeed
 - MiniMax-M2
-- MiniMax-M1
-- MiniMax-Text-01
 
 ## Architecture
 
