@@ -208,7 +208,10 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			new SupportedOption( OptionEnum::functionDeclarations() ),
 		);
 
+		// Mirrors the official MiniMax chat-completion model catalogue.
+		// See https://platform.minimax.io/docs/api-reference/api-overview.
 		$model_list = array(
+			array( 'MiniMax-M3', 'MiniMax M3' ),
 			array( 'MiniMax-M2.7', 'MiniMax M2.7' ),
 			array( 'MiniMax-M2.7-highspeed', 'MiniMax M2.7 Highspeed' ),
 			array( 'MiniMax-M2.5', 'MiniMax M2.5' ),
@@ -216,8 +219,6 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			array( 'MiniMax-M2.1', 'MiniMax M2.1' ),
 			array( 'MiniMax-M2.1-highspeed', 'MiniMax M2.1 Highspeed' ),
 			array( 'MiniMax-M2', 'MiniMax M2' ),
-			array( 'MiniMax-M1', 'MiniMax M1' ),
-			array( 'MiniMax-Text-01', 'MiniMax Text-01' ),
 		);
 
 		$models = array();

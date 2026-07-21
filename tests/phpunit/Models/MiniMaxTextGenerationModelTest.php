@@ -25,7 +25,7 @@ class MiniMaxTextGenerationModelTest extends AbstractTextGenerationModelTest {
 	}
 
 	protected function getProviderModelId(): string {
-		return 'MiniMax-M2.7';
+		return 'MiniMax-M3';
 	}
 
 	protected function getProviderName(): string {
@@ -41,7 +41,7 @@ class MiniMaxTextGenerationModelTest extends AbstractTextGenerationModelTest {
 	}
 
 	/**
-	 * Test all 9 fallback models can be instantiated.
+	 * Test all 8 fallback models can be instantiated.
 	 *
 	 * @since 1.1.0
 	 *
@@ -49,6 +49,7 @@ class MiniMaxTextGenerationModelTest extends AbstractTextGenerationModelTest {
 	 */
 	public function test_all_fallback_models_are_creatable(): void {
 		$model_ids = array(
+			'MiniMax-M3',
 			'MiniMax-M2.7',
 			'MiniMax-M2.7-highspeed',
 			'MiniMax-M2.5',
@@ -56,8 +57,6 @@ class MiniMaxTextGenerationModelTest extends AbstractTextGenerationModelTest {
 			'MiniMax-M2.1',
 			'MiniMax-M2.1-highspeed',
 			'MiniMax-M2',
-			'MiniMax-M1',
-			'MiniMax-Text-01',
 		);
 
 		foreach ( $model_ids as $model_id ) {

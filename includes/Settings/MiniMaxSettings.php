@@ -37,7 +37,7 @@ class MiniMaxSettings {
 	 *
 	 * @since 1.3.2
 	 */
-	public const DEFAULT_MODEL = 'MiniMax-M2.7';
+	public const DEFAULT_MODEL = 'MiniMax-M3';
 
 	/**
 	 * Initialize settings.
