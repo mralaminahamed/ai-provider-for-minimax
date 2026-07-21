@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Connection status on the settings page — indicates whether a MiniMax API key is configured, with a link to the Connectors screen to add one.
+- A "Connectors" quick link on the Plugins screen, next to the existing "Settings" link.
+
+### Changed
+
+- A default model (`MiniMax-M2.7`) is now selected out of the box instead of an empty choice, so generation works before the live model list loads.
+
 ### Fixed
 
 - Autoloader collision with WordPress core's bundled AI Client. When the plugin's copy of `wordpress/php-ai-client` registered the `WordPress\AiClient\` namespace before core did, any request that triggered the AI Client hit a `TypeError`. The package is now excluded from the shipped plugin via a Composer `replace`; WordPress core provides those classes at runtime.

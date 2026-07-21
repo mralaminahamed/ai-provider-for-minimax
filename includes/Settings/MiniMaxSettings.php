@@ -30,6 +30,16 @@ class MiniMaxSettings {
 	public const OPTION_KEY = 'minimax_settings';
 
 	/**
+	 * Default model used when none has been chosen.
+	 *
+	 * Matches the flagship entry in MiniMaxModelMetadataDirectory's built-in
+	 * list, so it is always a valid selection even before the API is reachable.
+	 *
+	 * @since 1.3.2
+	 */
+	public const DEFAULT_MODEL = 'MiniMax-M2.7';
+
+	/**
 	 * Initialize settings.
 	 *
 	 * @since 1.0.0
@@ -51,8 +61,9 @@ class MiniMaxSettings {
 	 * @return array<int|string, string>
 	 */
 	public static function add_action_links( array $links ): array {
-		$settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=minimax-settings' ) ) . '">' . esc_html__( 'Settings', 'alamin-ai-provider-for-minimax' ) . '</a>';
-		array_unshift( $links, $settings_link );
+		$settings_link   = '<a href="' . esc_url( admin_url( 'options-general.php?page=minimax-settings' ) ) . '">' . esc_html__( 'Settings', 'alamin-ai-provider-for-minimax' ) . '</a>';
+		$connectors_link = '<a href="' . esc_url( admin_url( 'options-connectors.php' ) ) . '">' . esc_html__( 'Connectors', 'alamin-ai-provider-for-minimax' ) . '</a>';
+		array_unshift( $links, $settings_link, $connectors_link );
 		return $links;
 	}
 
@@ -160,8 +171,9 @@ class MiniMaxSettings {
 
 		$sanitized = array();
 
-		$default_model              = $input['default_model'] ?? '';
-		$sanitized['default_model'] = sanitize_text_field( is_string( $default_model ) ? $default_model : '' );
+		$default_model_raw          = $input['default_model'] ?? '';
+		$default_model              = sanitize_text_field( is_string( $default_model_raw ) ? $default_model_raw : '' );
+		$sanitized['default_model'] = '' !== $default_model ? $default_model : self::DEFAULT_MODEL;
 
 		$temperature_raw          = $input['temperature'] ?? 0.7;
 		$sanitized['temperature'] = is_numeric( $temperature_raw ) ? (float) $temperature_raw : 0.7;
@@ -307,9 +319,40 @@ class MiniMaxSettings {
 			return;
 		}
 
-		$option_key = self::OPTION_KEY;
+		$option_key     = self::OPTION_KEY;
+		$is_connected   = self::has_api_key();
+		$connectors_url = admin_url( 'options-connectors.php' );
 
 		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/settings-page.php';
+	}
+
+	/**
+	 * Whether a MiniMax API key is configured.
+	 *
+	 * Checks the same sources as the AI Client credential filter: the
+	 * MINIMAX_API_KEY environment variable, the WordPress Connectors page option
+	 * (WP 7.0+), and the legacy nested wp_ai_client_credentials option.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @return bool True when an API key is present in any supported location.
+	 */
+	public static function has_api_key(): bool {
+		$env_key = getenv( 'MINIMAX_API_KEY' );
+		if ( ! empty( $env_key ) ) {
+			return true;
+		}
+
+		$connectors_key = get_option( 'connectors_ai_minimax_api_key', '' );
+		if ( ! empty( $connectors_key ) ) {
+			return true;
+		}
+
+		$option      = get_option( 'wp_ai_client_credentials', array() );
+		$credentials = is_array( $option ) ? ( $option['minimax'] ?? array() ) : array();
+		$key         = is_array( $credentials ) ? ( $credentials['api_key'] ?? '' ) : '';
+
+		return ! empty( $key );
 	}
 
 	/**
@@ -321,7 +364,7 @@ class MiniMaxSettings {
 	 */
 	public static function get_settings(): array {
 		$defaults = array(
-			'default_model'     => '',
+			'default_model'     => self::DEFAULT_MODEL,
 			'temperature'       => 0.7,
 			'max_tokens'        => 4096,
 			'top_p'             => 1.0,
@@ -335,9 +378,9 @@ class MiniMaxSettings {
 		}
 
 		return array(
-			'default_model'     => isset( $saved['default_model'] ) && is_string( $saved['default_model'] )
+			'default_model'     => isset( $saved['default_model'] ) && is_string( $saved['default_model'] ) && '' !== $saved['default_model']
 				? $saved['default_model']
-				: '',
+				: self::DEFAULT_MODEL,
 			'temperature'       => isset( $saved['temperature'] ) && is_numeric( $saved['temperature'] )
 				? (float) $saved['temperature']
 				: $defaults['temperature'],

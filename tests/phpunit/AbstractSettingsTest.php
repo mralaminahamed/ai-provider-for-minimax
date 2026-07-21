@@ -696,18 +696,20 @@ abstract class AbstractSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Test get settings returns default_model as empty string by default.
+	 * Test get settings returns the class default model when nothing is saved.
 	 *
 	 * @since 1.3.2
 	 *
 	 * @return void
 	 */
-	public function test_get_settings_default_model_is_empty_string(): void {
+	public function test_get_settings_default_model_is_default(): void {
 		Functions\when( 'get_option' )->justReturn( array() );
 
+		$class    = $this->getSettingsClass();
 		$settings = $this->callGetSettings();
 
-		$this->assertSame( '', $settings['default_model'] );
+		$this->assertSame( $class::DEFAULT_MODEL, $settings['default_model'] );
+		$this->assertNotSame( '', $settings['default_model'] );
 	}
 
 	/**

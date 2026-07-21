@@ -95,23 +95,7 @@ function declare_credentials( bool $has_credentials ): bool {
 		return true;
 	}
 
-	$api_key = getenv( 'MINIMAX_API_KEY' );
-	if ( ! empty( $api_key ) ) {
-		return true;
-	}
-
-	// Key stored by WordPress Connectors page (WP 7.0+).
-	$connectors_key = get_option( 'connectors_ai_minimax_api_key', '' );
-	if ( ! empty( $connectors_key ) ) {
-		return true;
-	}
-
-	// Key stored via legacy wp_ai_client_credentials option.
-	$option      = get_option( 'wp_ai_client_credentials', array() );
-	$credentials = is_array( $option ) ? ( $option['minimax'] ?? array() ) : array();
-	$key         = is_array( $credentials ) ? ( $credentials['api_key'] ?? '' ) : '';
-
-	return ! empty( $key );
+	return MiniMaxSettings::has_api_key();
 }
 
 add_filter( 'wpai_has_ai_credentials', __NAMESPACE__ . '\\declare_credentials' );
