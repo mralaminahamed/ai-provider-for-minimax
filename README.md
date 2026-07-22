@@ -46,6 +46,15 @@ echo AiClient::prompt('Explain quantum computing')
 
 Version history: [CHANGELOG.md](CHANGELOG.md).
 
+## Contributing
+
+Issues and pull requests are welcome:
+
+- [Open a new issue](https://github.com/mralaminahamed/ai-provider-for-minimax/issues/new) to report a bug or request a feature
+- [Submit a pull request](https://github.com/mralaminahamed/ai-provider-for-minimax/pulls)
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the local build, test, and lint workflow.
+
 ## License
 
 GPL-2.0-or-later

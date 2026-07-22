@@ -89,7 +89,13 @@ Go to **Settings > MiniMax** to configure:
 
 This plugin follows the official WordPress AI Provider pattern and works with any plugin built on the WordPress AI Client SDK. It registers the `minimax` provider and supports the standard generation options (temperature, max tokens, top P, presence/frequency penalties, stop sequences, system instruction, and function declarations).
 
-Full developer documentation lives on GitHub:
+The source code is on GitHub — bug reports and pull requests are welcome:
+
+* Repository: [github.com/mralaminahamed/ai-provider-for-minimax](https://github.com/mralaminahamed/ai-provider-for-minimax)
+* Report a bug or request a feature: [open a new issue](https://github.com/mralaminahamed/ai-provider-for-minimax/issues/new)
+* Contribute code: [submit a pull request](https://github.com/mralaminahamed/ai-provider-for-minimax/pulls)
+
+Developer documentation:
 
 * [Usage and code examples](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/USAGE.md)
 * [Architecture and API key resolution](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/ARCHITECTURE.md)
