@@ -33,4 +33,6 @@ composer.phar
 # Claude Code / AI tools
 .remember/
 .playwright-mcp/
-docs/
+
+# docs/ is tracked (GitHub-facing developer docs); it is kept out of the
+# plugin zip via .distignore, not here.

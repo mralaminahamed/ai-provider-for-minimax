@@ -52,16 +52,9 @@ Once this provider is configured, any WordPress plugin or theme that integrates 
 
 = Supported Models =
 
-When an API key is configured, the live model list is fetched from the MiniMax API. The built-in fallback list includes:
+When an API key is configured, the live model list is fetched directly from the MiniMax API, so you always see the latest models. If the API is ever unavailable, a built-in fallback list of 8 models keeps everything working — the **MiniMax-M3** flagship plus the **M2 series** (M2.7, M2.5, M2.1, and M2), each with an optional Highspeed variant tuned for lower latency.
 
-* **MiniMax-M3** — latest generation, highest capability with long-context support
-* **MiniMax-M2.7** — high-capability general model
-* **MiniMax-M2.7 Highspeed** — M2.7 performance at lower latency
-* **MiniMax-M2.5** — balanced performance and cost
-* **MiniMax-M2.5 Highspeed** — M2.5 with faster response times
-* **MiniMax-M2.1** — cost-effective mid-tier model
-* **MiniMax-M2.1 Highspeed** — M2.1 with reduced latency
-* **MiniMax-M2** — previous generation, widely supported
+See the [full model catalogue](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/MODELS.md) for every model ID. Not sure which to pick? See the FAQ below.
 
 = Requirements =
 
@@ -94,18 +87,13 @@ Go to **Settings > MiniMax** to configure:
 
 = For Developers =
 
-This plugin follows the official WordPress AI Provider pattern and is fully compatible with any plugin built on the WordPress AI Client SDK.
+This plugin follows the official WordPress AI Provider pattern and works with any plugin built on the WordPress AI Client SDK. It registers the `minimax` provider and supports the standard generation options (temperature, max tokens, top P, presence/frequency penalties, stop sequences, system instruction, and function declarations).
 
-**Supported SupportedOptions:** `temperature`, `maxTokens`, `topP`, `presencePenalty`, `frequencyPenalty`, `stopSequences`, `systemInstruction`, `functionDeclarations`
+Full developer documentation lives on GitHub:
 
-**Provider ID:** `minimax`
-
-**Base URL:** `https://api.minimax.io/v1`
-
-**API key resolution order:**
-1. `MINIMAX_API_KEY` environment variable
-2. WordPress option `connectors_ai_minimax_api_key` (Settings > Connectors)
-3. WordPress option `wp_ai_client_credentials['minimax']['api_key']` (legacy)
+* [Usage and code examples](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/USAGE.md)
+* [Architecture and API key resolution](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/ARCHITECTURE.md)
+* [Development and contributing](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/DEVELOPMENT.md)
 
 == Installation ==
 
