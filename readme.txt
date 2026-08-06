@@ -193,11 +193,6 @@ This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to:
 
 No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
 
-== Screenshots ==
-
-1. Settings > MiniMax screen showing default model selection and generation parameter configuration.
-2. Settings > Connectors screen where you enter your MiniMax API key.
-
 == Changelog ==
 
 = 1.4.0 - 2026-07-21 =
