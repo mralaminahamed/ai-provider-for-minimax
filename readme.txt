@@ -193,6 +193,24 @@ This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to:
 
 No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
 
+== More from us ==
+
+Other free plugins by the same author, all on WordPress.org.
+
+**Another provider for the same AI Client**
+
+* [AI Provider for OpenCode Zen](https://wordpress.org/plugins/alamin-ai-provider-for-opencode-zen/) - One API key, 57 models including GPT-5, Claude and Gemini 3, for the WordPress AI Client.
+
+**For any site**
+
+* [Swift Menu Duplicator](https://wordpress.org/plugins/swift-menu-duplicator/) - Duplicate menus in one click, snapshot revisions, export and import, WP-CLI and REST.
+* [Author Profile Blocks](https://wordpress.org/plugins/author-profile-blocks/) - Author and team profiles as Gutenberg blocks — grid, carousel, list and single.
+
+**For a WooCommerce store**
+
+* [StoreSeeder](https://wordpress.org/plugins/storeseeder/) - Realistic test data for WooCommerce and Fluent Cart — a whole shop from a recipe, with one-click cleanup.
+* [StoreSheet](https://wordpress.org/plugins/storesheet/) - Sync WooCommerce products, orders and coupons to a Google spreadsheet, one way and in the background.
+
 == Changelog ==
 
 = 1.4.0 - 2026-07-21 =
