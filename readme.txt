@@ -1,6 +1,6 @@
-=== AI Provider for MiniMax ===
+=== AI Provider for MiniMax – M2 & M3 LLM Models for the WordPress AI Client ===
 Contributors:      mralaminahamed
-Tags:              ai, minimax, llm, connector, artificial-intelligence
+Tags:              minimax, ai, llm, ai provider, text generation
 Requires at least: 7.0
 Tested up to:      7.0
 Stable tag:        1.4.0
