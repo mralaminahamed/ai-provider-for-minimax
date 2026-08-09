@@ -1,6 +1,6 @@
-=== AI Provider for MiniMax – M2 & M3 LLM Models for the WordPress AI Client ===
+=== AI Provider for MiniMax – AI Connector for M3, M2 & Image Models ===
 Contributors:      mralaminahamed
-Tags:              minimax, ai, llm, ai provider, text generation
+Tags:              ai, artificial intelligence, connector, minimax, llm
 Requires at least: 7.0
 Tested up to:      7.0
 Stable tag:        1.5.0
@@ -8,11 +8,11 @@ Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-MiniMax provider for the WordPress AI Client. Access MiniMax M3 and M2 series models for high-performance text generation.
+AI connector for MiniMax. Adds M3 and M2 text models, M3 image input, and image-01 image generation to the WordPress AI Client.
 
 == Description ==
 
-This plugin provides [MiniMax](https://www.minimax.io/) integration for the WordPress AI Client. It enables WordPress sites to use MiniMax's high-performance large language models for text generation, content creation, and other AI capabilities through an OpenAI-compatible API.
+This plugin is an AI connector for [MiniMax](https://www.minimax.io/). It registers MiniMax with the WordPress AI Client, so every AI-enabled plugin on your site can generate text and images through MiniMax — text generation, chat, image understanding on MiniMax-M3, and image generation with image-01.
 
 This plugin is an independent, third-party integration and is not affiliated with, endorsed by, or sponsored by MiniMax.
 
