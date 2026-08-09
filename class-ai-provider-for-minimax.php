@@ -3,7 +3,7 @@
  * Main Plugin Class
  *
  * @package    MiniMax
- * @author     Al Amin Ahamed <me@alaminahamed.com>
+ * @author     Al Amin Ahamed <alamin.ahamed.dev@gmail.com>
  * @copyright  2026 Al Amin Ahamed
  * @license    GPL-2.0-or-later
  */
