@@ -78,6 +78,7 @@ alamin-ai-provider-for-minimax/
 │   ├── Metadata/
 │   │   └── ModelMetadataDirectory.php
 │   ├── Models/
+│   │   ├── ImageGenerationModel.php
 │   │   └── TextGenerationModel.php
 │   ├── Provider/
 │   │   └── Provider.php
@@ -191,6 +192,7 @@ inlined twice, the two copies drifted.
 |---|---|
 | `CapabilityEnum::textGeneration()` | The obvious one |
 | `CapabilityEnum::chatHistory()` | The endpoint takes a `messages` array; multi-turn has always worked |
+| `CapabilityEnum::imageGeneration()` | `image-01` only, from a separate endpoint — see below |
 | `OptionEnum::temperature()` | `[0, 2]`, default 1 |
 | `OptionEnum::maxTokens()` | Up to M3's 1,000,000-token context; M2.x caps at 204,800 |
 | `OptionEnum::topP()` | `[0, 1]`; M3 defaults 0.95, M2.x 0.9 |
@@ -217,24 +219,51 @@ and at worst refused.
 Extend through the `minimax_generate_text_params` filter rather than adding
 more special cases here.
 
+### Image generation
+
+`image-01` is the one model served from `POST /v1/image_generation`, and that
+endpoint is **not** OpenAI-compatible. `ImageGenerationModel` extends the SDK's
+OpenAI-compatible image base for the plumbing they share and overrides the four
+places they differ:
+
+| OpenAI | MiniMax |
+|---|---|
+| `POST /images/generations` | `POST /image_generation` |
+| `size: "1024x1024"` | `aspect_ratio: "16:9"` |
+| `response_format: b64_json` | `response_format: base64` |
+| `data: [ { b64_json: … } ]` | `data: { image_base64: [ … ] }` |
+
+The response shape is the awkward one — an object of lists where the SDK
+expects a list of objects. `normalize_response()` reshapes it rather than
+duplicating the candidate parser, and returns an already-OpenAI-shaped response
+untouched in case MiniMax ever converges.
+
+**MiniMax reports API errors with HTTP 200** and a `base_resp.status_code`, so
+`throwIfNotSuccessful()` is overridden. Without it an insufficient-balance
+error arrives as an empty result rather than an exception.
+
+Model metadata is chosen per model in `build_model()`: `image-01` gets image
+capabilities and image options, everything else gets text. The live
+`/v1/models` response does not say what a model can do, so the id is the only
+signal available.
+
+Reach `seed`, `prompt_optimizer` and `subject_reference` — none of which the AI
+Client's config models — through the `minimax_generate_image_params` filter.
+
 ### Capabilities not yet built
 
-MiniMax offers four modalities the SDK models and this plugin does not. Each
-needs its own model class, because none of them is OpenAI-compatible — they are
-MiniMax's own endpoints, so `AbstractOpenAiCompatibleTextGenerationModel` is
-not the base to extend.
+MiniMax offers three more modalities the SDK models. Each needs its own model
+class; none is OpenAI-compatible.
 
 | Capability | MiniMax models | Precedent to copy |
 |---|---|---|
-| `imageGeneration()` | `image-01` — text-to-image and image-to-image | `OpenAiImageGenerationModel`, `GoogleImageGenerationModel` |
 | `textToSpeechConversion()` | `speech-2.8-hd`, `speech-2.8-turbo`, `speech-2.6-hd`, `speech-2.6-turbo`, `speech-02-hd`, `speech-02-turbo` | `ai-provider-for-openai` |
 | `videoGeneration()` | `MiniMax-H3` — async: create task, poll, retrieve | No WordPress precedent yet |
 | `musicGeneration()` | `music-3.0` | No WordPress precedent yet |
 
 Video is the awkward one: it is a task queue, not a request/response call, and
-nothing in the AI Client models polling. Image generation is the natural first
-addition — one model class, a synchronous endpoint, and two official
-implementations to read.
+nothing in the AI Client models polling. Speech is the natural next addition,
+being synchronous with an official implementation to read.
 
 Voice cloning and voice design have no `CapabilityEnum`, so they cannot be
 declared at all.

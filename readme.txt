@@ -33,6 +33,7 @@ MiniMax models are particularly strong at:
 * **Automatic model discovery** — live model list fetched from the MiniMax API and cached hourly; falls back to a hardcoded list when offline
 * **Full parameter control** — temperature, max tokens, top P, thinking mode, service tier, system instruction, and function declarations
 * **Chat history** — multi-turn conversations, not just single prompts
+* **Image generation** — `image-01`, with aspect ratio, orientation and multiple candidates
 * **Settings page** — configure default model and generation parameters without touching code
 * **API key via Connectors** — enter your key once in **Settings > Connectors**; all AI-enabled plugins share it automatically
 * **Environment variable support** — `MINIMAX_API_KEY` for server-level configuration, bypassing the database entirely
@@ -222,6 +223,7 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 - **Service tier** — opt in to priority routing, which MiniMax bills at 1.5x standard.
 - `minimax_generate_text_params` filter, for anything this plugin does not model.
 
+* **Image generation.** `image-01` is now offered as an image model, served from MiniMax's own `/v1/image_generation` endpoint. Aspect ratio, orientation, number of candidates, and a choice between a URL and inline base64 are all supported. Reach `seed`, `prompt_optimizer` and `subject_reference` through the new `minimax_generate_image_params` filter.
 * **Chat history** — the models are now declared as supporting multi-turn conversations, not just single prompts. They always could (the OpenAI-compatible endpoint takes a `messages` array and the AI Client already sends one), but the capability was never declared and the AI Client routes on the declaration, so conversation requests were going to other providers. Every official WordPress AI provider declares this.
 
 **Changed**
@@ -304,7 +306,7 @@ Both renames are internal. No hook, option, setting or model id changes, and not
 == Upgrade Notice ==
 
 = 1.5.0 =
-Settings now actually apply to requests — temperature, max tokens and top_p were stored and never read. Adds thinking mode and service tier. Removes the presence and frequency penalty controls, which MiniMax ignores. Internal PHP namespace and class names changed; no database changes and no settings to redo.
+Adds image generation via image-01, and declares chat-history support. Settings now actually apply to requests — temperature, max tokens and top_p were stored and never read. Adds thinking mode and service tier. Removes the presence and frequency penalty controls, which MiniMax ignores. Internal PHP namespace and class names changed; no database changes and no settings to redo.
 
 = 1.4.0 =
 Adds a connection-status indicator, defaults to MiniMax-M3, and syncs the fallback model list with the official MiniMax catalogue. Fixes a possible AI Client TypeError. No database changes required.

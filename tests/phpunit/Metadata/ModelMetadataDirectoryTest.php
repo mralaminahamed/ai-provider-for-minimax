@@ -29,7 +29,7 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 	}
 
 	protected function getExpectedModelCount(): int {
-		return 8;
+		return 9;
 	}
 
 	/**

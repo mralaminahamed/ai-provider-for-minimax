@@ -21,6 +21,7 @@ use WordPress\AiClient\Providers\Models\Contracts\ModelInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use MiniMax\MiniMaxAiProvider\Availability\ProviderAvailability;
 use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
+use MiniMax\MiniMaxAiProvider\Models\ImageGenerationModel;
 use MiniMax\MiniMaxAiProvider\Models\TextGenerationModel;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,6 +59,18 @@ class Provider extends AbstractApiProvider {
 		ProviderMetadata $provider_metadata
 	): ModelInterface {
 		$capabilities = $model_metadata->getSupportedCapabilities();
+
+		/*
+		 * Image is checked first because it is the narrower claim. A model that
+		 * declared both would be a metadata bug, but if one ever does, sending
+		 * it to the image endpoint fails loudly rather than returning a picture
+		 * described as text.
+		 */
+		foreach ( $capabilities as $capability ) {
+			if ( $capability->isImageGeneration() ) {
+				return new ImageGenerationModel( $model_metadata, $provider_metadata );
+			}
+		}
 
 		foreach ( $capabilities as $capability ) {
 			if ( $capability->isTextGeneration() ) {

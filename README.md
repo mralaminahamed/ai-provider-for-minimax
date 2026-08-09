@@ -41,6 +41,7 @@ Activate it, paste your MiniMax key, and you are generating content through fron
 
 **Built to stay out of the way**
 - **OpenAI-compatible** under the hood — text generation, chat history, system instructions, and function declarations
+- **Image generation** with `image-01`, via MiniMax's own endpoint
 - Ships as both a **WordPress plugin** and a **Composer package** for standalone PHP use
 - **No SDK bloat** — WordPress core provides the AI Client at runtime, and the plugin excludes its own copy to stay collision-safe
 
