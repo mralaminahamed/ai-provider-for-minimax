@@ -2,7 +2,7 @@
 /**
  * Settings page template.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  *
  * @var string $option_key     The settings option key.
  * @var bool   $is_connected   Whether a MiniMax API key is configured.
@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p>
 				<?php
 				printf(
-					/* translators: %s: URL of the WordPress Connectors settings screen. */
 					wp_kses(
+						/* translators: %s: URL of the WordPress Connectors settings screen. */
 						__( 'No MiniMax API key found. Add your key on the <a href="%s">Connectors screen</a> to activate this provider.', 'alamin-ai-provider-for-minimax' ),
 						array( 'a' => array( 'href' => array() ) )
 					),

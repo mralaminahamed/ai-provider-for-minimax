@@ -2,25 +2,25 @@
 /**
  * MiniMax Settings.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Settings;
+namespace MiniMax\MiniMaxAiProvider\Settings;
 
-use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
+use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Class MiniMaxSettings
+ * Class Settings
  *
  * @since 1.0.0
  */
-class MiniMaxSettings {
+class Settings {
 
 	/**
 	 * Option key for settings.
@@ -32,7 +32,7 @@ class MiniMaxSettings {
 	/**
 	 * Default model used when none has been chosen.
 	 *
-	 * Matches the flagship entry in MiniMaxModelMetadataDirectory's built-in
+	 * Matches the flagship entry in ModelMetadataDirectory's built-in
 	 * list, so it is always a valid selection even before the API is reachable.
 	 *
 	 * @since 1.3.2
@@ -140,20 +140,31 @@ class MiniMaxSettings {
 		);
 
 		add_settings_field(
-			'presence_penalty',
-			__( 'Presence Penalty', 'alamin-ai-provider-for-minimax' ),
-			array( self::class, 'render_presence_penalty_field' ),
+			'thinking',
+			__( 'Thinking', 'alamin-ai-provider-for-minimax' ),
+			array( self::class, 'render_thinking_field' ),
 			'minimax-settings',
 			'minimax_general'
 		);
 
 		add_settings_field(
-			'frequency_penalty',
-			__( 'Frequency Penalty', 'alamin-ai-provider-for-minimax' ),
-			array( self::class, 'render_frequency_penalty_field' ),
+			'service_tier',
+			__( 'Service Tier', 'alamin-ai-provider-for-minimax' ),
+			array( self::class, 'render_service_tier_field' ),
 			'minimax-settings',
 			'minimax_general'
 		);
+
+		/*
+		 * No presence or frequency penalty field.
+		 *
+		 * MiniMax documents both as ignored on the OpenAI-compatible endpoint,
+		 * so the fields offered a setting that could not affect anything. A
+		 * control that does nothing is worse than a missing one: it invites the
+		 * user to tune it and then blame the model for not responding.
+		 *
+		 * @link https://platform.minimax.io/docs/api-reference/text-openai-api
+		 */
 	}
 
 	/**
@@ -184,17 +195,23 @@ class MiniMaxSettings {
 		$top_p_raw          = $input['top_p'] ?? 1.0;
 		$sanitized['top_p'] = is_numeric( $top_p_raw ) ? (float) $top_p_raw : 1.0;
 
-		$presence_penalty_raw          = $input['presence_penalty'] ?? 0.0;
-		$sanitized['presence_penalty'] = is_numeric( $presence_penalty_raw ) ? (float) $presence_penalty_raw : 0.0;
+		$thinking_raw          = $input['thinking'] ?? 'adaptive';
+		$thinking              = is_string( $thinking_raw ) ? $thinking_raw : 'adaptive';
+		$sanitized['thinking'] = in_array( $thinking, array( 'adaptive', 'disabled' ), true ) ? $thinking : 'adaptive';
 
-		$frequency_penalty_raw          = $input['frequency_penalty'] ?? 0.0;
-		$sanitized['frequency_penalty'] = is_numeric( $frequency_penalty_raw ) ? (float) $frequency_penalty_raw : 0.0;
+		$service_tier_raw          = $input['service_tier'] ?? 'standard';
+		$service_tier              = is_string( $service_tier_raw ) ? $service_tier_raw : 'standard';
+		$sanitized['service_tier'] = in_array( $service_tier, array( 'standard', 'priority' ), true ) ? $service_tier : 'standard';
 
-		$sanitized['temperature']       = max( 0, min( 2, $sanitized['temperature'] ) );
-		$sanitized['max_tokens']        = max( 1, min( 200000, $sanitized['max_tokens'] ) );
-		$sanitized['top_p']             = max( 0, min( 1, $sanitized['top_p'] ) );
-		$sanitized['presence_penalty']  = max( -2, min( 2, $sanitized['presence_penalty'] ) );
-		$sanitized['frequency_penalty'] = max( -2, min( 2, $sanitized['frequency_penalty'] ) );
+		/*
+		 * Ranges are MiniMax's own, not OpenAI's: temperature is [0, 2] and
+		 * top_p is [0, 1]. The upper bound on max_tokens covers M3's
+		 * 1,000,000-token context; the M2.x models top out at 204,800 and the
+		 * API is left to reject anything beyond what the chosen model allows.
+		 */
+		$sanitized['temperature'] = max( 0, min( 2, $sanitized['temperature'] ) );
+		$sanitized['max_tokens']  = max( 1, min( 1000000, $sanitized['max_tokens'] ) );
+		$sanitized['top_p']       = max( 0, min( 1, $sanitized['top_p'] ) );
 
 		return $sanitized;
 	}
@@ -219,7 +236,7 @@ class MiniMaxSettings {
 	 */
 	public static function render_model_field(): void {
 		$settings       = self::get_settings();
-		$directory      = new MiniMaxModelMetadataDirectory();
+		$directory      = new ModelMetadataDirectory();
 		$models         = $directory->listModelMetadata();
 		$selected_model = $settings['default_model'] ?? '';
 		$option_key     = self::OPTION_KEY;
@@ -276,35 +293,35 @@ class MiniMaxSettings {
 	}
 
 	/**
-	 * Render presence penalty field.
+	 * Render thinking field.
 	 *
-	 * @since 1.3.0
+	 * @since 1.5.0
 	 *
 	 * @return void
 	 */
-	public static function render_presence_penalty_field(): void {
+	public static function render_thinking_field(): void {
 		$settings   = self::get_settings();
-		$raw        = $settings['presence_penalty'] ?? 0.0;
-		$value      = is_numeric( $raw ) ? (float) $raw : 0.0;
+		$raw        = $settings['thinking'] ?? 'adaptive';
+		$value      = is_string( $raw ) ? $raw : 'adaptive';
 		$option_key = self::OPTION_KEY;
 
-		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/field-presence-penalty.php';
+		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/field-thinking.php';
 	}
 
 	/**
-	 * Render frequency penalty field.
+	 * Render service tier field.
 	 *
-	 * @since 1.3.0
+	 * @since 1.5.0
 	 *
 	 * @return void
 	 */
-	public static function render_frequency_penalty_field(): void {
+	public static function render_service_tier_field(): void {
 		$settings   = self::get_settings();
-		$raw        = $settings['frequency_penalty'] ?? 0.0;
-		$value      = is_numeric( $raw ) ? (float) $raw : 0.0;
+		$raw        = $settings['service_tier'] ?? 'standard';
+		$value      = is_string( $raw ) ? $raw : 'standard';
 		$option_key = self::OPTION_KEY;
 
-		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/field-frequency-penalty.php';
+		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/field-service-tier.php';
 	}
 
 	/**
@@ -364,12 +381,12 @@ class MiniMaxSettings {
 	 */
 	public static function get_settings(): array {
 		$defaults = array(
-			'default_model'     => self::DEFAULT_MODEL,
-			'temperature'       => 0.7,
-			'max_tokens'        => 4096,
-			'top_p'             => 1.0,
-			'presence_penalty'  => 0.0,
-			'frequency_penalty' => 0.0,
+			'default_model' => self::DEFAULT_MODEL,
+			'temperature'   => 0.7,
+			'max_tokens'    => 4096,
+			'top_p'         => 1.0,
+			'thinking'      => 'adaptive',
+			'service_tier'  => 'standard',
 		);
 
 		$saved = get_option( self::OPTION_KEY, array() );
@@ -377,25 +394,32 @@ class MiniMaxSettings {
 			return $defaults;
 		}
 
+		/*
+		 * `presence_penalty` and `frequency_penalty` are deliberately not read
+		 * back, even where an older version of this plugin saved them. MiniMax
+		 * ignores both, so returning them would put values into the settings
+		 * array that nothing may act on. The stored keys are harmless and are
+		 * left in place rather than migrated away.
+		 */
 		return array(
-			'default_model'     => isset( $saved['default_model'] ) && is_string( $saved['default_model'] ) && '' !== $saved['default_model']
+			'default_model' => isset( $saved['default_model'] ) && is_string( $saved['default_model'] ) && '' !== $saved['default_model']
 				? $saved['default_model']
 				: self::DEFAULT_MODEL,
-			'temperature'       => isset( $saved['temperature'] ) && is_numeric( $saved['temperature'] )
+			'temperature'   => isset( $saved['temperature'] ) && is_numeric( $saved['temperature'] )
 				? (float) $saved['temperature']
 				: $defaults['temperature'],
-			'max_tokens'        => isset( $saved['max_tokens'] ) && is_int( $saved['max_tokens'] )
+			'max_tokens'    => isset( $saved['max_tokens'] ) && is_int( $saved['max_tokens'] )
 				? $saved['max_tokens']
 				: $defaults['max_tokens'],
-			'top_p'             => isset( $saved['top_p'] ) && is_numeric( $saved['top_p'] )
+			'top_p'         => isset( $saved['top_p'] ) && is_numeric( $saved['top_p'] )
 				? (float) $saved['top_p']
 				: 1.0,
-			'presence_penalty'  => isset( $saved['presence_penalty'] ) && is_numeric( $saved['presence_penalty'] )
-				? (float) $saved['presence_penalty']
-				: 0.0,
-			'frequency_penalty' => isset( $saved['frequency_penalty'] ) && is_numeric( $saved['frequency_penalty'] )
-				? (float) $saved['frequency_penalty']
-				: 0.0,
+			'thinking'      => isset( $saved['thinking'] ) && in_array( $saved['thinking'], array( 'adaptive', 'disabled' ), true )
+				? $saved['thinking']
+				: $defaults['thinking'],
+			'service_tier'  => isset( $saved['service_tier'] ) && in_array( $saved['service_tier'], array( 'standard', 'priority' ), true )
+				? $saved['service_tier']
+				: $defaults['service_tier'],
 		);
 	}
 }

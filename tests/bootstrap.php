@@ -2,7 +2,7 @@
 /**
  * PHPUnit bootstrap file.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Tests
+ * @package MiniMax\MiniMaxAiProvider\Tests
  */
 
 declare(strict_types=1);

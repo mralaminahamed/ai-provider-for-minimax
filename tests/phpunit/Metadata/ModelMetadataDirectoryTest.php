@@ -1,27 +1,27 @@
 <?php
 /**
- * Tests for MiniMaxModelMetadataDirectory.
+ * Tests for ModelMetadataDirectory.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Tests\Metadata
+ * @package MiniMax\MiniMaxAiProvider\Tests\Metadata
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Tests\Metadata;
+namespace MiniMax\MiniMaxAiProvider\Tests\Metadata;
 
-use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
-use AlAminAhamed\MiniMaxAiProvider\Tests\AbstractModelMetadataDirectoryTest;
+use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
+use MiniMax\MiniMaxAiProvider\Tests\AbstractModelMetadataDirectoryTest;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 
 /**
- * Class MiniMaxModelMetadataDirectoryTest
+ * Class ModelMetadataDirectoryTest
  *
  * @since 1.0.0
  */
-class MiniMaxModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
+class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 
 	protected function createDirectory(): ModelMetadataDirectoryInterface {
-		return new MiniMaxModelMetadataDirectory();
+		return new ModelMetadataDirectory();
 	}
 
 	protected function getKnownModelId(): string {

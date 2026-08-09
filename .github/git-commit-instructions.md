@@ -41,8 +41,8 @@ Use specific, meaningful scopes that clearly identify the affected area:
 
 **Common Scopes:**
 
-- `provider` - MiniMaxProvider registration logic
-- `model` - Text generation model (MiniMaxTextGenerationModel)
+- `provider` - Provider registration logic
+- `model` - Text generation model (TextGenerationModel)
 - `metadata` - Model metadata directory / API fetch / fallback list
 - `settings` - WP admin settings page
 - `api` - API key resolution or request handling
@@ -66,7 +66,7 @@ chore(deps): bump phpstan to 2.x
 ```
 feat(provider): register provider with AI Client registry
 
-- Wire up MiniMaxProvider on init hook (priority 5)
+- Wire up Provider on init hook (priority 5)
 - Resolve API key from env then WP option
 
 Closes #12

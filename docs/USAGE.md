@@ -18,10 +18,10 @@ echo $result->toText();
 
 ```php
 use WordPress\AiClient\AiClient;
-use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
+use MiniMax\MiniMaxAiProvider\Provider\Provider;
 
 $registry = AiClient::defaultRegistry();
-$registry->registerProvider(MiniMaxProvider::class);
+$registry->registerProvider(Provider::class);
 
 putenv('MINIMAX_API_KEY=your-api-key');
 
@@ -50,16 +50,16 @@ Defaults are configurable on the settings page and can be overridden per request
 |---|---|---|
 | Default Model | any available model | `MiniMax-M3` |
 | Temperature | 0.0–2.0 | 0.7 |
-| Max Tokens | 1–200,000 | 4096 |
+| Max Tokens | 1–1,000,000 | 4096 |
 | Top P | 0.0–1.0 | 1.0 |
-| Presence Penalty | -2.0–2.0 | 0.0 |
-| Frequency Penalty | -2.0–2.0 | 0.0 |
+| Thinking | adaptive / disabled | adaptive |
+| Service Tier | standard / priority | standard |
 
 ## Credential filters
 
 So the WordPress AI admin page does not show a false "no valid connector" warning when the key is stored outside the standard flat option, the plugin hooks two filters:
 
-- `wpai_has_ai_credentials` — returns `true` when `MiniMaxSettings::has_api_key()` finds a key (env var, Connectors option, or legacy credentials option).
+- `wpai_has_ai_credentials` — returns `true` when `Settings::has_api_key()` finds a key (env var, Connectors option, or legacy credentials option).
 - `wpai_pre_has_valid_credentials_check` — short-circuits the validity check to `true` when a key is confirmed present.
 
 Both are thin wrappers over the credential resolution described in [ARCHITECTURE.md](ARCHITECTURE.md#credential-resolution).

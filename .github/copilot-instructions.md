@@ -14,9 +14,9 @@ This file provides comprehensive guidelines for using GitHub Copilot in the AI P
 
 ### PHP Standards
 
-- Follow WordPress Coding Standards (WPCS) — PSR-4 autoloading with `AlAminAhamed\MiniMaxAiProvider\` namespace
+- Follow WordPress Coding Standards (WPCS) — PSR-4 autoloading with `MiniMax\MiniMaxAiProvider\` namespace
 - PHP 7.4+ minimum; `declare(strict_types=1)` on every file
-- Class names: PascalCase (e.g., `MiniMaxProvider`)
+- Class names: PascalCase (e.g., `Provider`)
 - Method/variable names: snake_case (WordPress style)
 - File names: snake_case with hyphens
 - PHPDoc comments for all classes, methods, and properties
@@ -30,29 +30,29 @@ All plugin classes extend from the `wordpress/wp-ai-client` SDK:
 
 ```
 AbstractApiProvider  (SDK)
-  └── MiniMaxProvider              # registers provider ID "minimax"
+  └── Provider              # registers provider ID "minimax"
 
 AbstractOpenAiCompatibleTextGenerationModel  (SDK)
-  └── MiniMaxTextGenerationModel   # adds MiniMax-Provider header
+  └── TextGenerationModel   # adds MiniMax-Provider header
 
 ModelMetadataDirectoryInterface  (SDK)
-  └── MiniMaxModelMetadataDirectory  # API fetch + WP transient cache + fallback list
+  └── ModelMetadataDirectory  # API fetch + WP transient cache + fallback list
 ```
 
-`MiniMaxSettings` — standalone WP settings page; not part of the SDK hierarchy.
+`Settings` — standalone WP settings page; not part of the SDK hierarchy.
 
 ## File Structure
 
 ```
 alamin-ai-provider-for-minimax.php   # Plugin entry point; defines constant, loads autoloader
 src/
-  MiniMaxProvider.php                # Provider registration
+  Provider.php                # Provider registration
   Metadata/
-    MiniMaxModelMetadataDirectory.php # Model list (API + fallback)
+    ModelMetadataDirectory.php # Model list (API + fallback)
   Models/
-    MiniMaxTextGenerationModel.php   # Text generation model
+    TextGenerationModel.php   # Text generation model
   Settings/
-    MiniMaxSettings.php              # WP admin settings page
+    Settings.php              # WP admin settings page
 ```
 
 ## API Key Resolution (priority order)

@@ -2,12 +2,12 @@
 /**
  * MiniMax Model Metadata Directory.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Metadata
+ * @package MiniMax\MiniMaxAiProvider\Metadata
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Metadata;
+namespace MiniMax\MiniMaxAiProvider\Metadata;
 
 use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
+class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 
 	/**
 	 * {@inheritDoc}
@@ -94,6 +94,41 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	}
 
 	/**
+	 * The generation options MiniMax actually honours.
+	 *
+	 * `SupportedOption` is a promise, not a wish list. The AI Client uses it to
+	 * decide which model can satisfy a request, so declaring an option here
+	 * routes callers who need that option to MiniMax — and if MiniMax ignores
+	 * it, they get a silently wrong answer rather than an error.
+	 *
+	 * Three options were declared here and are documented by MiniMax as
+	 * ignored on the OpenAI-compatible endpoint:
+	 *
+	 * - `presencePenalty`  — sent as `presence_penalty`, ignored
+	 * - `frequencyPenalty` — sent as `frequency_penalty`, ignored
+	 * - `stopSequences`    — sent as `stop`, ignored
+	 *
+	 * They are gone. A caller that needs stop sequences should be routed to a
+	 * provider that implements them, which is exactly what removing them
+	 * achieves.
+	 *
+	 * @link https://platform.minimax.io/docs/api-reference/text-openai-api
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return list<SupportedOption>
+	 */
+	private function supported_options(): array {
+		return array(
+			new SupportedOption( OptionEnum::temperature() ),
+			new SupportedOption( OptionEnum::maxTokens() ),
+			new SupportedOption( OptionEnum::topP() ),
+			new SupportedOption( OptionEnum::systemInstruction() ),
+			new SupportedOption( OptionEnum::functionDeclarations() ),
+		);
+	}
+
+	/**
 	 * Fetch models from the MiniMax API.
 	 *
 	 * @since 1.0.0
@@ -153,16 +188,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		$capabilities = array(
 			CapabilityEnum::textGeneration(),
 		);
-		$options      = array(
-			new SupportedOption( OptionEnum::temperature() ),
-			new SupportedOption( OptionEnum::maxTokens() ),
-			new SupportedOption( OptionEnum::topP() ),
-			new SupportedOption( OptionEnum::presencePenalty() ),
-			new SupportedOption( OptionEnum::frequencyPenalty() ),
-			new SupportedOption( OptionEnum::stopSequences() ),
-			new SupportedOption( OptionEnum::systemInstruction() ),
-			new SupportedOption( OptionEnum::functionDeclarations() ),
-		);
+		$options      = $this->supported_options();
 
 		$models = array();
 		foreach ( $data['data'] as $model_data ) {
@@ -197,16 +223,7 @@ class MiniMaxModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 		$capabilities = array(
 			CapabilityEnum::textGeneration(),
 		);
-		$options      = array(
-			new SupportedOption( OptionEnum::temperature() ),
-			new SupportedOption( OptionEnum::maxTokens() ),
-			new SupportedOption( OptionEnum::topP() ),
-			new SupportedOption( OptionEnum::presencePenalty() ),
-			new SupportedOption( OptionEnum::frequencyPenalty() ),
-			new SupportedOption( OptionEnum::stopSequences() ),
-			new SupportedOption( OptionEnum::systemInstruction() ),
-			new SupportedOption( OptionEnum::functionDeclarations() ),
-		);
+		$options      = $this->supported_options();
 
 		// Mirrors the official MiniMax chat-completion model catalogue.
 		// See https://platform.minimax.io/docs/api-reference/api-overview.

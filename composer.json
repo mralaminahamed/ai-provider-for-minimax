@@ -33,12 +33,15 @@
     },
     "autoload": {
         "psr-4": {
-            "AlAminAhamed\\MiniMaxAiProvider\\": "includes/"
-        }
+            "MiniMax\\MiniMaxAiProvider\\": "includes/"
+        },
+        "classmap": [
+            "class-ai-provider-for-minimax.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "AlAminAhamed\\MiniMaxAiProvider\\Tests\\": "tests/phpunit/"
+            "MiniMax\\MiniMaxAiProvider\\Tests\\": "tests/phpunit/"
         }
     },
     "scripts": {
@@ -59,7 +62,7 @@
         "phpcs": "@lint",
         "phpcbf": "@lint:fix",
         "phpstan": "@analyze",
-        "makepot": "wp i18n make-pot . languages/alamin-ai-provider-for-minimax.pot --exclude=node_modules,vendor,docs,release,tests,.wordpress-org,.playwright-mcp,.claude,.remember",
+        "makepot": "wp i18n make-pot . languages/alamin-ai-provider-for-minimax.pot --package-name=\"AI Provider for MiniMax\" --exclude=node_modules,vendor,docs,release,tests,.wordpress-org,.playwright-mcp,.claude,.remember",
         "release": [
             "rm -rf release vendor",
             "@makepot",

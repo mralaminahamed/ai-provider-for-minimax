@@ -15,14 +15,19 @@ How the plugin is put together and how a request flows through it.
 ## File layout
 
 ```
+alamin-ai-provider-for-minimax.php   # Entry point: constants, autoloader, boot
+class-ai-provider-for-minimax.php   # Main class: every hook the plugin registers
 includes/
   Provider/
-    MiniMaxProvider.php                # Registers provider ID "minimax", base URL
-    MiniMaxTextGenerationModel.php      # OpenAI-compatible text generation
+    Provider.php                 # Registers provider ID "minimax", base URL
+  Models/
+    TextGenerationModel.php      # OpenAI-compatible text generation, applies saved settings
   Metadata/
-    MiniMaxModelMetadataDirectory.php   # Live model discovery + transient cache + fallback list
+    ModelMetadataDirectory.php   # Live model discovery + transient cache + fallback list
+  Availability/
+    ProviderAvailability.php     # Is a key configured, and where
   Settings/
-    MiniMaxSettings.php                # WP admin settings page (logic only)
+    Settings.php                 # WP admin settings page (logic only)
 templates/
   admin/
     settings-page.php                  # <form> wrapper
@@ -31,8 +36,8 @@ templates/
     field-temperature.php              # Temperature <input>
     field-max-tokens.php               # Max tokens <input>
     field-top-p.php                    # Top P <input>
-    field-presence-penalty.php         # Presence penalty <input>
-    field-frequency-penalty.php        # Frequency penalty <input>
+    field-thinking.php                 # Thinking mode <select>
+    field-service-tier.php             # Service tier <select>
 ```
 
 Settings logic lives in PHP; all markup lives in `templates/admin/` so the two never mix.
@@ -41,15 +46,15 @@ Settings logic lives in PHP; all markup lives in `templates/admin/` so the two n
 
 ```
 AiClient::prompt(…)->usingProvider('minimax')->generateTextResult()
-  └─ MiniMaxProvider                    resolves provider + base URL + credentials
-       └─ MiniMaxTextGenerationModel    POST {base}/chat/completions (OpenAI-compatible)
+  └─ Provider                    resolves provider + base URL + credentials
+       └─ TextGenerationModel    POST {base}/chat/completions (OpenAI-compatible)
             └─ returns GenerateTextResult
 ```
 
 Model discovery is a separate path:
 
 ```
-MiniMaxModelMetadataDirectory::listModelMetadata()
+ModelMetadataDirectory::listModelMetadata()
   └─ GET {base}/models   (when an API key is present)
        ├─ success → cache in transient (1 h) and return live list
        └─ failure → cache empty (5 min) and return the built-in fallback list
@@ -65,7 +70,7 @@ The API key is resolved in priority order (first hit wins):
 2. `connectors_ai_minimax_api_key` option (WordPress 7.0+ Connectors screen)
 3. `wp_ai_client_credentials['minimax']['api_key']` (legacy AI Client credentials option)
 
-`MiniMaxSettings::has_api_key()` centralises this check; it is reused by the credential filters described in [USAGE.md](USAGE.md).
+`Settings::has_api_key()` centralises this check; it is reused by the credential filters described in [USAGE.md](USAGE.md).
 
 ## Runtime dependency: the AI Client SDK
 

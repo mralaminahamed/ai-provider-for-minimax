@@ -2,7 +2,7 @@
 /**
  * Max tokens field template.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  *
  * @var string $option_key The settings option key.
  * @var int    $value      Current max tokens value.

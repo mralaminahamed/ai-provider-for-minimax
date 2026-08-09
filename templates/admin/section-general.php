@@ -2,7 +2,7 @@
 /**
  * General settings section description template.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

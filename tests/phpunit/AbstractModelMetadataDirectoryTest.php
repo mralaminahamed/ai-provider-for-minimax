@@ -2,12 +2,12 @@
 /**
  * Abstract base test for ModelMetadataDirectory implementations.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Tests
+ * @package MiniMax\MiniMaxAiProvider\Tests
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Tests;
+namespace MiniMax\MiniMaxAiProvider\Tests;
 
 use Brain\Monkey;
 use Brain\Monkey\Functions;
@@ -283,44 +283,33 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
-	 * Test all fallback models support the presencePenalty option.
+	 * Options MiniMax documents as ignored are not declared as supported.
 	 *
-	 * @since 1.3.2
+	 * These three used to be asserted the other way round, which is how they
+	 * came to be declared at all. `SupportedOption` is what the AI Client reads
+	 * to decide which model can satisfy a request: declaring an option MiniMax
+	 * ignores routes a caller who needs it to a provider that will quietly
+	 * disregard it and answer anyway.
+	 *
+	 * @link https://platform.minimax.io/docs/api-reference/text-openai-api
+	 *
+	 * @since 1.5.0
 	 *
 	 * @return void
 	 */
-	public function test_all_models_support_presence_penalty_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
-			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
-			$this->assertContains( 'presencePenalty', $names, "Model {$model->getId()} missing presencePenalty option" );
-		}
-	}
+	public function test_ignored_options_are_not_declared_as_supported(): void {
+		$ignored = array( 'presencePenalty', 'frequencyPenalty', 'stopSequences' );
 
-	/**
-	 * Test all fallback models support the frequencyPenalty option.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_all_models_support_frequency_penalty_option(): void {
 		foreach ( $this->directory->listModelMetadata() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
-			$this->assertContains( 'frequencyPenalty', $names, "Model {$model->getId()} missing frequencyPenalty option" );
-		}
-	}
 
-	/**
-	 * Test all fallback models support the stopSequences option.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_all_models_support_stop_sequences_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
-			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
-			$this->assertContains( 'stopSequences', $names, "Model {$model->getId()} missing stopSequences option" );
+			foreach ( $ignored as $option ) {
+				$this->assertNotContains(
+					$option,
+					$names,
+					"Model {$model->getId()} declares {$option}, which the MiniMax API ignores"
+				);
+			}
 		}
 	}
 

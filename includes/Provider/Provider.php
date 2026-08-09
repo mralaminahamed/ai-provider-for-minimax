@@ -2,12 +2,12 @@
 /**
  * MiniMax AI Provider.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Provider
+ * @package MiniMax\MiniMaxAiProvider\Provider
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Provider;
+namespace MiniMax\MiniMaxAiProvider\Provider;
 
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Common\Exception\RuntimeException;
@@ -19,9 +19,9 @@ use WordPress\AiClient\Providers\Enums\ProviderTypeEnum;
 use WordPress\AiClient\Providers\Http\Enums\RequestAuthenticationMethod;
 use WordPress\AiClient\Providers\Models\Contracts\ModelInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
-use AlAminAhamed\MiniMaxAiProvider\Availability\MiniMaxProviderAvailability;
-use AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadataDirectory;
-use AlAminAhamed\MiniMaxAiProvider\Models\MiniMaxTextGenerationModel;
+use MiniMax\MiniMaxAiProvider\Availability\ProviderAvailability;
+use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
+use MiniMax\MiniMaxAiProvider\Models\TextGenerationModel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class MiniMaxProvider extends AbstractApiProvider {
+class Provider extends AbstractApiProvider {
 
 	/**
 	 * {@inheritDoc}
@@ -61,7 +61,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 
 		foreach ( $capabilities as $capability ) {
 			if ( $capability->isTextGeneration() ) {
-				return new MiniMaxTextGenerationModel( $model_metadata, $provider_metadata );
+				return new TextGenerationModel( $model_metadata, $provider_metadata );
 			}
 		}
 
@@ -105,7 +105,7 @@ class MiniMaxProvider extends AbstractApiProvider {
 	 * @since 1.0.0
 	 */
 	protected static function createProviderAvailability(): ProviderAvailabilityInterface {
-		return new MiniMaxProviderAvailability();
+		return new ProviderAvailability();
 	}
 
 	/**
@@ -114,6 +114,6 @@ class MiniMaxProvider extends AbstractApiProvider {
 	 * @since 1.0.0
 	 */
 	protected static function createModelMetadataDirectory(): ModelMetadataDirectoryInterface {
-		return new MiniMaxModelMetadataDirectory();
+		return new ModelMetadataDirectory();
 	}
 }

@@ -83,10 +83,10 @@ Configure defaults on **Settings → MiniMax** (option key `minimax_settings`):
 |---|---|---|
 | Default Model | any available model | `MiniMax-M3` |
 | Temperature | 0.0–2.0 | 0.7 |
-| Max Tokens | 1–200,000 | 4096 |
+| Max Tokens | 1–1,000,000 | 4096 |
 | Top P | 0.0–1.0 | 1.0 |
-| Presence Penalty | -2.0–2.0 | 0.0 |
-| Frequency Penalty | -2.0–2.0 | 0.0 |
+| Thinking | adaptive / disabled | adaptive |
+| Service Tier | standard / priority | standard |
 
 The `MINIMAX_API_KEY` environment variable takes priority over the stored key. Full resolution order is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#credential-resolution).
 
