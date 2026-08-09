@@ -2,10 +2,10 @@
 /**
  * Default model field template.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  *
  * @var string                                                            $option_key     The settings option key.
- * @var \AlAminAhamed\MiniMaxAiProvider\Metadata\MiniMaxModelMetadata[]  $models         List of model metadata objects.
+ * @var \WordPress\AiClient\Providers\Models\DTO\ModelMetadata[]  $models         List of model metadata objects.
  * @var string                                                            $selected_model Currently selected model ID.
  */
 

@@ -2,12 +2,12 @@
 /**
  * Abstract base test for Settings implementations.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Tests
+ * @package MiniMax\MiniMaxAiProvider\Tests
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Tests;
+namespace MiniMax\MiniMaxAiProvider\Tests;
 
 use Brain\Monkey;
 use Brain\Monkey\Functions;
@@ -218,7 +218,7 @@ abstract class AbstractSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Test sanitize settings clamps max_tokens above 200000 to 200000.
+	 * Test sanitize settings clamps max_tokens to MiniMax-M3's context limit.
 	 *
 	 * @since 1.3.2
 	 *
@@ -231,11 +231,11 @@ abstract class AbstractSettingsTest extends TestCase {
 			array(
 				'default_model' => '',
 				'temperature'   => 1.0,
-				'max_tokens'    => 999999,
+				'max_tokens'    => 9999999,
 			)
 		);
 
-		$this->assertEquals( 200000, $result['max_tokens'] );
+		$this->assertEquals( 1000000, $result['max_tokens'] );
 	}
 
 	/**
@@ -373,200 +373,30 @@ abstract class AbstractSettingsTest extends TestCase {
 		$this->assertEquals( 1.0, $result['top_p'] );
 	}
 
+
+
+
+
+
+
+
+
 	/**
-	 * Test sanitize settings clamps presence_penalty below -2 to -2.
+	 * Test sanitize settings result contains all four expected keys.
 	 *
 	 * @since 1.3.2
 	 *
 	 * @return void
 	 */
-	public function test_sanitize_settings_clamps_presence_penalty_below_minus_two(): void {
+	public function test_sanitize_settings_returns_all_four_keys(): void {
 		Functions\when( 'sanitize_text_field' )->returnArg();
 
 		$result = $this->callSanitize(
 			array(
-				'default_model'    => '',
-				'temperature'      => 1.0,
-				'max_tokens'       => 100,
-				'presence_penalty' => -5.0,
-			)
-		);
-
-		$this->assertEquals( -2.0, $result['presence_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings clamps presence_penalty above 2 to 2.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_clamps_presence_penalty_above_two(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'    => '',
-				'temperature'      => 1.0,
-				'max_tokens'       => 100,
-				'presence_penalty' => 5.0,
-			)
-		);
-
-		$this->assertEquals( 2.0, $result['presence_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings accepts a valid presence_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_accepts_valid_presence_penalty(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'    => '',
-				'temperature'      => 1.0,
-				'max_tokens'       => 100,
-				'presence_penalty' => 1.5,
-			)
-		);
-
-		$this->assertEquals( 1.5, $result['presence_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings falls back to default presence_penalty for non-numeric value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_defaults_for_non_numeric_presence_penalty(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'    => '',
-				'temperature'      => 1.0,
-				'max_tokens'       => 100,
-				'presence_penalty' => 'high',
-			)
-		);
-
-		$this->assertEquals( 0.0, $result['presence_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings clamps frequency_penalty below -2 to -2.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_clamps_frequency_penalty_below_minus_two(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'     => '',
-				'temperature'       => 1.0,
-				'max_tokens'        => 100,
-				'frequency_penalty' => -5.0,
-			)
-		);
-
-		$this->assertEquals( -2.0, $result['frequency_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings clamps frequency_penalty above 2 to 2.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_clamps_frequency_penalty_above_two(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'     => '',
-				'temperature'       => 1.0,
-				'max_tokens'        => 100,
-				'frequency_penalty' => 5.0,
-			)
-		);
-
-		$this->assertEquals( 2.0, $result['frequency_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings accepts a valid frequency_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_accepts_valid_frequency_penalty(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'     => '',
-				'temperature'       => 1.0,
-				'max_tokens'        => 100,
-				'frequency_penalty' => 0.8,
-			)
-		);
-
-		$this->assertEquals( 0.8, $result['frequency_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings falls back to default frequency_penalty for non-numeric value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_defaults_for_non_numeric_frequency_penalty(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'     => '',
-				'temperature'       => 1.0,
-				'max_tokens'        => 100,
-				'frequency_penalty' => 'high',
-			)
-		);
-
-		$this->assertEquals( 0.0, $result['frequency_penalty'] );
-	}
-
-	/**
-	 * Test sanitize settings result contains all six expected keys.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_sanitize_settings_returns_all_six_keys(): void {
-		Functions\when( 'sanitize_text_field' )->returnArg();
-
-		$result = $this->callSanitize(
-			array(
-				'default_model'     => 'test-model-id',
-				'temperature'       => 1.0,
-				'max_tokens'        => 2048,
-				'top_p'             => 0.9,
-				'presence_penalty'  => 0.0,
-				'frequency_penalty' => 0.0,
+				'default_model' => 'test-model-id',
+				'temperature'   => 1.0,
+				'max_tokens'    => 2048,
+				'top_p'         => 0.9,
 			)
 		);
 
@@ -574,8 +404,10 @@ abstract class AbstractSettingsTest extends TestCase {
 		$this->assertArrayHasKey( 'temperature', $result );
 		$this->assertArrayHasKey( 'max_tokens', $result );
 		$this->assertArrayHasKey( 'top_p', $result );
-		$this->assertArrayHasKey( 'presence_penalty', $result );
-		$this->assertArrayHasKey( 'frequency_penalty', $result );
+
+		// The MiniMax API ignores both penalties, so they are no longer stored.
+		$this->assertArrayNotHasKey( 'presence_penalty', $result );
+		$this->assertArrayNotHasKey( 'frequency_penalty', $result );
 	}
 
 	/**
@@ -665,35 +497,7 @@ abstract class AbstractSettingsTest extends TestCase {
 		$this->assertEquals( 1.0, $settings['top_p'] );
 	}
 
-	/**
-	 * Test get settings returns default presence_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_get_settings_default_presence_penalty(): void {
-		Functions\when( 'get_option' )->justReturn( array() );
 
-		$settings = $this->callGetSettings();
-
-		$this->assertEquals( 0.0, $settings['presence_penalty'] );
-	}
-
-	/**
-	 * Test get settings returns default frequency_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_get_settings_default_frequency_penalty(): void {
-		Functions\when( 'get_option' )->justReturn( array() );
-
-		$settings = $this->callGetSettings();
-
-		$this->assertEquals( 0.0, $settings['frequency_penalty'] );
-	}
 
 	/**
 	 * Test get settings returns the class default model when nothing is saved.
@@ -748,35 +552,7 @@ abstract class AbstractSettingsTest extends TestCase {
 		$this->assertEquals( 0.9, $settings['top_p'] );
 	}
 
-	/**
-	 * Test get settings returns saved presence_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_get_settings_saved_presence_penalty(): void {
-		Functions\when( 'get_option' )->justReturn( array( 'presence_penalty' => -1.0 ) );
 
-		$settings = $this->callGetSettings();
-
-		$this->assertEquals( -1.0, $settings['presence_penalty'] );
-	}
-
-	/**
-	 * Test get settings returns saved frequency_penalty value.
-	 *
-	 * @since 1.3.2
-	 *
-	 * @return void
-	 */
-	public function test_get_settings_saved_frequency_penalty(): void {
-		Functions\when( 'get_option' )->justReturn( array( 'frequency_penalty' => 0.5 ) );
-
-		$settings = $this->callGetSettings();
-
-		$this->assertEquals( 0.5, $settings['frequency_penalty'] );
-	}
 
 	/**
 	 * Test get settings returns saved default_model value.
@@ -800,7 +576,7 @@ abstract class AbstractSettingsTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_get_settings_returns_all_six_keys(): void {
+	public function test_get_settings_returns_all_four_keys(): void {
 		Functions\when( 'get_option' )->justReturn( array() );
 
 		$settings = $this->callGetSettings();
@@ -809,8 +585,8 @@ abstract class AbstractSettingsTest extends TestCase {
 		$this->assertArrayHasKey( 'temperature', $settings );
 		$this->assertArrayHasKey( 'max_tokens', $settings );
 		$this->assertArrayHasKey( 'top_p', $settings );
-		$this->assertArrayHasKey( 'presence_penalty', $settings );
-		$this->assertArrayHasKey( 'frequency_penalty', $settings );
+		$this->assertArrayNotHasKey( 'presence_penalty', $settings );
+		$this->assertArrayNotHasKey( 'frequency_penalty', $settings );
 	}
 
 	/**

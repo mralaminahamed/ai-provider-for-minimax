@@ -2,7 +2,7 @@
 /**
  * Top P field template.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Settings
+ * @package MiniMax\MiniMaxAiProvider\Settings
  *
  * @var string $option_key The settings option key.
  * @var float  $value      Current top_p value.

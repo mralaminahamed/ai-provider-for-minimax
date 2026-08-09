@@ -5,7 +5,7 @@
  * Loads the autoloader, registers the MiniMax provider with the
  * WordPress AI Client registry, and initialises the wp-admin settings page.
  *
- * @package AlAminAhamed\MiniMaxAiProvider
+ * @package MiniMax
  * @author  Al Amin Ahamed
  * @link    https://github.com/mralaminahamed/ai-provider-for-minimax
  * @since   1.0.0
@@ -14,7 +14,7 @@
  * Plugin Name:       AI Provider for MiniMax
  * Plugin URI:        https://github.com/mralaminahamed/ai-provider-for-minimax
  * Description:       MiniMax AI provider for the WordPress AI Client. Not affiliated with MiniMax.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Requires at least: 7.0
  * Requires PHP:      7.4
  * Author:            Al Amin Ahamed
@@ -27,11 +27,11 @@
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider;
+namespace MiniMax;
 
 use WordPress\AiClient\AiClient;
-use AlAminAhamed\MiniMaxAiProvider\Provider\MiniMaxProvider;
-use AlAminAhamed\MiniMaxAiProvider\Settings\MiniMaxSettings;
+use MiniMax\MiniMaxAiProvider\Provider\Provider;
+use MiniMax\MiniMaxAiProvider\Settings\Settings;
 
 define( 'MINIMAX_PLUGIN_FILE', __FILE__ );
 
@@ -55,11 +55,11 @@ function register_provider(): void {
 
 	$registry = AiClient::defaultRegistry();
 
-	if ( $registry->hasProvider( MiniMaxProvider::class ) ) {
+	if ( $registry->hasProvider( Provider::class ) ) {
 		return;
 	}
 
-	$registry->registerProvider( MiniMaxProvider::class );
+	$registry->registerProvider( Provider::class );
 }
 
 add_action( 'init', __NAMESPACE__ . '\\register_provider', 5 );
@@ -72,7 +72,7 @@ add_action( 'init', __NAMESPACE__ . '\\register_provider', 5 );
  * @return void
  */
 function init_settings(): void {
-	MiniMaxSettings::init();
+	Settings::init();
 }
 
 add_action( 'init', __NAMESPACE__ . '\\init_settings', 5 );
@@ -95,7 +95,7 @@ function declare_credentials( bool $has_credentials ): bool {
 		return true;
 	}
 
-	return MiniMaxSettings::has_api_key();
+	return Settings::has_api_key();
 }
 
 add_filter( 'wpai_has_ai_credentials', __NAMESPACE__ . '\\declare_credentials' );

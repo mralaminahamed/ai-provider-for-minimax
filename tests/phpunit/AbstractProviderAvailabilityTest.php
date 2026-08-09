@@ -2,12 +2,12 @@
 /**
  * Abstract base test for ProviderAvailability implementations.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Tests
+ * @package MiniMax\MiniMaxAiProvider\Tests
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Tests;
+namespace MiniMax\MiniMaxAiProvider\Tests;
 
 use Brain\Monkey;
 use Brain\Monkey\Functions;

@@ -2,12 +2,12 @@
 /**
  * MiniMax Provider Availability.
  *
- * @package AlAminAhamed\MiniMaxAiProvider\Availability
+ * @package MiniMax\MiniMaxAiProvider\Availability
  */
 
 declare(strict_types=1);
 
-namespace AlAminAhamed\MiniMaxAiProvider\Availability;
+namespace MiniMax\MiniMaxAiProvider\Availability;
 
 use WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface;
 use WordPress\AiClient\Providers\Http\Contracts\RequestAuthenticationInterface;
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.2.0
  */
-class MiniMaxProviderAvailability implements ProviderAvailabilityInterface {
+class ProviderAvailability implements ProviderAvailabilityInterface {
 
 	/**
 	 * Request authentication instance set by the registry.
