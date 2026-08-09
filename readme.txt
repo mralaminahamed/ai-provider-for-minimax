@@ -32,6 +32,7 @@ MiniMax models are particularly strong at:
 * **MiniMax M2 and M3 series models** — including Highspeed variants optimised for faster responses
 * **Automatic model discovery** — live model list fetched from the MiniMax API and cached hourly; falls back to a hardcoded list when offline
 * **Full parameter control** — temperature, max tokens, top P, thinking mode, service tier, system instruction, and function declarations
+* **Chat history** — multi-turn conversations, not just single prompts
 * **Settings page** — configure default model and generation parameters without touching code
 * **API key via Connectors** — enter your key once in **Settings > Connectors**; all AI-enabled plugins share it automatically
 * **Environment variable support** — `MINIMAX_API_KEY` for server-level configuration, bypassing the database entirely
@@ -220,6 +221,8 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 - **Thinking mode** — MiniMax-M3 can be told to answer without reasoning first, which is faster and cheaper. The M2 series always reasons and ignores the setting.
 - **Service tier** — opt in to priority routing, which MiniMax bills at 1.5x standard.
 - `minimax_generate_text_params` filter, for anything this plugin does not model.
+
+* **Chat history** — the models are now declared as supporting multi-turn conversations, not just single prompts. They always could (the OpenAI-compatible endpoint takes a `messages` array and the AI Client already sends one), but the capability was never declared and the AI Client routes on the declaration, so conversation requests were going to other providers. Every official WordPress AI provider declares this.
 
 **Changed**
 - **PHP namespace is now `MiniMax\MiniMaxAiProvider\`** (was `AlAminAhamed\MiniMaxAiProvider\`).
