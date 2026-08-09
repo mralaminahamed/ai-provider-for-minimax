@@ -198,12 +198,20 @@ inlined twice, the two copies drifted.
 | `OptionEnum::topP()` | `[0, 1]`; M3 defaults 0.95, M2.x 0.9 |
 | `OptionEnum::systemInstruction()` | — |
 | `OptionEnum::functionDeclarations()` | Sent as `tools` |
+| `OptionEnum::customOptions()` | Passthrough the SDK base already merges into the body |
+| `OptionEnum::inputModalities()` | **MiniMax-M3 only** — it reads images; the M2 series does not |
 
 **Deliberately not declared**, because MiniMax documents them as ignored on the
 OpenAI-compatible endpoint. Do not add them back:
 
 `presencePenalty` · `frequencyPenalty` · `stopSequences` · `candidateCount`
-(`n` accepts only 1) · `logprobs` · `topK`
+(`n` accepts only 1) · `logprobs` · `topK` · `webSearch`
+
+Also **not** declared, and worth knowing why, because the SDK would happily
+send it: `outputSchema` and `outputMimeType`. The SDK maps
+`outputMimeType: application/json` onto `response_format`, and MiniMax's
+OpenAI-compatible endpoint has no `response_format` — M2.x and M3 ignore it
+silently. Declaring either would promise structured output and return prose.
 
 ### Provider-specific parameters
 
@@ -218,6 +226,12 @@ and at worst refused.
 
 Extend through the `minimax_generate_text_params` filter rather than adding
 more special cases here.
+
+Note the overlap with `customOptions`, which reaches the same request body from
+the caller's side. They are not redundant — `customOptions` can only *add* keys
+and throws on a conflict, while the filter can rewrite or remove what the SDK
+already put there — but prefer `customOptions` for anything a caller should
+control per request, and the filter for what a site decides once.
 
 ### Image generation
 

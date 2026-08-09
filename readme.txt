@@ -223,6 +223,8 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 - **Service tier** — opt in to priority routing, which MiniMax bills at 1.5x standard.
 - `minimax_generate_text_params` filter, for anything this plugin does not model.
 
+* **Image input on MiniMax-M3.** Vision has worked since the first release — the AI Client turns an image into an `image_url` content part — but was never declared, so image prompts were routed to other providers. The M2 series is text only and is declared as such.
+* **Custom options.** Arbitrary passthrough parameters, which the AI Client's base class already merged into the request body but which no caller could reach, because the option was not declared. All three official WordPress AI providers offer this.
 * **Image generation.** `image-01` is now offered as an image model, served from MiniMax's own `/v1/image_generation` endpoint. Aspect ratio, orientation, number of candidates, and a choice between a URL and inline base64 are all supported. Reach `seed`, `prompt_optimizer` and `subject_reference` through the new `minimax_generate_image_params` filter.
 * **Chat history** — the models are now declared as supporting multi-turn conversations, not just single prompts. They always could (the OpenAI-compatible endpoint takes a `messages` array and the AI Client already sends one), but the capability was never declared and the AI Client routes on the declaration, so conversation requests were going to other providers. Every official WordPress AI provider declares this.
 
