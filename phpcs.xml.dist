@@ -5,6 +5,7 @@
 	<description>WordPress Coding Standards for Alamin AI Provider for MiniMax plugin.</description>
 
 	<file>./alamin-ai-provider-for-minimax.php</file>
+	<file>./class-ai-provider-for-minimax.php</file>
 	<file>./includes</file>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>

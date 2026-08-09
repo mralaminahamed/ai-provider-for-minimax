@@ -1,14 +1,12 @@
 <?php
 /**
- * AI Provider for MiniMax — plugin bootstrap.
+ * AI Provider for MiniMax
  *
- * Loads the autoloader, registers the MiniMax provider with the
- * WordPress AI Client registry, and initialises the wp-admin settings page.
- *
- * @package MiniMax
- * @author  Al Amin Ahamed
- * @link    https://github.com/mralaminahamed/ai-provider-for-minimax
- * @since   1.0.0
+ * @package           MiniMax
+ * @author            Al Amin Ahamed
+ * @copyright         2026 Al Amin Ahamed
+ * @license           GPL-2.0-or-later
+ * @link              https://github.com/mralaminahamed/ai-provider-for-minimax
  *
  * @wordpress-plugin
  * Plugin Name:       AI Provider for MiniMax
@@ -27,93 +25,37 @@
 
 declare(strict_types=1);
 
-namespace MiniMax;
-
-use WordPress\AiClient\AiClient;
-use MiniMax\MiniMaxAiProvider\Provider\Provider;
-use MiniMax\MiniMaxAiProvider\Settings\Settings;
-
-define( 'MINIMAX_PLUGIN_FILE', __FILE__ );
-
 if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'MINIMAX_VERSION', '1.5.0' );
+define( 'MINIMAX_PLUGIN_FILE', __FILE__ );
+define( 'MINIMAX_URL', plugin_dir_url( __FILE__ ) );
+define( 'MINIMAX_PATH', plugin_dir_path( __FILE__ ) );
+
+/*
+ * Bail rather than fatal when the autoloader is absent.
+ *
+ * A plugin installed from git rather than from a built zip has no vendor
+ * directory, and requiring a file that is not there takes the whole site down
+ * instead of just this plugin.
+ */
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	return;
 }
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 /**
- * Registers the MiniMax provider with the AI Client.
+ * Get the main plugin instance.
  *
- * @since 1.0.0
+ * @since 1.5.0
  *
- * @return void
+ * @return AI_Provider_For_MiniMax Plugin instance.
  */
-function register_provider(): void {
-	if ( ! class_exists( AiClient::class ) ) {
-		return;
-	}
-
-	$registry = AiClient::defaultRegistry();
-
-	if ( $registry->hasProvider( Provider::class ) ) {
-		return;
-	}
-
-	$registry->registerProvider( Provider::class );
+function ai_provider_for_minimax(): AI_Provider_For_MiniMax {
+	return AI_Provider_For_MiniMax::get_instance();
 }
 
-add_action( 'init', __NAMESPACE__ . '\\register_provider', 5 );
-
-/**
- * Initialize settings page.
- *
- * @since 1.0.0
- *
- * @return void
- */
-function init_settings(): void {
-	Settings::init();
-}
-
-add_action( 'init', __NAMESPACE__ . '\\init_settings', 5 );
-
-/**
- * Declare credential availability to the AI plugin.
- *
- * The AI plugin's has_ai_credentials() only checks connectors that store an
- * API key as a flat WP option. MiniMax stores its key under the nested
- * wp_ai_client_credentials option or the WP 7.0 Connectors page option, so
- * we must hook this filter explicitly.
- *
- * @since 1.2.0
- *
- * @param bool $has_credentials Current credential status.
- * @return bool
- */
-function declare_credentials( bool $has_credentials ): bool {
-	if ( $has_credentials ) {
-		return true;
-	}
-
-	return Settings::has_api_key();
-}
-
-add_filter( 'wpai_has_ai_credentials', __NAMESPACE__ . '\\declare_credentials' );
-
-/**
- * Short-circuit the valid credentials check when MiniMax key is configured.
- *
- * @since 1.2.0
- *
- * @param bool|null $valid Current validity status; null means "use default check".
- * @return bool|null
- */
-function declare_valid_credentials( $valid ) {
-	if ( true === $valid ) {
-		return true;
-	}
-
-	return declare_credentials( false ) ? true : null;
-}
-
-add_filter( 'wpai_pre_has_valid_credentials_check', __NAMESPACE__ . '\\declare_valid_credentials' );
+ai_provider_for_minimax()->init();
