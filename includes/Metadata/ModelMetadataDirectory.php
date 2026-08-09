@@ -15,6 +15,7 @@ use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
 use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,6 +28,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
+
+	/**
+	 * The one chat model that accepts images.
+	 *
+	 * @since 1.5.0
+	 */
+	public const VISION_MODEL = 'MiniMax-M3';
 
 	/**
 	 * {@inheritDoc}
@@ -173,7 +181,12 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return new ModelMetadata( $id, $name, $this->image_capabilities(), $this->image_options() );
 		}
 
-		return new ModelMetadata( $id, $name, $this->capabilities(), $this->supported_options() );
+		/*
+		 * Vision is an M3 feature; the M2 series is text only. The live
+		 * `/v1/models` response does not say so, which is why this is keyed on
+		 * the id.
+		 */
+		return new ModelMetadata( $id, $name, $this->capabilities(), $this->supported_options( self::VISION_MODEL === $id ) );
 	}
 
 	/**
@@ -199,16 +212,49 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 *
 	 * @since 1.5.0
 	 *
+	 * @param bool $vision Whether this model reads images.
 	 * @return list<SupportedOption>
 	 */
-	private function supported_options(): array {
-		return array(
+	private function supported_options( bool $vision = false ): array {
+		$options = array(
 			new SupportedOption( OptionEnum::temperature() ),
 			new SupportedOption( OptionEnum::maxTokens() ),
 			new SupportedOption( OptionEnum::topP() ),
 			new SupportedOption( OptionEnum::systemInstruction() ),
 			new SupportedOption( OptionEnum::functionDeclarations() ),
+
+			/*
+			 * A passthrough for anything the SDK does not model, and the reason
+			 * `thinking` and `service_tier` do not need one option each. The
+			 * base class already merges these into the request body — the
+			 * option was simply never declared, so no caller could reach it.
+			 * All three official WordPress providers declare it.
+			 */
+			new SupportedOption( OptionEnum::customOptions() ),
 		);
+
+		/*
+		 * Only MiniMax-M3 reads images. The SDK's OpenAI-compatible text model
+		 * already converts an image message part into an `image_url` content
+		 * part, so vision has worked since the first release and was never
+		 * advertised — the AI Client will not route an image prompt to a model
+		 * that does not declare it.
+		 *
+		 * Video is left out: MiniMax documents M3 as accepting it, but nothing
+		 * in the SDK's OpenAI-compatible message builder emits a video part, so
+		 * declaring it would promise a route that cannot be built.
+		 */
+		if ( $vision ) {
+			$options[] = new SupportedOption(
+				OptionEnum::inputModalities(),
+				array(
+					array( ModalityEnum::text() ),
+					array( ModalityEnum::text(), ModalityEnum::image() ),
+				)
+			);
+		}
+
+		return $options;
 	}
 
 	/**

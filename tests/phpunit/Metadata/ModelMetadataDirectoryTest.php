@@ -87,4 +87,53 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 		$this->assertEquals( 'MiniMax M2.7 Highspeed', $this->directory->getModelMetadata( 'MiniMax-M2.7-highspeed' )->getName() );
 		$this->assertEquals( 'MiniMax M2', $this->directory->getModelMetadata( 'MiniMax-M2' )->getName() );
 	}
+	/**
+	 * Every model accepts arbitrary passthrough options.
+	 *
+	 * The SDK's base class has always merged `customOptions` into the request
+	 * body; the option was simply never declared, so no caller could reach it.
+	 * All three official WordPress providers declare it.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_custom_options(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+
+			if ( 'image-01' === $model->getId() ) {
+				continue;
+			}
+
+			$this->assertContains( 'customOptions', $names, "Model {$model->getId()} cannot take custom options" );
+		}
+	}
+
+	/**
+	 * Only MiniMax-M3 advertises image input.
+	 *
+	 * Vision has worked since the first release — the SDK turns an image
+	 * message part into an `image_url` content part — but was never declared,
+	 * so the AI Client would not route an image prompt here. The M2 series is
+	 * text only and must not claim otherwise.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public function test_only_m3_declares_image_input(): void {
+		$with_vision = array();
+
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+
+			if ( in_array( 'inputModalities', $names, true ) ) {
+				$with_vision[] = $model->getId();
+			}
+		}
+
+		$this->assertSame( array( 'MiniMax-M3' ), $with_vision );
+	}
+
 }
