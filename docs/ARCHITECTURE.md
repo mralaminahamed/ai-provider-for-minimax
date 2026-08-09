@@ -22,6 +22,7 @@ includes/
     Provider.php                 # Registers provider ID "minimax", base URL
   Models/
     TextGenerationModel.php      # OpenAI-compatible text generation, applies saved settings
+    ImageGenerationModel.php     # image-01 — MiniMax's own endpoint, not OpenAI-compatible
   Metadata/
     ModelMetadataDirectory.php   # Live model discovery + transient cache + fallback list
   Availability/

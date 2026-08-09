@@ -12,7 +12,7 @@ The default model (used when a request specifies none) is **`MiniMax-M3`**.
 
 ## Fallback catalogue
 
-Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-reference/api-overview) — **8 models**. This list is only a safety net; the live API overrides it whenever a key is present.
+Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-reference/api-overview) — **8 text models plus `image-01`**. This list is only a safety net; the live API overrides it whenever a key is present.
 
 | Model ID | Name |
 |---|---|
@@ -24,6 +24,16 @@ Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-re
 | `MiniMax-M2.1` | MiniMax M2.1 |
 | `MiniMax-M2.1-highspeed` | MiniMax M2.1 Highspeed |
 | `MiniMax-M2` | MiniMax M2 |
+
+### Image
+
+| Model ID | Name |
+|---|---|
+| `image-01` | MiniMax Image 01 |
+
+Served from `POST /v1/image_generation`, not the chat endpoint, and declared
+with image capabilities only — it is not a chat model and must not be offered
+as one.
 
 The `-highspeed` variants trade some quality for faster inference.
 

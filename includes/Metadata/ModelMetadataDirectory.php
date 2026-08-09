@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MiniMax\MiniMaxAiProvider\Metadata;
 
+use MiniMax\MiniMaxAiProvider\Models\ImageGenerationModel;
 use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
@@ -115,6 +116,67 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	}
 
 	/**
+	 * What `image-01` can do.
+	 *
+	 * Kept apart from the text models deliberately. Declaring `textGeneration`
+	 * on an image model would route prompts to an endpoint that answers with a
+	 * picture, and declaring image options on a chat model would advertise an
+	 * aspect ratio that nothing reads.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return list<CapabilityEnum>
+	 */
+	private function image_capabilities(): array {
+		return array(
+			CapabilityEnum::imageGeneration(),
+		);
+	}
+
+	/**
+	 * The image options MiniMax honours.
+	 *
+	 * `outputMediaAspectRatio` and `outputMediaOrientation` both map onto
+	 * MiniMax's single `aspect_ratio` field. `candidateCount` is `n`, and
+	 * `outputFileType` chooses between a URL and inline base64.
+	 *
+	 * There is no `outputMimeType`: MiniMax does not let a caller pick the
+	 * image format.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return list<SupportedOption>
+	 */
+	private function image_options(): array {
+		return array(
+			new SupportedOption( OptionEnum::outputMediaAspectRatio() ),
+			new SupportedOption( OptionEnum::outputMediaOrientation() ),
+			new SupportedOption( OptionEnum::candidateCount() ),
+			new SupportedOption( OptionEnum::outputFileType() ),
+		);
+	}
+
+	/**
+	 * Metadata for one model, chosen by what that model actually is.
+	 *
+	 * The live `/v1/models` response does not say what a model can do, so the
+	 * id is the only signal available.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $id   Model id.
+	 * @param string $name Human-readable name.
+	 * @return ModelMetadata
+	 */
+	private function build_model( string $id, string $name ): ModelMetadata {
+		if ( ImageGenerationModel::MODEL_ID === $id ) {
+			return new ModelMetadata( $id, $name, $this->image_capabilities(), $this->image_options() );
+		}
+
+		return new ModelMetadata( $id, $name, $this->capabilities(), $this->supported_options() );
+	}
+
+	/**
 	 * The generation options MiniMax actually honours.
 	 *
 	 * `SupportedOption` is a promise, not a wish list. The AI Client uses it to
@@ -206,9 +268,6 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return array();
 		}
 
-		$capabilities = $this->capabilities();
-		$options      = $this->supported_options();
-
 		$models = array();
 		foreach ( $data['data'] as $model_data ) {
 			if ( ! is_array( $model_data ) ) {
@@ -223,7 +282,7 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			$name_raw = $model_data['name'] ?? $id;
 			$name     = is_string( $name_raw ) ? $name_raw : $id;
 
-			$models[] = new ModelMetadata( $id, $name, $capabilities, $options );
+			$models[] = $this->build_model( $id, $name );
 		}
 
 		set_transient( $transient_key, $models, HOUR_IN_SECONDS );
@@ -239,9 +298,6 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 * @return ModelMetadata[]
 	 */
 	private function get_fallback_models(): array {
-		$capabilities = $this->capabilities();
-		$options      = $this->supported_options();
-
 		// Mirrors the official MiniMax chat-completion model catalogue.
 		// See https://platform.minimax.io/docs/api-reference/api-overview.
 		$model_list = array(
@@ -253,11 +309,14 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			array( 'MiniMax-M2.1', 'MiniMax M2.1' ),
 			array( 'MiniMax-M2.1-highspeed', 'MiniMax M2.1 Highspeed' ),
 			array( 'MiniMax-M2', 'MiniMax M2' ),
+
+			// Image generation, served from a different endpoint.
+			array( ImageGenerationModel::MODEL_ID, 'MiniMax Image 01' ),
 		);
 
 		$models = array();
 		foreach ( $model_list as $item ) {
-			$models[] = new ModelMetadata( $item[0], $item[1], $capabilities, $options );
+			$models[] = $this->build_model( $item[0], $item[1] );
 		}
 
 		return $models;

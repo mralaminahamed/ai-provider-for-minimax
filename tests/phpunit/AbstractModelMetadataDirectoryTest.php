@@ -177,7 +177,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_have_text_generation_capability(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$caps = $model->getSupportedCapabilities();
 			$this->assertNotEmpty( $caps, "Model {$model->getId()} has no capabilities" );
 			$this->assertTrue(
@@ -248,7 +248,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_temperature_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
 			$this->assertContains( 'temperature', $names, "Model {$model->getId()} missing temperature option" );
 		}
@@ -262,7 +262,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_max_tokens_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
 			$this->assertContains( 'maxTokens', $names, "Model {$model->getId()} does not support maxTokens option" );
 		}
@@ -276,7 +276,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_top_p_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
 			$this->assertContains( 'topP', $names, "Model {$model->getId()} missing topP option" );
 		}
@@ -321,7 +321,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_system_instruction_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
 			$this->assertContains( 'systemInstruction', $names, "Model {$model->getId()} missing systemInstruction option" );
 		}
@@ -335,7 +335,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_function_declarations_option(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
 			$this->assertContains( 'functionDeclarations', $names, "Model {$model->getId()} missing functionDeclarations option" );
 		}
@@ -352,7 +352,7 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 	 * @return void
 	 */
 	public function test_all_models_support_chat_history(): void {
-		foreach ( $this->directory->listModelMetadata() as $model ) {
+		foreach ( $this->textModels() as $model ) {
 			$caps = $model->getSupportedCapabilities();
 
 			$has_chat_history = false;
@@ -366,6 +366,33 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 			$this->assertTrue( $has_chat_history, "Model {$model->getId()} does not declare chatHistory" );
 			$this->assertTrue( $has_text, "Model {$model->getId()} does not declare textGeneration" );
 		}
+	}
+
+	/**
+	 * Only the models that generate text.
+	 *
+	 * The catalogue is no longer uniform: `image-01` generates images and
+	 * declares none of the chat options. Assertions about temperature or system
+	 * instructions apply to the text models and would be wrong applied to it.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return array<int, \WordPress\AiClient\Providers\Models\DTO\ModelMetadata>
+	 */
+	protected function textModels(): array {
+		return array_values(
+			array_filter(
+				$this->directory->listModelMetadata(),
+				static function ( $model ) {
+					foreach ( $model->getSupportedCapabilities() as $cap ) {
+						if ( $cap->isTextGeneration() ) {
+							return true;
+						}
+					}
+					return false;
+				}
+			)
+		);
 	}
 
 }
