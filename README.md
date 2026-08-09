@@ -37,10 +37,10 @@ Activate it, paste your MiniMax key, and you are generating content through fron
 - Registers as a first-class provider for the WordPress 7.0+ AI Client — any AI-enabled plugin uses it with **zero extra wiring**
 - Enter your key on **Settings → MiniMax**, the core **Settings → Connectors** screen, or via the `MINIMAX_API_KEY` environment variable
 - **Connection-status indicator** on the settings page and the provider logo on the Connectors screen
-- Standard generation controls: temperature, max tokens, top&nbsp;P, and presence/frequency penalties
+- Generation controls MiniMax honours: temperature, max tokens, top&nbsp;P, thinking mode, and service tier
 
 **Built to stay out of the way**
-- **OpenAI-compatible** under the hood — text generation, system instructions, stop sequences, and function declarations
+- **OpenAI-compatible** under the hood — text generation, chat history, system instructions, and function declarations
 - Ships as both a **WordPress plugin** and a **Composer package** for standalone PHP use
 - **No SDK bloat** — WordPress core provides the AI Client at runtime, and the plugin excludes its own copy to stay collision-safe
 

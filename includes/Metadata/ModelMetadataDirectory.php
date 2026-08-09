@@ -94,6 +94,27 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	}
 
 	/**
+	 * What these models can do.
+	 *
+	 * `chatHistory` was missing, and every official WordPress provider declares
+	 * it. It means the model accepts a conversation rather than a single
+	 * prompt — which MiniMax has always done, because the OpenAI-compatible
+	 * endpoint takes a `messages` array and the SDK already sends one. Without
+	 * the declaration the AI Client will not route a chat request here, so the
+	 * plugin was declining work it could do.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return list<CapabilityEnum>
+	 */
+	private function capabilities(): array {
+		return array(
+			CapabilityEnum::textGeneration(),
+			CapabilityEnum::chatHistory(),
+		);
+	}
+
+	/**
 	 * The generation options MiniMax actually honours.
 	 *
 	 * `SupportedOption` is a promise, not a wish list. The AI Client uses it to
@@ -185,9 +206,7 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			return array();
 		}
 
-		$capabilities = array(
-			CapabilityEnum::textGeneration(),
-		);
+		$capabilities = $this->capabilities();
 		$options      = $this->supported_options();
 
 		$models = array();
@@ -220,9 +239,7 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 * @return ModelMetadata[]
 	 */
 	private function get_fallback_models(): array {
-		$capabilities = array(
-			CapabilityEnum::textGeneration(),
-		);
+		$capabilities = $this->capabilities();
 		$options      = $this->supported_options();
 
 		// Mirrors the official MiniMax chat-completion model catalogue.

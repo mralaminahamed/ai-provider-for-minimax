@@ -340,4 +340,32 @@ abstract class AbstractModelMetadataDirectoryTest extends TestCase {
 			$this->assertContains( 'functionDeclarations', $names, "Model {$model->getId()} missing functionDeclarations option" );
 		}
 	}
+	/**
+	 * Every model advertises chat history, not just single-shot generation.
+	 *
+	 * The endpoint takes a `messages` array and the SDK already sends one, so
+	 * this was always true — it just was not declared, and the AI Client routes
+	 * on the declaration. Every official WordPress provider declares it.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public function test_all_models_support_chat_history(): void {
+		foreach ( $this->directory->listModelMetadata() as $model ) {
+			$caps = $model->getSupportedCapabilities();
+
+			$has_chat_history = false;
+			$has_text         = false;
+
+			foreach ( $caps as $cap ) {
+				$has_chat_history = $has_chat_history || $cap->isChatHistory();
+				$has_text         = $has_text || $cap->isTextGeneration();
+			}
+
+			$this->assertTrue( $has_chat_history, "Model {$model->getId()} does not declare chatHistory" );
+			$this->assertTrue( $has_text, "Model {$model->getId()} does not declare textGeneration" );
+		}
+	}
+
 }

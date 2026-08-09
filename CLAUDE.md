@@ -1,6 +1,32 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository.
+
+Every command and path below was checked against the tree on 2026-08-09. If one
+turns out to be wrong, fix the code or fix this file — do not work around it
+silently.
+
+## What this plugin is
+
+A provider for the WordPress AI Client: it teaches WordPress how to talk to
+MiniMax, and nothing else. It does not add AI features to a site — the plugins
+that consume the AI Client do that. This plugin's whole job is to describe
+MiniMax accurately and forward requests to it.
+
+**That makes accuracy the product.** `ModelMetadata` is not documentation; the
+AI Client reads it to decide which provider can satisfy a request. Declaring a
+capability or an option the API does not honour routes real work here and gets
+it silently ignored — the failure mode is a wrong answer, not an error. Before
+adding either, read MiniMax's reference and confirm the parameter is honoured
+rather than merely accepted.
+
+That rule has already been broken twice, in both directions:
+
+- v1.4.0 declared `presencePenalty`, `frequencyPenalty` and `stopSequences`,
+  which MiniMax documents as **ignored**. Callers who needed stop sequences
+  were routed here and quietly given output that ignored them.
+- Every version up to 1.4.0 omitted `chatHistory`, which MiniMax has always
+  supported, so conversation requests were routed elsewhere.
 
 ## Commands
 
@@ -29,12 +55,16 @@ composer install --no-dev --no-interaction --prefer-dist -o
 
 ## Reference Repositories
 
-| Repository | URL |
+| Repository | Read it for |
 |---|---|
-| Base SDK | https://github.com/WordPress/wp-ai-client |
-| Reference Provider | https://github.com/WordPress/ai-provider-for-anthropic |
-| OpenAI Provider | https://github.com/WordPress/ai-provider-for-openai |
-| Google Provider | https://github.com/WordPress/ai-provider-for-google |
+| [wp-ai-client](https://github.com/WordPress/wp-ai-client) | The SDK. `CapabilityEnum` and `OptionEnum` define everything a provider may declare |
+| [ai-provider-for-anthropic](https://github.com/WordPress/ai-provider-for-anthropic) | The minimal shape — text only, plus a custom authentication class |
+| [ai-provider-for-openai](https://github.com/WordPress/ai-provider-for-openai) | A second modality: `OpenAiImageGenerationModel`, and `textToSpeechConversion` |
+| [ai-provider-for-google](https://github.com/WordPress/ai-provider-for-google) | The fullest example — image, combined text-and-image, and a shared trait for aspect ratio |
+
+[MiniMax API reference](https://platform.minimax.io/docs/api-reference/text-openai-api) —
+the authority for what this plugin may declare. Check it before adding any
+capability or option.
 
 ## Directory Structure
 
@@ -146,19 +176,68 @@ public function getModelMetadata(string $model_id): ModelMetadata  // throws Inv
 new ModelMetadata(
     $model_id,                                       // string
     $model_name,                                     // string
-    [ CapabilityEnum::textGeneration() ],            // array<CapabilityEnum>
-    [                                                // array<SupportedOption>
-        new SupportedOption( OptionEnum::temperature() ),
-        new SupportedOption( OptionEnum::maxTokens() ),
-        new SupportedOption( OptionEnum::topP() ),
-        new SupportedOption( OptionEnum::presencePenalty() ),
-        new SupportedOption( OptionEnum::frequencyPenalty() ),
-        new SupportedOption( OptionEnum::stopSequences() ),
-        new SupportedOption( OptionEnum::systemInstruction() ),
-        new SupportedOption( OptionEnum::functionDeclarations() ),
-    ]
+    $this->capabilities(),                           // list<CapabilityEnum>
+    $this->supported_options()                       // list<SupportedOption>
 )
 ```
+
+Both lists are single private methods on `ModelMetadataDirectory`, shared by the
+live-fetch path and the fallback path. Keep them that way — when they were
+inlined twice, the two copies drifted.
+
+### What this provider declares, and why
+
+| Declared | Reason |
+|---|---|
+| `CapabilityEnum::textGeneration()` | The obvious one |
+| `CapabilityEnum::chatHistory()` | The endpoint takes a `messages` array; multi-turn has always worked |
+| `OptionEnum::temperature()` | `[0, 2]`, default 1 |
+| `OptionEnum::maxTokens()` | Up to M3's 1,000,000-token context; M2.x caps at 204,800 |
+| `OptionEnum::topP()` | `[0, 1]`; M3 defaults 0.95, M2.x 0.9 |
+| `OptionEnum::systemInstruction()` | — |
+| `OptionEnum::functionDeclarations()` | Sent as `tools` |
+
+**Deliberately not declared**, because MiniMax documents them as ignored on the
+OpenAI-compatible endpoint. Do not add them back:
+
+`presencePenalty` · `frequencyPenalty` · `stopSequences` · `candidateCount`
+(`n` accepts only 1) · `logprobs` · `topK`
+
+### Provider-specific parameters
+
+`thinking` and `service_tier` are MiniMax's own — the SDK's OpenAI-shaped
+config has nowhere to carry them, so they are added in
+`TextGenerationModel::prepareGenerateTextParams()` from saved settings.
+
+Both are sent **only when they change something**: `thinking` only as
+`disabled` (M3 reasons by default, M2.x cannot be stopped), and `service_tier`
+only as `priority` (which bills at 1.5x). Anything else is at best redundant
+and at worst refused.
+
+Extend through the `minimax_generate_text_params` filter rather than adding
+more special cases here.
+
+### Capabilities not yet built
+
+MiniMax offers four modalities the SDK models and this plugin does not. Each
+needs its own model class, because none of them is OpenAI-compatible — they are
+MiniMax's own endpoints, so `AbstractOpenAiCompatibleTextGenerationModel` is
+not the base to extend.
+
+| Capability | MiniMax models | Precedent to copy |
+|---|---|---|
+| `imageGeneration()` | `image-01` — text-to-image and image-to-image | `OpenAiImageGenerationModel`, `GoogleImageGenerationModel` |
+| `textToSpeechConversion()` | `speech-2.8-hd`, `speech-2.8-turbo`, `speech-2.6-hd`, `speech-2.6-turbo`, `speech-02-hd`, `speech-02-turbo` | `ai-provider-for-openai` |
+| `videoGeneration()` | `MiniMax-H3` — async: create task, poll, retrieve | No WordPress precedent yet |
+| `musicGeneration()` | `music-3.0` | No WordPress precedent yet |
+
+Video is the awkward one: it is a task queue, not a request/response call, and
+nothing in the AI Client models polling. Image generation is the natural first
+addition — one model class, a synchronous endpoint, and two official
+implementations to read.
+
+Voice cloning and voice design have no `CapabilityEnum`, so they cannot be
+declared at all.
 
 ## Coding Standards
 
@@ -167,16 +246,55 @@ new ModelMetadata(
 - Namespace root: `MiniMax\MiniMaxAiProvider\`
 - PHPStan at `level: max` (WP function stubs via `szepeviktor/phpstan-wordpress`)
 - All output escaped: `esc_html()`, `esc_attr()`, `esc_url()`
-- All strings wrapped: `__()` / `esc_html__()`
+- All strings wrapped: `__()` / `esc_html__()`; a `translators:` comment goes
+  immediately above the `__()` it describes, not above an enclosing
+  `wp_kses()` — make-pot associates by adjacency and silently drops it otherwise
 - Templates set variables then `require` the template file — no logic inside template files
+
+### Naming
+
+Class names carry no vendor prefix — the namespace supplies it. A class is
+named for what it *is*: `Provider`, `Settings`, `ModelMetadataDirectory`,
+`TextGenerationModel`, `ProviderAvailability`. This diverges from the official
+providers, which prefix everything (`AnthropicProvider`), and matches the rest
+of this author's plugins.
+
+### Comments
+
+Comments explain **why**, and earn their place where the code looks wrong but is
+not. A comment restating the line above it is noise; a comment recording that
+MiniMax ignores `presence_penalty` saves the next person from re-adding it.
+Where a change corrects a real defect, say what the defect was.
+
+No AI attribution anywhere — not in comments, commits, or output.
+
+### Commits
+
+Conventional Commits: `type(scope): description`. Branch off `trunk`, never
+commit to it directly. Merge with `gh pr merge --merge` — **never `--squash`**.
+Stage explicit paths; never `git add -A`.
 
 ## Common Mistakes to Avoid
 
+- **Do NOT declare a capability or option the API does not honour.** This is the
+  mistake that matters most — see *What this plugin is*. `SupportedOption` is a
+  routing promise, not a feature list. An earlier version of this file said
+  "declare all options the API actually supports", which was read as "declare
+  everything" and put three ignored options into the metadata.
 - **Do NOT** add `wordpress/php-ai-client` to Composer production deps — the SDK is provided by WordPress core (WP 7.0+)
 - **Do NOT** use `TextGenerationCapability` class — use `CapabilityEnum::textGeneration()`
 - **Do NOT** omit the `connectors_ai_minimax_api_key` option check from any code that reads the API key
+- **Do NOT** add a setting without wiring it into
+  `TextGenerationModel::prepareGenerateTextParams()`. Every setting on the
+  screen was stored and never read until 1.5.0; a control that changes nothing
+  is worse than a missing one.
+- **Do NOT** add a root-level PHP file without adding it to `phpcs.xml.dist`
+  *and* `phpstan.neon.dist`. Both list files explicitly, so a new file is
+  silently unchecked.
+- **Do NOT** call WordPress functions in `includes/` without a
+  `function_exists()` guard. The classes are documented as usable as a plain
+  Composer package, and that is only true while the guards hold.
 - **Do NOT** downgrade GitHub Actions versions — current baseline: `actions/checkout@v6`, `actions/cache@v5`, `actions/upload-artifact@v7`, `actions/download-artifact@v8`, `softprops/action-gh-release@v3`
-- **Do NOT** hardcode only a subset of `SupportedOption` entries — declare all options the API actually supports
 
 ## CI / Release Workflows
 

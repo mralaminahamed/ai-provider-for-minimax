@@ -8,6 +8,7 @@
 - Thinking mode. MiniMax-M3 can be told to answer without reasoning first, which is faster and cheaper. The M2 series always reasons and ignores the setting, so it is only sent when set to `disabled`.
 - Service tier, for opting in to priority routing at 1.5x the standard cost.
 - `minimax_generate_text_params` filter, for anything this plugin does not model.
+- Chat history. The models are now declared as supporting multi-turn conversations, not just single prompts. They always could (the OpenAI-compatible endpoint takes a `messages` array and the AI Client already sends one), but the capability was never declared and the AI Client routes on the declaration, so conversation requests went to other providers. Every official WordPress AI provider declares this.
 
 ### Changed
 
