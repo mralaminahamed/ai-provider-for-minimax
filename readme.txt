@@ -3,7 +3,7 @@ Contributors:      mralaminahamed
 Tags:              minimax, ai, llm, ai provider, text generation
 Requires at least: 7.0
 Tested up to:      7.0
-Stable tag:        1.4.0
+Stable tag:        1.5.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -31,7 +31,7 @@ MiniMax models are particularly strong at:
 
 * **MiniMax M2 and M3 series models** — including Highspeed variants optimised for faster responses
 * **Automatic model discovery** — live model list fetched from the MiniMax API and cached hourly; falls back to a hardcoded list when offline
-* **Full parameter control** — temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations
+* **Full parameter control** — temperature, max tokens, top P, thinking mode, service tier, system instruction, and function declarations
 * **Settings page** — configure default model and generation parameters without touching code
 * **API key via Connectors** — enter your key once in **Settings > Connectors**; all AI-enabled plugins share it automatically
 * **Environment variable support** — `MINIMAX_API_KEY` for server-level configuration, bypassing the database entirely
@@ -80,14 +80,14 @@ Go to **Settings > MiniMax** to configure:
 
 * **Default Model** — the model used when no explicit model is requested by a plugin
 * **Temperature** — controls output randomness (0.0–2.0, default 0.7)
-* **Max Tokens** — maximum tokens in the response (1–200,000, default 4096)
+* **Max Tokens** — maximum tokens in the response (1–1,000,000, default 4096)
 * **Top P** — nucleus sampling threshold (0.0–1.0, default 1.0)
-* **Presence Penalty** — penalises repeated topics (-2.0–2.0, default 0.0)
-* **Frequency Penalty** — penalises repeated tokens (-2.0–2.0, default 0.0)
+* **Thinking** — whether MiniMax-M3 reasons before answering; disabling it is faster and cheaper (adaptive or disabled, default adaptive)
+* **Service Tier** — standard, or priority routing at 1.5x the cost (default standard)
 
 = For Developers =
 
-This plugin follows the official WordPress AI Provider pattern and works with any plugin built on the WordPress AI Client SDK. It registers the `minimax` provider and supports the standard generation options (temperature, max tokens, top P, presence/frequency penalties, stop sequences, system instruction, and function declarations).
+This plugin follows the official WordPress AI Provider pattern and works with any plugin built on the WordPress AI Client SDK. It registers the `minimax` provider and supports the generation options MiniMax actually honours (temperature, max tokens, top P, system instruction, and function declarations). Presence and frequency penalties and stop sequences are deliberately not declared, because MiniMax documents them as ignored.
 
 The source code is on GitHub — bug reports and pull requests are welcome:
 
@@ -107,7 +107,7 @@ Other free plugins by the same author, all on WordPress.org.
 
 **Another provider for the same AI Client**
 
-* [AI Provider for OpenCode Zen](https://wordpress.org/plugins/alamin-ai-provider-for-opencode-zen/) - One API key, 57 models including GPT-5, Claude and Gemini 3, for the WordPress AI Client.
+* [AI Provider for OpenCode Zen](https://wordpress.org/plugins/alamin-ai-provider-for-opencode-zen/) - One API key, 61 models including GPT-5, Claude and Gemini 3, for the WordPress AI Client.
 
 **For any site**
 
@@ -177,7 +177,7 @@ Billing is handled entirely by MiniMax. Your usage is billed according to [MiniM
 
 = What generation parameters does this provider support? =
 
-Temperature, max tokens, top P, presence penalty, frequency penalty, stop sequences, system instruction, and function declarations — the full set of options supported by the WordPress AI Client SDK.
+Temperature, max tokens, top P, thinking mode, service tier, system instruction, and function declarations. Presence and frequency penalties and stop sequences are not offered: MiniMax ignores them, so a control for them would do nothing.
 
 = Is MiniMax good for multilingual content? =
 
@@ -212,6 +212,28 @@ This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to:
 No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
 
 == Changelog ==
+
+= 1.5.0 - 2026-08-09 =
+
+**Added**
+- **Settings are now applied to requests.** Temperature, max tokens and top_p had been stored since 1.0.0 and never read — nothing outside the settings class touched `minimax_settings`, so saving the form changed a database row and nothing else. A caller's own value still wins; the saved values fill in what was left unset.
+- **Thinking mode** — MiniMax-M3 can be told to answer without reasoning first, which is faster and cheaper. The M2 series always reasons and ignores the setting.
+- **Service tier** — opt in to priority routing, which MiniMax bills at 1.5x standard.
+- `minimax_generate_text_params` filter, for anything this plugin does not model.
+
+**Changed**
+- **PHP namespace is now `MiniMax\MiniMaxAiProvider\`** (was `AlAminAhamed\MiniMaxAiProvider\`).
+- **Class names dropped their `MiniMax` prefix**, which the namespace already carries: `MiniMaxProvider` is `Provider`, `MiniMaxSettings` is `Settings`, `MiniMaxModelMetadataDirectory` is `ModelMetadataDirectory`, `MiniMaxTextGenerationModel` is `TextGenerationModel`, and `MiniMaxProviderAvailability` is `ProviderAvailability`.
+- Max tokens now accepts up to 1,000,000, matching MiniMax-M3's context window. The previous ceiling of 200,000 was the M2 limit.
+
+- **Restructured the bootstrap.** The plugin file is now an entry point — constants, autoloader, boot — and all wiring moved into an `AI_Provider_For_MiniMax` singleton in `class-ai-provider-for-minimax.php`, so every hook the plugin registers is visible in one file. Matches the layout used across this author's other plugins.
+- Added `MINIMAX_VERSION`, `MINIMAX_URL` and `MINIMAX_PATH` constants; only `MINIMAX_PLUGIN_FILE` existed before.
+
+Both renames are internal. No hook, option, setting or model id changes, and nothing a site has configured is affected — but any code referencing these classes directly needs updating.
+
+**Removed**
+- **Presence penalty and frequency penalty settings.** MiniMax documents both as ignored on its OpenAI-compatible endpoint, so the controls could not affect anything. Saved values are left in the database untouched.
+- `presencePenalty`, `frequencyPenalty` and `stopSequences` are no longer declared as supported model options. The AI Client uses those declarations to decide which model can satisfy a request, so claiming them routed callers here and had their request quietly ignored. A caller that needs stop sequences is now correctly routed elsewhere.
 
 = 1.4.0 - 2026-07-21 =
 
@@ -277,6 +299,9 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 * Support for `MINIMAX_API_KEY` environment variable.
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+Settings now actually apply to requests — temperature, max tokens and top_p were stored and never read. Adds thinking mode and service tier. Removes the presence and frequency penalty controls, which MiniMax ignores. Internal PHP namespace and class names changed; no database changes and no settings to redo.
 
 = 1.4.0 =
 Adds a connection-status indicator, defaults to MiniMax-M3, and syncs the fallback model list with the official MiniMax catalogue. Fixes a possible AI Client TypeError. No database changes required.

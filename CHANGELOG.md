@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.5.0] - 2026-08-09
+
+### Added
+
+- Saved settings are now applied to generation requests. Temperature, max tokens and top_p had been stored since 1.0.0 and never read — nothing outside the settings class touched `minimax_settings`. A caller's own value still wins; the saved values fill in what was left unset.
+- Thinking mode. MiniMax-M3 can be told to answer without reasoning first, which is faster and cheaper. The M2 series always reasons and ignores the setting, so it is only sent when set to `disabled`.
+- Service tier, for opting in to priority routing at 1.5x the standard cost.
+- `minimax_generate_text_params` filter, for anything this plugin does not model.
+
+### Changed
+
+- PHP namespace is now `MiniMax\MiniMaxAiProvider\` (was `AlAminAhamed\MiniMaxAiProvider\`).
+- Class names dropped their `MiniMax` prefix, which the namespace already carries: `Provider`, `Settings`, `ModelMetadataDirectory`, `TextGenerationModel`, `ProviderAvailability`.
+- Max tokens accepts up to 1,000,000, matching MiniMax-M3's context window. The previous ceiling of 200,000 was the M2 limit.
+
+- **Restructured the bootstrap.** The plugin file is now an entry point — constants, autoloader, boot — and all wiring moved into an `AI_Provider_For_MiniMax` singleton in `class-ai-provider-for-minimax.php`, so every hook the plugin registers is visible in one file. Matches the layout used across this author's other plugins.
+- Added `MINIMAX_VERSION`, `MINIMAX_URL` and `MINIMAX_PATH` constants; only `MINIMAX_PLUGIN_FILE` existed before.
+
+### Removed
+
+- Presence penalty and frequency penalty settings. MiniMax documents both as ignored on its OpenAI-compatible endpoint, so the controls could not affect anything. Saved values are left in the database untouched.
+- `presencePenalty`, `frequencyPenalty` and `stopSequences` are no longer declared as supported model options. The AI Client reads those declarations to decide which model can satisfy a request, so declaring them routed callers here and had their request quietly ignored.
+
 ## [1.4.0] - 2026-07-21
 
 ### Added

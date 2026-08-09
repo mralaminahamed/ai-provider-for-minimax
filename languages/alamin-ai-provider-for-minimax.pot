@@ -1,68 +1,64 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: AI Provider for MiniMax\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-21T11:10:43+00:00\n"
+"POT-Creation-Date: 2026-08-09T03:30:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.13.0-alpha-3eb2dd7\n"
 "X-Domain: alamin-ai-provider-for-minimax\n"
 
-#: includes/Provider/MiniMaxProvider.php:89
+#: includes/Provider/Provider.php:89
 msgid "High-performance AI models for coding and text generation."
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:64
+#: includes/Settings/Settings.php:64
 msgid "Settings"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:65
+#: includes/Settings/Settings.php:65
 msgid "Connectors"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:79
+#: includes/Settings/Settings.php:79
 #: templates/admin/settings-page.php:17
 msgid "MiniMax Settings"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:80
+#: includes/Settings/Settings.php:80
 msgid "MiniMax"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:105
+#: includes/Settings/Settings.php:105
 msgid "General Settings"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:112
+#: includes/Settings/Settings.php:112
 msgid "Default Model"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:120
+#: includes/Settings/Settings.php:120
 msgid "Temperature"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:128
+#: includes/Settings/Settings.php:128
 msgid "Max Tokens"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:136
+#: includes/Settings/Settings.php:136
 msgid "Top P"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:144
-msgid "Presence Penalty"
+#: includes/Settings/Settings.php:144
+msgid "Thinking"
 msgstr ""
 
-#: includes/Settings/MiniMaxSettings.php:152
-msgid "Frequency Penalty"
-msgstr ""
-
-#: templates/admin/field-frequency-penalty.php:20
-msgid "Penalizes tokens based on their frequency in the output so far. Range: -2 to 2."
+#: includes/Settings/Settings.php:152
+msgid "Service Tier"
 msgstr ""
 
 #: templates/admin/field-max-tokens.php:20
@@ -77,12 +73,32 @@ msgstr ""
 msgid "The default model to use for text generation."
 msgstr ""
 
-#: templates/admin/field-presence-penalty.php:20
-msgid "Penalizes tokens that have appeared in the output so far. Range: -2 to 2."
+#: templates/admin/field-service-tier.php:17
+msgid "Standard"
+msgstr ""
+
+#: templates/admin/field-service-tier.php:20
+msgid "Priority — faster, 1.5× the cost"
+msgstr ""
+
+#: templates/admin/field-service-tier.php:25
+msgid "Priority routing costs 1.5 times standard for every request this site makes. Worth it for a visitor waiting on a response; wasteful for a scheduled job nobody is watching."
 msgstr ""
 
 #: templates/admin/field-temperature.php:20
 msgid "Controls randomness. Lower values make output more focused. Range: 0-2."
+msgstr ""
+
+#: templates/admin/field-thinking.php:17
+msgid "Adaptive — let the model decide"
+msgstr ""
+
+#: templates/admin/field-thinking.php:20
+msgid "Disabled — answer without reasoning first"
+msgstr ""
+
+#: templates/admin/field-thinking.php:25
+msgid "Reasoning before answering. Disabling it is faster and cheaper, and weaker on anything multi-step. Only MiniMax-M3 can be switched off; the M2 series always reasons and ignores this."
 msgstr ""
 
 #: templates/admin/field-top-p.php:20
@@ -97,6 +113,7 @@ msgstr ""
 msgid "MiniMax is connected — an API key is configured. The defaults below apply to new text generation requests."
 msgstr ""
 
+#. translators: %s: URL of the WordPress Connectors settings screen.
 #: templates/admin/settings-page.php:30
 msgid "No MiniMax API key found. Add your key on the <a href=\"%s\">Connectors screen</a> to activate this provider."
 msgstr ""

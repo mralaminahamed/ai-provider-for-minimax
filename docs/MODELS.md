@@ -29,4 +29,4 @@ The `-highspeed` variants trade some quality for faster inference.
 
 ## Keeping the fallback in sync
 
-The fallback lives in `includes/Metadata/MiniMaxModelMetadataDirectory.php` (`get_fallback_models()`). When the official catalogue changes, update that array **and** its PHPUnit expectations in `tests/phpunit/Metadata/MiniMaxModelMetadataDirectoryTest.php` (`getExpectedModelCount()` plus the model ID lists), then refresh the counts in `README.md` and `readme.txt`. Source of truth: <https://platform.minimax.io/docs/api-reference/api-overview>.
+The fallback lives in `includes/Metadata/ModelMetadataDirectory.php` (`get_fallback_models()`). When the official catalogue changes, update that array **and** its PHPUnit expectations in `tests/phpunit/Metadata/ModelMetadataDirectoryTest.php` (`getExpectedModelCount()` plus the model ID lists), then refresh the counts in `README.md` and `readme.txt`. Source of truth: <https://platform.minimax.io/docs/api-reference/api-overview>.
