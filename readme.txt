@@ -1,6 +1,6 @@
-=== AI Provider for MiniMax – AI Connector for M3, M2 & Image Models ===
+=== AI Provider for MiniMax – AI Text & Image Generation Connector ===
 Contributors:      mralaminahamed
-Tags:              ai, artificial intelligence, connector, minimax, llm
+Tags:              connector, minimax, llm, text generation, image generation
 Requires at least: 7.0
 Tested up to:      7.0
 Stable tag:        1.5.0
@@ -8,7 +8,7 @@ Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-AI connector for MiniMax. Adds M3 and M2 text models, M3 image input, and image-01 image generation to the WordPress AI Client.
+AI connector for MiniMax. Text generation, image generation and vision for the WordPress AI Client — M3, M2 and image-01 on one API key.
 
 == Description ==
 
