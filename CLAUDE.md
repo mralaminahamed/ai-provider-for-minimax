@@ -339,6 +339,42 @@ Stage explicit paths; never `git add -A`.
   Composer package, and that is only true while the guards hold.
 - **Do NOT** downgrade GitHub Actions versions — current baseline: `actions/checkout@v6`, `actions/cache@v5`, `actions/upload-artifact@v7`, `actions/download-artifact@v8`, `softprops/action-gh-release@v3`
 
+## WordPress.org listing
+
+Five tag slots, and a tag listing is ordered by **active installs** — so a tag
+holding a thousand plugins shows a twenty-install plugin to nobody. Pick tags by
+where this plugin actually lands, not by how well the word describes it.
+
+Measured 2026-08-10 against
+`https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[tag]=…`:
+
+| Tag | Plugins in it | We place | Kept |
+|---|---|---|---|
+| `text generation` | 5 | #2 | yes |
+| `image generation` | 35 | #5 | yes |
+| `connector` | 80 | #42 | yes — the cluster the official AI providers share |
+| `llm` | 88 | #34 | yes |
+| `minimax` | — | — | yes — brand |
+| `artificial intelligence` | 121 | #46 | **dropped**, page 2 |
+| `ai` | 1832 | #400+ | **dropped**, never reached |
+
+Re-measure before changing tags; installs move and so does the answer. Do not
+re-add `ai` on the reasoning that this is an AI plugin — it is, and the tag
+still returns nothing.
+
+Both remaining capability tags are **earned**: text generation on M3/M2, image
+generation on `image-01`. Tagging for a capability the plugin does not have
+routes the wrong searches here, which is the same mistake as declaring a
+`SupportedOption` the API ignores.
+
+The readme title is the highest-weighted field in directory search. Spend it on
+what people type — it opened with "M3, M2 & Image Models", model names that
+carry no search volume outside the sentence explaining them.
+
+readme-only changes need no version bump: pushing `readme.txt` to `trunk` fires
+`svn-readme-assets-update.yml`. Only the plugin header version and `Stable tag`
+require a release.
+
 ## CI / Release Workflows
 
 ### Release pipeline (`.github/workflows/svn-deploy.yml`)
