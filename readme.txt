@@ -1,4 +1,4 @@
-=== AI Provider for MiniMax – AI Connector for M3, M2 & Image Models ===
+=== AI Provider for MiniMax – AI Text & Image Generation Connector ===
 Contributors:      mralaminahamed
 Tags:              connector, minimax, llm, text generation, image generation
 Requires at least: 7.0
