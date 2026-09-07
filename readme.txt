@@ -34,6 +34,7 @@ MiniMax models are particularly strong at:
 * **Full parameter control** — temperature, max tokens, top P, thinking mode, service tier, system instruction, and function declarations
 * **Chat history** — multi-turn conversations, not just single prompts
 * **Image generation** — `image-01`, with aspect ratio, orientation and multiple candidates
+* **Text to speech** — the `speech-2.8`, `speech-2.6`, `speech-02` and `speech-01` voices, with a choice of voice and of MP3, WAV, FLAC or Opus output
 * **Settings page** — configure default model and generation parameters without touching code
 * **API key via Connectors** — enter your key once in **Settings > Connectors**; all AI-enabled plugins share it automatically
 * **Environment variable support** — `MINIMAX_API_KEY` for server-level configuration, bypassing the database entirely
@@ -54,7 +55,7 @@ Once this provider is configured, any WordPress plugin or theme that integrates 
 
 = Supported Models =
 
-When an API key is configured, the live model list is fetched directly from the MiniMax API, so you always see the latest models. If the API is ever unavailable, a built-in fallback list of 8 models keeps everything working — the **MiniMax-M3** flagship plus the **M2 series** (M2.7, M2.5, M2.1, and M2), each with an optional Highspeed variant tuned for lower latency.
+When an API key is configured, the live model list is fetched directly from the MiniMax API, so you always see the latest models. If the API is ever unavailable, a built-in fallback list keeps everything working — the **MiniMax-M3** flagship plus the **M2 series** (M2.7, M2.5, M2.1, and M2), each with an optional Highspeed variant tuned for lower latency, alongside `image-01` for images and eight `speech-*` voices for text to speech.
 
 See the [full model catalogue](https://github.com/mralaminahamed/ai-provider-for-minimax/blob/trunk/docs/MODELS.md) for every model ID. Not sure which to pick? See the FAQ below.
 

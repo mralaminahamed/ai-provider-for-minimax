@@ -12,7 +12,7 @@ The default model (used when a request specifies none) is **`MiniMax-M3`**.
 
 ## Fallback catalogue
 
-Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-reference/api-overview) — **8 text models plus `image-01`**. This list is only a safety net; the live API overrides it whenever a key is present.
+Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-reference/api-overview) — **8 text models, `image-01`, and 8 speech models**. This list is only a safety net; the live API overrides it whenever a key is present.
 
 | Model ID | Name |
 |---|---|
@@ -34,6 +34,27 @@ Mirrors the [official MiniMax catalogue](https://platform.minimax.io/docs/api-re
 Served from `POST /v1/image_generation`, not the chat endpoint, and declared
 with image capabilities only — it is not a chat model and must not be offered
 as one.
+
+### Speech
+
+| Model ID | Name |
+|---|---|
+| `speech-2.8-hd` | MiniMax Speech 2.8 HD |
+| `speech-2.8-turbo` | MiniMax Speech 2.8 Turbo |
+| `speech-2.6-hd` | MiniMax Speech 2.6 HD |
+| `speech-2.6-turbo` | MiniMax Speech 2.6 Turbo |
+| `speech-02-hd` | MiniMax Speech 02 HD |
+| `speech-02-turbo` | MiniMax Speech 02 Turbo |
+| `speech-01-hd` | MiniMax Speech 01 HD |
+| `speech-01-turbo` | MiniMax Speech 01 Turbo |
+
+Served from `POST /v1/t2a_v2` and declared with `textToSpeechConversion` only.
+The `-hd` models favour fidelity and the `-turbo` models favour latency.
+
+Only the synchronous endpoint is implemented, which accepts up to 10,000
+characters. MiniMax also offers an asynchronous task API for texts up to
+1,000,000 characters and a WebSocket stream; both need polling or a persistent
+socket, which this plugin does not have.
 
 The `-highspeed` variants trade some quality for faster inference.
 

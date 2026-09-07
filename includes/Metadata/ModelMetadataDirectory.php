@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace MiniMax\MiniMaxAiProvider\Metadata;
 
 use MiniMax\MiniMaxAiProvider\Models\ImageGenerationModel;
+use MiniMax\MiniMaxAiProvider\Models\TextToSpeechConversionModel;
 use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
@@ -165,6 +166,56 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	}
 
 	/**
+	 * What the `speech-*` models can do.
+	 *
+	 * `textToSpeechConversion` rather than `speechGeneration`: the distinction
+	 * the SDK draws is between speaking a text that was given (conversion) and
+	 * producing speech from an instruction (generation). MiniMax's T2A endpoint
+	 * takes a `text` field and reads it, which is the former.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return list<CapabilityEnum>
+	 */
+	private function speech_capabilities(): array {
+		return array(
+			CapabilityEnum::textToSpeechConversion(),
+		);
+	}
+
+	/**
+	 * The speech options MiniMax honours.
+	 *
+	 * `outputSpeechVoice` is `voice_setting.voice_id`, which the API requires —
+	 * the model supplies a default when the caller names no voice.
+	 * `outputMimeType` is `audio_setting.format`, and `outputFileType` chooses
+	 * between MiniMax's hex-encoded audio and a URL.
+	 *
+	 * Speed, volume, pitch, emotion, sample rate, bitrate and language boost are
+	 * all real MiniMax parameters with no option in the SDK to carry them; they
+	 * are reachable through `customOptions` and the
+	 * `minimax_convert_text_to_speech_params` filter rather than being declared
+	 * as something they are not.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return list<SupportedOption>
+	 */
+	private function speech_options(): array {
+		return array(
+			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+			new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::audio() ) ) ),
+			new SupportedOption(
+				OptionEnum::outputMimeType(),
+				array( 'audio/mpeg', 'audio/wav', 'audio/flac', 'audio/opus' )
+			),
+			new SupportedOption( OptionEnum::outputSpeechVoice() ),
+			new SupportedOption( OptionEnum::outputFileType() ),
+			new SupportedOption( OptionEnum::customOptions() ),
+		);
+	}
+
+	/**
 	 * Metadata for one model, chosen by what that model actually is.
 	 *
 	 * The live `/v1/models` response does not say what a model can do, so the
@@ -179,6 +230,10 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	private function build_model( string $id, string $name ): ModelMetadata {
 		if ( ImageGenerationModel::MODEL_ID === $id ) {
 			return new ModelMetadata( $id, $name, $this->image_capabilities(), $this->image_options() );
+		}
+
+		if ( TextToSpeechConversionModel::is_speech_model( $id ) ) {
+			return new ModelMetadata( $id, $name, $this->speech_capabilities(), $this->speech_options() );
 		}
 
 		/*
@@ -359,6 +414,11 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 			// Image generation, served from a different endpoint.
 			array( ImageGenerationModel::MODEL_ID, 'MiniMax Image 01' ),
 		);
+
+		// Speech, served from `/v1/t2a_v2`.
+		foreach ( TextToSpeechConversionModel::MODELS as $speech_id => $speech_name ) {
+			$model_list[] = array( $speech_id, $speech_name );
+		}
 
 		$models = array();
 		foreach ( $model_list as $item ) {

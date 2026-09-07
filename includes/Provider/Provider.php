@@ -23,6 +23,7 @@ use MiniMax\MiniMaxAiProvider\Availability\ProviderAvailability;
 use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
 use MiniMax\MiniMaxAiProvider\Models\ImageGenerationModel;
 use MiniMax\MiniMaxAiProvider\Models\TextGenerationModel;
+use MiniMax\MiniMaxAiProvider\Models\TextToSpeechConversionModel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -61,14 +62,21 @@ class Provider extends AbstractApiProvider {
 		$capabilities = $model_metadata->getSupportedCapabilities();
 
 		/*
-		 * Image is checked first because it is the narrower claim. A model that
-		 * declared both would be a metadata bug, but if one ever does, sending
-		 * it to the image endpoint fails loudly rather than returning a picture
-		 * described as text.
+		 * Image and speech are checked before text because both are narrower
+		 * claims. A model that declared text alongside either would be a
+		 * metadata bug, but if one ever does, sending it to the narrower
+		 * endpoint fails loudly rather than returning a picture or an audio
+		 * file described as text.
 		 */
 		foreach ( $capabilities as $capability ) {
 			if ( $capability->isImageGeneration() ) {
 				return new ImageGenerationModel( $model_metadata, $provider_metadata );
+			}
+		}
+
+		foreach ( $capabilities as $capability ) {
+			if ( $capability->isTextToSpeechConversion() ) {
+				return new TextToSpeechConversionModel( $model_metadata, $provider_metadata );
 			}
 		}
 
@@ -99,9 +107,9 @@ class Provider extends AbstractApiProvider {
 
 		if ( version_compare( AiClient::VERSION, '1.2.0', '>=' ) ) { // @phpstan-ignore-line
 			if ( function_exists( '__' ) ) {
-				$provider_metadata_args[] = __( 'High-performance AI models for coding and text generation.', 'alamin-ai-provider-for-minimax' );
+				$provider_metadata_args[] = __( 'High-performance AI models for text, image and speech generation.', 'alamin-ai-provider-for-minimax' );
 			} else {
-				$provider_metadata_args[] = 'High-performance AI models for coding and text generation.';
+				$provider_metadata_args[] = 'High-performance AI models for text, image and speech generation.';
 			}
 		}
 

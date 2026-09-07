@@ -235,9 +235,30 @@ class Settings {
 	 * @return void
 	 */
 	public static function render_model_field(): void {
-		$settings       = self::get_settings();
-		$directory      = new ModelMetadataDirectory();
-		$models         = $directory->listModelMetadata();
+		$settings  = self::get_settings();
+		$directory = new ModelMetadataDirectory();
+
+		/*
+		 * The field is labelled "default model for text generation", so it
+		 * lists text models. It listed everything, which already offered
+		 * `image-01` as a text model and would now offer eight speech models
+		 * too.
+		 */
+		$models = array_values(
+			array_filter(
+				$directory->listModelMetadata(),
+				static function ( $model ): bool {
+					foreach ( $model->getSupportedCapabilities() as $capability ) {
+						if ( $capability->isTextGeneration() ) {
+							return true;
+						}
+					}
+
+					return false;
+				}
+			)
+		);
+
 		$selected_model = $settings['default_model'] ?? '';
 		$option_key     = self::OPTION_KEY;
 
