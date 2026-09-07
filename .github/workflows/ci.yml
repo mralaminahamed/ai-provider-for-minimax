@@ -131,3 +131,50 @@ jobs:
 
       - name: Run PHPUnit
         run: composer test
+
+  # ---------------------------------------------------------------------------
+  # JOB 4 — test-core-sdk
+  #
+  # The suite above resolves wordpress/php-ai-client to the newest release the
+  # constraint allows. WordPress core ships an older one, and that is what the
+  # plugin actually runs against on a real site — so a call added against the
+  # newer SDK passes CI and fatals in production.
+  #
+  # This job pins the version core ships. When core updates its bundled copy,
+  # bump CORE_AI_CLIENT_VERSION; the value is readable from a WordPress install
+  # at wp-includes/php-ai-client/src/AiClient.php (`const VERSION`).
+  # ---------------------------------------------------------------------------
+  test-core-sdk:
+    name: "PHP Tests (AI Client as shipped by WordPress core)"
+    runs-on: ubuntu-latest
+
+    env:
+      CORE_AI_CLIENT_VERSION: "1.3.1"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Pin the AI Client to the version WordPress core ships
+        run: |
+          composer require --working-dir=tools/ai-client --no-interaction --update-no-dev \
+            "wordpress/php-ai-client:${CORE_AI_CLIENT_VERSION}"
+
+      - name: Confirm the pin took
+        run: |
+          installed=$(composer show --working-dir=tools/ai-client --format=json wordpress/php-ai-client | php -r 'echo json_decode(stream_get_contents(STDIN), true)["versions"][0];')
+          echo "Resolved wordpress/php-ai-client: ${installed}"
+          test "${installed#v}" = "${CORE_AI_CLIENT_VERSION}"
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
