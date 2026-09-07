@@ -270,4 +270,34 @@ class ImageGenerationModelTest extends TestCase {
 
 		$this->addToAssertionCount( 1 );
 	}
+
+	/**
+	 * The image endpoint is addressed absolutely.
+	 *
+	 * The image model builds its own request, on a different path from the chat
+	 * model, so it needs its own guard: both returned the relative path the SDK
+	 * handed them and neither could reach MiniMax.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_request_uri_is_absolute(): void {
+		$model  = Provider::model( ImageGenerationModel::MODEL_ID );
+		$method = new ReflectionMethod( ImageGenerationModel::class, 'createRequest' );
+		$method->setAccessible( true );
+
+		$request = $method->invoke(
+			$model,
+			\WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum::POST(),
+			'image_generation',
+			array( 'Content-Type' => 'application/json' ),
+			null
+		);
+
+		$this->assertSame(
+			'https://api.minimax.io/v1/image_generation',
+			$request->getUri()
+		);
+	}
 }
