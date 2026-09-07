@@ -58,6 +58,15 @@ abstract class AbstractTextGenerationModelTest extends TestCase {
 	abstract protected function createModel( string $modelId ): object;
 
 	/**
+	 * The provider's API base URL, without a trailing slash.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string
+	 */
+	abstract protected function getApiBaseUrl(): string;
+
+	/**
 	 * Set up Brain Monkey before each test.
 	 *
 	 * @since 1.3.2
@@ -147,5 +156,41 @@ abstract class AbstractTextGenerationModelTest extends TestCase {
 
 		$this->assertTrue( $request->hasHeader( $header ) );
 		$this->assertEquals( 'wordpress-plugin', $request->getHeaderAsString( $header ) );
+	}
+
+	/**
+	 * The request is addressed somewhere.
+	 *
+	 * The SDK passes `createRequest()` a path relative to the provider's base
+	 * URI and expects an absolute URL back. This plugin returned the relative
+	 * path unchanged, so every request it built named no host and could not be
+	 * sent. The test above already called `createRequest()` — it asserted the
+	 * header and never looked at the URI, which is how the bug survived a test
+	 * that was standing right next to it.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_request_uri_is_absolute(): void {
+		$model      = $this->createModel( $this->getProviderModelId() );
+		$reflection = new \ReflectionMethod( $this->getModelClass(), 'createRequest' );
+		$reflection->setAccessible( true );
+
+		$request = $reflection->invoke(
+			$model,
+			HttpMethodEnum::POST(),
+			'chat/completions',
+			array( 'Content-Type' => 'application/json' ),
+			null
+		);
+
+		$uri = $request->getUri();
+
+		$this->assertNotEmpty(
+			parse_url( $uri, PHP_URL_HOST ),
+			'The request URI names no host, so it cannot be sent.'
+		);
+		$this->assertSame( $this->getApiBaseUrl() . '/chat/completions', $uri );
 	}
 }
