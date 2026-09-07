@@ -3,7 +3,7 @@ Contributors:      mralaminahamed
 Tags:              connector, minimax, llm, text generation, image generation
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag:        1.5.0
+Stable tag:        1.6.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -215,6 +215,23 @@ This plugin connects to the **MiniMax API** (`https://api.minimax.io/v1`) to:
 No data is sent to the MiniMax API until you enter an API key and a WordPress feature triggers a text generation request.
 
 == Changelog ==
+
+= 1.6.0 - 2026-09-07 =
+
+**Added**
+- **Text to speech.** MiniMax's eight `speech-*` models are now offered as text-to-speech models. Choose a voice and a format — MP3, WAV, FLAC or Opus — and get the audio inline or as a URL. Speed, volume, pitch, emotion, sample rate and language boost are reachable through the new `minimax_convert_text_to_speech_params` filter. Only the synchronous endpoint is supported, so text is capped at 10,000 characters, and the limit is refused up front rather than discovered as an API error.
+- **A Test connection button** on the settings page. The page used to say MiniMax was connected as soon as a key was present anywhere, without ever asking MiniMax about it — a key that had been revoked or mistyped read as connected, and the first sign of trouble was a generation failing somewhere else. The check costs nothing: it asks the models endpoint, which authenticates but generates nothing. A network failure is reported as "could not be checked" rather than as a bad key.
+- **An uninstall handler.** Deleting the plugin now removes its settings and its cached model list, which it used to leave in the database for good. API keys are deliberately left alone — they are managed on the Connectors screen and shared with every other AI provider on the site.
+
+**Fixed**
+- **Requests now reach MiniMax.** Every text and image request was addressed to a relative path with no host and could not be sent. This is the fix that matters most in this release.
+- **The default model setting now decides something.** It had been stored since 1.0.0 and read by nothing, so choosing a model changed no request that followed. Your choice is now the model used when a caller does not name one; naming a model explicitly still wins.
+- **A copy installed from git works.** The plugin used to look for a Composer autoloader, not find one, and quietly do nothing — no provider registered, no explanation. It now loads its own classes and needs no `vendor` directory at all.
+
+**Changed**
+- The settings page no longer claims to be connected on the strength of a key existing. It says a key is configured, notes that this is not the same as a key that works, and offers to check.
+- The default-model dropdown lists text models only. It is labelled "for text generation" and was listing everything, so the image model was offered as a text model.
+- Declared as tested against WordPress 7.1.
 
 = 1.5.0 - 2026-08-09 =
 
