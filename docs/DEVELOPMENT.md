@@ -50,11 +50,44 @@ Wiring:
 
 ## Release / zip hygiene
 
-`composer release` runs `composer install --no-dev --optimize-autoloader`, so only the plugin's own classmap is in `vendor/`. `.distignore` keeps development-only files out of the zip — including `tools/`, `tests/`, `docs/`, and all `*.md` (readme.txt is canonical for WP.org). The AI Client SDK is excluded by the `replace` above.
+The plugin autoloads its own classes from `includes/autoload.php` and has no runtime dependency — `composer.json` requires `php` and `ext-json` and nothing else — so **nothing under `vendor/` ships**. `.distignore` excludes `vendor/`, `composer.json` and `composer.lock` along with `tools/`, `tests/`, `docs/` and all `*.md` (readme.txt is canonical for WP.org). The AI Client SDK is excluded by the `replace` above, and provided by core at runtime.
+
+This matches the three official WordPress AI provider plugins, which ship a hand-written `src/autoload.php` and no vendor directory at all.
 
 ## CI
 
-- `ci.yml` (lint/analyze/test) is intentionally disabled — run the checks locally.
-- `svn-deploy.yml` is active and triggers on **tag push** (`*`). It strips a leading `v`, verifies the tag equals the plugin header version, then lints, runs PHPStan, packages, deploys to WordPress.org SVN, and creates a GitHub release.
+`ci.yml` has four jobs: **lint** (PHPCS), **analyze** (PHPStan), **test** (PHPUnit across PHP 7.4–8.3), and **test-core-sdk**.
+
+### Why `test-core-sdk` exists
+
+`tools/ai-client` requires `wordpress/php-ai-client: ^1.2`, which resolves to the newest release — currently 1.4.0. **WordPress core ships an older one.** A call written against the newer SDK therefore passes every other job and fatals on a real site.
+
+That job pins the version core ships (`CORE_AI_CLIENT_VERSION` in `ci.yml`) and runs the suite against it. The difference is not academic: `EmbeddingGenerationModelInterface` arrived in 1.4.0 and does not exist in 1.3.1, which is why the official OpenAI provider guards its embedding model with `interface_exists()`.
+
+**When core updates its bundled copy, bump `CORE_AI_CLIENT_VERSION`.** Read the current value from any WordPress install:
+
+```bash
+grep "const VERSION" wp-includes/php-ai-client/src/AiClient.php
+```
+
+To check the same thing locally:
+
+```bash
+composer require --working-dir=tools/ai-client wordpress/php-ai-client:1.3.1
+vendor/bin/phpunit
+composer install --working-dir=tools/ai-client   # back to the newest
+```
+
+### Workflow state
+
+`ci.yml` is currently **disabled** in the repository (`gh workflow list --all` shows `disabled_manually`). It was switched off on 2026-07-12 after a red run whose cause — PHPStan and PHPUnit not seeing `WordPress\AiClient\*` at all — was fixed later by the `tools/ai-client` side install described above. A fresh clone of `trunk` now passes lint, analyze and test.
+
+Re-enable with:
+
+```bash
+gh workflow enable ci.yml --repo mralaminahamed/ai-provider-for-minimax
+```
+
+`svn-deploy.yml` is active and triggers on **tag push** (`*`). It strips a leading `v`, verifies the tag equals the plugin header version, then lints, runs PHPStan, packages, deploys to WordPress.org SVN, and creates a GitHub release.
 
 A plain push to `trunk` runs nothing that deploys — only pushing a tag ships a release.
