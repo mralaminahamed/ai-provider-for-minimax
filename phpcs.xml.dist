@@ -6,6 +6,7 @@
 
 	<file>./alamin-ai-provider-for-minimax.php</file>
 	<file>./class-ai-provider-for-minimax.php</file>
+	<file>./uninstall.php</file>
 	<file>./includes</file>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>

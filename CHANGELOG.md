@@ -8,6 +8,7 @@
 - Only the synchronous endpoint is implemented, and its 10,000-character limit is refused before the request rather than discovered as MiniMax's "invalid input parameters". The asynchronous task API and the WebSocket stream both need machinery this plugin does not have.
 - The plugin now autoloads its own classes from `includes/autoload.php` and ships no `vendor/` directory. There was never a runtime dependency to justify Composer here — `composer.json` requires `php` and `ext-json` and nothing else — and the three official WordPress AI provider plugins do the same.
 
+- An uninstall handler. Deleting the plugin now removes the `minimax_settings` option and the `minimax_models_cache` transient, which it used to leave behind for good. Credentials are deliberately left alone: `connectors_ai_minimax_api_key` is written by the WordPress Connectors screen and `wp_ai_client_credentials` is shared by every AI provider on the site, so removing either would delete a row this plugin did not create — and in the second case, other providers' keys along with its own.
 ### Changed
 
 - The default-model dropdown lists text models only. It is labelled "for text generation" and listed everything the directory knew about, so `image-01` was already offered as a text model; the speech models would have added eight more.
