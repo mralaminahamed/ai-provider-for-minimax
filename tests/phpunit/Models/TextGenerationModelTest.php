@@ -40,6 +40,10 @@ class TextGenerationModelTest extends AbstractTextGenerationModelTest {
 		return Provider::model( $modelId );
 	}
 
+	protected function getApiBaseUrl(): string {
+		return 'https://api.minimax.io/v1';
+	}
+
 	/**
 	 * Test all 8 fallback models can be instantiated.
 	 *

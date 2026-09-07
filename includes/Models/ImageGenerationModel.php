@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MiniMax\MiniMaxAiProvider\Models;
 
+use MiniMax\MiniMaxAiProvider\Provider\Provider;
 use WordPress\AiClient\Files\Enums\MediaOrientationEnum;
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\DTO\Response;
@@ -55,7 +56,15 @@ class ImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel 
 	/**
 	 * Creates a request object for the provider's API.
 	 *
+	 * The SDK hands this method a path relative to the provider's base URI —
+	 * `image_generation` — and expects an absolute URL back. It was passed
+	 * straight into the `Request`, so every generation request this plugin has
+	 * ever made was addressed to a host-less URI and could not be sent. The
+	 * three official WordPress providers all resolve the path the same way,
+	 * through their provider's `url()`.
+	 *
 	 * @since 1.5.0
+	 * @since 1.6.0 Resolves the path against the provider's base URL.
 	 *
 	 * @param HttpMethodEnum                     $method  The HTTP method.
 	 * @param string                             $path    The API endpoint path, relative to the base URI.
@@ -73,7 +82,7 @@ class ImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel 
 
 		return new Request(
 			$method,
-			$path,
+			Provider::url( $path ),
 			$headers,
 			$data,
 			$this->getRequestOptions()
