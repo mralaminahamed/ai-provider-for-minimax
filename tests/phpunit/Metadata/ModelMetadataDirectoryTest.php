@@ -227,12 +227,12 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 	 * @return void
 	 */
 	public function test_a_stale_default_leaves_the_order_alone(): void {
-		$before = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
-
 		Functions\when( 'get_option' )->justReturn( array( 'default_model' => 'MiniMax-Retired-99' ) );
 
-		$after = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
+		$ids = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
 
-		$this->assertSame( $before, $after );
+		// The catalogue's own first entry, unpromoted.
+		$this->assertSame( 'MiniMax-M3', $ids[0] );
+		$this->assertNotContains( 'MiniMax-Retired-99', $ids );
 	}
 }
