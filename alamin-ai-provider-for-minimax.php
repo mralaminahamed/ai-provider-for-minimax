@@ -35,17 +35,15 @@ define( 'MINIMAX_URL', plugin_dir_url( __FILE__ ) );
 define( 'MINIMAX_PATH', plugin_dir_path( __FILE__ ) );
 
 /*
- * Bail rather than fatal when the autoloader is absent.
+ * The plugin's own autoloader, which ships with the source.
  *
- * A plugin installed from git rather than from a built zip has no vendor
- * directory, and requiring a file that is not there takes the whole site down
- * instead of just this plugin.
+ * This used to load Composer's, and bail silently when `vendor/` was absent —
+ * so a copy installed from git activated, registered nothing and explained
+ * nothing. There is no runtime dependency to justify Composer here:
+ * `composer.json` requires `php` and `ext-json`, and everything in `vendor/`
+ * is development tooling.
  */
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	return;
-}
-
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/includes/autoload.php';
 
 /**
  * Get the main plugin instance.

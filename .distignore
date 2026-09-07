@@ -21,7 +21,15 @@ tests/
 # Dev-only tooling (php-ai-client side install for PHPStan/PHPUnit) — never ships
 tools/
 
-# Composer (phar only; composer.json + composer.lock ship with the plugin)
+# Composer — development only.
+#
+# The plugin autoloads its own classes from includes/autoload.php and has no
+# runtime dependency (composer.json requires php and ext-json, nothing more), so
+# nothing under vendor/ belongs in the zip. The official WordPress AI provider
+# plugins ship no vendor directory either.
+vendor/
+composer.json
+composer.lock
 composer.phar
 
 # IDE

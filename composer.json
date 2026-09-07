@@ -64,14 +64,12 @@
         "phpstan": "@analyze",
         "makepot": "wp i18n make-pot . languages/alamin-ai-provider-for-minimax.pot --package-name=\"AI Provider for MiniMax\" --exclude=node_modules,vendor,docs,release,tests,.wordpress-org,.playwright-mcp,.claude,.remember",
         "release": [
-            "rm -rf release vendor",
+            "rm -rf release",
             "@makepot",
             "mkdir -p release",
-            "composer install --no-dev --optimize-autoloader",
             "rsync -av --exclude-from=.distignore . release/alamin-ai-provider-for-minimax/",
             "cd release && zip -r alamin-ai-provider-for-minimax.zip alamin-ai-provider-for-minimax/",
-            "rm -rf release/alamin-ai-provider-for-minimax/",
-            "composer install"
+            "rm -rf release/alamin-ai-provider-for-minimax/"
         ]
     },
     "config": {
