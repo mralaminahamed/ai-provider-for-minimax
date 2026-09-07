@@ -11,6 +11,7 @@ parameters:
 		- ./includes
 		- ./alamin-ai-provider-for-minimax.php
 		- ./class-ai-provider-for-minimax.php
+		- ./uninstall.php
 	excludePaths:
 		- ./vendor
 		- ./tests
