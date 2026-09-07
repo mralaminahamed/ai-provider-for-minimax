@@ -7,57 +7,88 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-07T08:55:50+00:00\n"
+"POT-Creation-Date: 2026-09-07T09:24:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.13.0-alpha-3eb2dd7\n"
 "X-Domain: alamin-ai-provider-for-minimax\n"
+
+#: includes/Connection/ConnectionTest.php:87
+msgid "No API key is configured."
+msgstr ""
+
+#. translators: %s: error message returned by WordPress.
+#: includes/Connection/ConnectionTest.php:108
+msgid "MiniMax could not be reached: %s"
+msgstr ""
+
+#: includes/Connection/ConnectionTest.php:119
+msgid "Connected. MiniMax accepted the API key."
+msgstr ""
+
+#. translators: %s: error message returned by MiniMax.
+#: includes/Connection/ConnectionTest.php:128
+msgid "MiniMax rejected the API key: %s"
+msgstr ""
+
+#. translators: 1: HTTP status code. 2: error message returned by MiniMax.
+#: includes/Connection/ConnectionTest.php:142
+msgid "MiniMax answered %1$d and the key could not be checked: %2$s"
+msgstr ""
+
+#: includes/Connection/ConnectionTest.php:237
+msgid "no explanation given"
+msgstr ""
 
 #: includes/Provider/Provider.php:110
 msgid "High-performance AI models for text, image and speech generation."
 msgstr ""
 
-#: includes/Settings/Settings.php:64
+#: includes/Settings/Settings.php:82
+msgid "You are not allowed to test this connection."
+msgstr ""
+
+#: includes/Settings/Settings.php:110
 msgid "Settings"
 msgstr ""
 
-#: includes/Settings/Settings.php:65
+#: includes/Settings/Settings.php:111
 msgid "Connectors"
 msgstr ""
 
-#: includes/Settings/Settings.php:79
-#: templates/admin/settings-page.php:17
+#: includes/Settings/Settings.php:125
+#: templates/admin/settings-page.php:19
 msgid "MiniMax Settings"
 msgstr ""
 
-#: includes/Settings/Settings.php:80
+#: includes/Settings/Settings.php:126
 msgid "MiniMax"
 msgstr ""
 
-#: includes/Settings/Settings.php:105
+#: includes/Settings/Settings.php:151
 msgid "General Settings"
 msgstr ""
 
-#: includes/Settings/Settings.php:112
+#: includes/Settings/Settings.php:158
 msgid "Default Model"
 msgstr ""
 
-#: includes/Settings/Settings.php:120
+#: includes/Settings/Settings.php:166
 msgid "Temperature"
 msgstr ""
 
-#: includes/Settings/Settings.php:128
+#: includes/Settings/Settings.php:174
 msgid "Max Tokens"
 msgstr ""
 
-#: includes/Settings/Settings.php:136
+#: includes/Settings/Settings.php:182
 msgid "Top P"
 msgstr ""
 
-#: includes/Settings/Settings.php:144
+#: includes/Settings/Settings.php:190
 msgid "Thinking"
 msgstr ""
 
-#: includes/Settings/Settings.php:152
+#: includes/Settings/Settings.php:198
 msgid "Service Tier"
 msgstr ""
 
@@ -109,11 +140,19 @@ msgstr ""
 msgid "These defaults apply to text generation requests that do not specify their own values. The MiniMax API key itself is managed on the Connectors screen."
 msgstr ""
 
-#: templates/admin/settings-page.php:21
-msgid "MiniMax is connected — an API key is configured. The defaults below apply to new text generation requests."
+#: templates/admin/settings-page.php:24
+msgid "An API key is configured. The defaults below apply to new text generation requests."
+msgstr ""
+
+#: templates/admin/settings-page.php:27
+msgid "A key being present is not the same as a key that works — MiniMax has not been asked until you test it."
+msgstr ""
+
+#: templates/admin/settings-page.php:32
+msgid "Test connection"
 msgstr ""
 
 #. translators: %s: URL of the WordPress Connectors settings screen.
-#: templates/admin/settings-page.php:30
+#: templates/admin/settings-page.php:56
 msgid "No MiniMax API key found. Add your key on the <a href=\"%s\">Connectors screen</a> to activate this provider."
 msgstr ""

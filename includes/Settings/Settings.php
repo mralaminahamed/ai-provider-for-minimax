@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MiniMax\MiniMaxAiProvider\Settings;
 
+use MiniMax\MiniMaxAiProvider\Connection\ConnectionTest;
 use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,6 +29,13 @@ class Settings {
 	 * @since 1.0.0
 	 */
 	public const OPTION_KEY = 'minimax_settings';
+
+	/**
+	 * The `admin-post.php` action behind the connection test.
+	 *
+	 * @since 1.6.0
+	 */
+	public const TEST_ACTION = 'minimax_test_connection';
 
 	/**
 	 * Default model used when none has been chosen.
@@ -50,6 +58,44 @@ class Settings {
 		add_action( 'admin_menu', array( self::class, 'add_settings_page' ) );
 		add_action( 'admin_init', array( self::class, 'register_settings' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( MINIMAX_PLUGIN_FILE ), array( self::class, 'add_action_links' ) );
+
+		add_action( 'admin_post_' . self::TEST_ACTION, array( self::class, 'handle_test_connection' ) );
+
+		/*
+		 * A cached verdict outlives the key it was about. Both places a key can
+		 * be stored are watched, so changing one drops the old answer rather
+		 * than leaving a stale "connected" on the screen.
+		 */
+		add_action( 'update_option_wp_ai_client_credentials', array( ConnectionTest::class, 'forget' ) );
+		add_action( 'update_option_connectors_ai_minimax_api_key', array( ConnectionTest::class, 'forget' ) );
+	}
+
+	/**
+	 * Runs the connection test and returns to the settings page.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public static function handle_test_connection(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to test this connection.', 'alamin-ai-provider-for-minimax' ), '', array( 'response' => 403 ) );
+		}
+
+		check_admin_referer( self::TEST_ACTION );
+
+		ConnectionTest::run();
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'           => 'minimax-settings',
+					'minimax-tested' => '1',
+				),
+				admin_url( 'options-general.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -360,6 +406,8 @@ class Settings {
 		$option_key     = self::OPTION_KEY;
 		$is_connected   = self::has_api_key();
 		$connectors_url = admin_url( 'options-connectors.php' );
+		$test_action    = self::TEST_ACTION;
+		$test_result    = ConnectionTest::last_result();
 
 		require dirname( MINIMAX_PLUGIN_FILE ) . '/templates/admin/settings-page.php';
 	}
@@ -376,21 +424,41 @@ class Settings {
 	 * @return bool True when an API key is present in any supported location.
 	 */
 	public static function has_api_key(): bool {
+		return '' !== self::get_api_key();
+	}
+
+	/**
+	 * The configured MiniMax API key, or an empty string.
+	 *
+	 * Checks the same sources as the AI Client credential filter, in the order
+	 * a site owner would expect them to win: an environment variable set by the
+	 * server, then the WordPress Connectors page option (WP 7.0+), then the
+	 * legacy nested `wp_ai_client_credentials` option.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string
+	 */
+	public static function get_api_key(): string {
 		$env_key = getenv( 'MINIMAX_API_KEY' );
-		if ( ! empty( $env_key ) ) {
-			return true;
+		if ( is_string( $env_key ) && '' !== $env_key ) {
+			return $env_key;
+		}
+
+		if ( ! function_exists( 'get_option' ) ) {
+			return '';
 		}
 
 		$connectors_key = get_option( 'connectors_ai_minimax_api_key', '' );
-		if ( ! empty( $connectors_key ) ) {
-			return true;
+		if ( is_string( $connectors_key ) && '' !== $connectors_key ) {
+			return $connectors_key;
 		}
 
 		$option      = get_option( 'wp_ai_client_credentials', array() );
 		$credentials = is_array( $option ) ? ( $option['minimax'] ?? array() ) : array();
 		$key         = is_array( $credentials ) ? ( $credentials['api_key'] ?? '' ) : '';
 
-		return ! empty( $key );
+		return is_string( $key ) ? $key : '';
 	}
 
 	/**
