@@ -8,8 +8,10 @@
 - Only the synchronous endpoint is implemented, and its 10,000-character limit is refused before the request rather than discovered as MiniMax's "invalid input parameters". The asynchronous task API and the WebSocket stream both need machinery this plugin does not have.
 - The plugin now autoloads its own classes from `includes/autoload.php` and ships no `vendor/` directory. There was never a runtime dependency to justify Composer here — `composer.json` requires `php` and `ext-json` and nothing else — and the three official WordPress AI provider plugins do the same.
 
+- A **Test connection** button on the settings page. The page reported "MiniMax is connected" as soon as a key was present anywhere, without ever asking MiniMax about it — a key that had been revoked, mistyped or copied from the wrong account read as connected, and the first sign of trouble was a generation failing somewhere else. The button asks `GET /v1/models`, which requires authentication and generates nothing, so verifying costs neither tokens nor money. A network failure is reported as "could not be checked" rather than as a bad key, since a firewalled site has learned nothing about its credentials. The verdict is cached for five minutes and dropped whenever a key is changed.
 ### Changed
 
+- The settings page no longer claims the provider is connected on the strength of a key existing. It says a key is configured, notes that this is not the same as one that works, and offers to check.
 - The default-model dropdown lists text models only. It is labelled "for text generation" and listed everything the directory knew about, so `image-01` was already offered as a text model; the speech models would have added eight more.
 - The release build no longer installs and packages a production `vendor/` directory, because nothing under it ships any more.
 

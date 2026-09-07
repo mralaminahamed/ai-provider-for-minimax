@@ -9,6 +9,7 @@ parameters:
 	level: max
 	paths:
 		- ./includes
+		- ./templates
 		- ./alamin-ai-provider-for-minimax.php
 		- ./class-ai-provider-for-minimax.php
 	excludePaths:

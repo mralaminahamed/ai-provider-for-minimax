@@ -7,6 +7,7 @@
 	<file>./alamin-ai-provider-for-minimax.php</file>
 	<file>./class-ai-provider-for-minimax.php</file>
 	<file>./includes</file>
+	<file>./templates</file>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
