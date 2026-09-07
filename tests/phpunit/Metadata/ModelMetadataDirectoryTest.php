@@ -10,7 +10,9 @@ declare(strict_types=1);
 namespace MiniMax\MiniMaxAiProvider\Tests\Metadata;
 
 use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
+use MiniMax\MiniMaxAiProvider\Models\TextToSpeechConversionModel;
 use MiniMax\MiniMaxAiProvider\Tests\AbstractModelMetadataDirectoryTest;
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 
 /**
@@ -29,7 +31,7 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 	}
 
 	protected function getExpectedModelCount(): int {
-		return 9;
+		return 17;
 	}
 
 	/**
@@ -118,6 +120,10 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 	 * so the AI Client would not route an image prompt here. The M2 series is
 	 * text only and must not claim otherwise.
 	 *
+	 * Asserted on the modality values rather than on the presence of the
+	 * `inputModalities` option: the speech models declare that option too, to
+	 * say they take text, and a name-only check counted them as vision.
+	 *
 	 * @since 1.5.0
 	 *
 	 * @return void
@@ -126,14 +132,45 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 		$with_vision = array();
 
 		foreach ( $this->directory->listModelMetadata() as $model ) {
-			$names = array_map( static fn( $opt ) => (string) $opt->getName(), $model->getSupportedOptions() );
+			foreach ( $model->getSupportedOptions() as $option ) {
+				if ( 'inputModalities' !== (string) $option->getName() ) {
+					continue;
+				}
 
-			if ( in_array( 'inputModalities', $names, true ) ) {
-				$with_vision[] = $model->getId();
+				foreach ( (array) $option->getSupportedValues() as $combination ) {
+					foreach ( (array) $combination as $modality ) {
+						if ( $modality instanceof ModalityEnum && $modality->isImage() ) {
+							$with_vision[] = $model->getId();
+							continue 4;
+						}
+					}
+				}
 			}
 		}
 
 		$this->assertSame( array( 'MiniMax-M3' ), $with_vision );
+	}
+
+	/**
+	 * The speech models are speech models, and nothing else.
+	 *
+	 * Declaring `textGeneration` on one would route prompts to an endpoint that
+	 * answers with an audio file.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_speech_models_declare_only_text_to_speech(): void {
+		foreach ( array_keys( TextToSpeechConversionModel::MODELS ) as $model_id ) {
+			$model        = $this->directory->getModelMetadata( $model_id );
+			$capabilities = array_map(
+				static fn( $capability ) => (string) $capability,
+				$model->getSupportedCapabilities()
+			);
+
+			$this->assertSame( array( 'text_to_speech_conversion' ), $capabilities, $model_id );
+		}
 	}
 
 }

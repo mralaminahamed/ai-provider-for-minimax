@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Text to speech. MiniMax's eight `speech-*` models are now offered as text-to-speech models, served from `POST /v1/t2a_v2` — an endpoint that is not OpenAI-shaped in any respect, so the request is built and the response parsed here rather than inherited. Choose a voice through `outputSpeechVoice`, a format through `outputMimeType` (MP3, WAV, FLAC or Opus), and inline audio or an expiring URL through `outputFileType`. Speed, volume, pitch, emotion, sample rate, bitrate and language boost are reachable through custom options or the new `minimax_convert_text_to_speech_params` filter. The official WordPress AI provider for OpenAI declares this capability but does not implement it.
+- Only the synchronous endpoint is implemented, and its 10,000-character limit is refused before the request rather than discovered as MiniMax's "invalid input parameters". The asynchronous task API and the WebSocket stream both need machinery this plugin does not have.
+
+### Changed
+
+- The default-model dropdown lists text models only. It is labelled "for text generation" and listed everything the directory knew about, so `image-01` was already offered as a text model; the speech models would have added eight more.
+
 ### Fixed
 
 - Generation requests are now addressed to MiniMax. The AI Client hands the plugin a path relative to the provider's base URL and expects an absolute URL back; the plugin returned the path unchanged, so every text and image request named no host and could not be sent. The three official WordPress AI providers all resolve the path through their provider's `url()`, and this now does the same.
