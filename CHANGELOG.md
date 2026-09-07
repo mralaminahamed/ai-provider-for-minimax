@@ -6,13 +6,19 @@
 
 - Text to speech. MiniMax's eight `speech-*` models are now offered as text-to-speech models, served from `POST /v1/t2a_v2` — an endpoint that is not OpenAI-shaped in any respect, so the request is built and the response parsed here rather than inherited. Choose a voice through `outputSpeechVoice`, a format through `outputMimeType` (MP3, WAV, FLAC or Opus), and inline audio or an expiring URL through `outputFileType`. Speed, volume, pitch, emotion, sample rate, bitrate and language boost are reachable through custom options or the new `minimax_convert_text_to_speech_params` filter. The official WordPress AI provider for OpenAI declares this capability but does not implement it.
 - Only the synchronous endpoint is implemented, and its 10,000-character limit is refused before the request rather than discovered as MiniMax's "invalid input parameters". The asynchronous task API and the WebSocket stream both need machinery this plugin does not have.
+- The plugin now autoloads its own classes from `includes/autoload.php` and ships no `vendor/` directory. There was never a runtime dependency to justify Composer here — `composer.json` requires `php` and `ext-json` and nothing else — and the three official WordPress AI provider plugins do the same.
 
 ### Changed
 
 - The default-model dropdown lists text models only. It is labelled "for text generation" and listed everything the directory knew about, so `image-01` was already offered as a text model; the speech models would have added eight more.
+- The release build no longer installs and packages a production `vendor/` directory, because nothing under it ships any more.
 
+- Declared as tested against WordPress 7.1.
 ### Fixed
 
+- The chosen default model now decides which model the AI Client reaches for. The setting has been stored since 1.0.0 and never read: picking one wrote a row to `wp_options` and changed no request that followed. The catalogue is now returned with that model first, which is what the AI Client reads — it keeps matching models in catalogue order and, when the caller names neither a model nor a preference, uses the first. Nothing is filtered, so a caller who names another model still gets it.
+- A copy installed from git no longer activates and silently does nothing. It used to look for Composer's autoloader, find no `vendor/`, and return without registering a provider or saying why.
+- Refreshed the translation template, which still carried the old provider description.
 - Generation requests are now addressed to MiniMax. The AI Client hands the plugin a path relative to the provider's base URL and expects an absolute URL back; the plugin returned the path unchanged, so every text and image request named no host and could not be sent. The three official WordPress AI providers all resolve the path through their provider's `url()`, and this now does the same.
 
 ## [1.5.0] - 2026-08-09

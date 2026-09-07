@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace MiniMax\MiniMaxAiProvider\Metadata;
 
 use MiniMax\MiniMaxAiProvider\Models\ImageGenerationModel;
+use MiniMax\MiniMaxAiProvider\Settings\Settings;
 use MiniMax\MiniMaxAiProvider\Models\TextToSpeechConversionModel;
 use WordPress\AiClient\Common\Exception\InvalidArgumentException;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
@@ -41,15 +42,75 @@ class ModelMetadataDirectory implements ModelMetadataDirectoryInterface {
 	 * {@inheritDoc}
 	 *
 	 * @since 1.0.0
+	 * @since 1.6.0 Honours the configured default model.
 	 */
 	public function listModelMetadata(): array {
 		$models = $this->fetch_models_from_api();
 
-		if ( ! empty( $models ) ) {
-			return array_values( $models );
+		if ( empty( $models ) ) {
+			$models = $this->get_fallback_models();
 		}
 
-		return array_values( $this->get_fallback_models() );
+		return $this->put_default_model_first( array_values( $models ) );
+	}
+
+	/**
+	 * Moves the site's chosen default model to the front of the list.
+	 *
+	 * The settings page has stored a default model since 1.0.0 and nothing has
+	 * ever read it. Picking one wrote a row to `wp_options` and changed no
+	 * request that followed — the same way temperature, max tokens and top_p
+	 * were inert until 1.5.0.
+	 *
+	 * Order is how the choice is expressed, because order is what the AI Client
+	 * reads. `ProviderRegistry::findProviderModelsMetadataForSupport()` walks
+	 * `listModelMetadata()` and keeps the models that meet the request's
+	 * requirements, in that order; `PromptBuilder` then takes an explicitly
+	 * named model first, an explicit preference list second, and otherwise
+	 * "the first candidate discovered". Being first is therefore exactly what
+	 * "default" means here.
+	 *
+	 * Nothing is filtered. A caller who names another model still gets it; this
+	 * only decides who wins when nobody expressed an opinion.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param ModelMetadata[] $models The models, in catalogue order.
+	 *
+	 * @phpstan-param list<ModelMetadata> $models
+	 *
+	 * @return list<ModelMetadata>
+	 */
+	private function put_default_model_first( array $models ): array {
+		if ( count( $models ) < 2 || ! function_exists( 'get_option' ) ) {
+			return $models;
+		}
+
+		$settings = Settings::get_settings();
+		$default  = $settings['default_model'] ?? '';
+
+		if ( ! is_string( $default ) || '' === $default ) {
+			return $models;
+		}
+
+		$preferred = array();
+		$rest      = array();
+
+		foreach ( $models as $model ) {
+			if ( $model->getId() === $default ) {
+				$preferred[] = $model;
+			} else {
+				$rest[] = $model;
+			}
+		}
+
+		/*
+		 * A default that names a model the catalogue no longer carries is left
+		 * alone rather than treated as an error: the live list changes under
+		 * the site, and a stale setting should cost nothing more than being
+		 * ignored.
+		 */
+		return array_merge( $preferred, $rest );
 	}
 
 	/**

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MiniMax\MiniMaxAiProvider\Tests\Metadata;
 
+use Brain\Monkey\Functions;
 use MiniMax\MiniMaxAiProvider\Metadata\ModelMetadataDirectory;
 use MiniMax\MiniMaxAiProvider\Models\TextToSpeechConversionModel;
 use MiniMax\MiniMaxAiProvider\Tests\AbstractModelMetadataDirectoryTest;
@@ -173,4 +174,65 @@ class ModelMetadataDirectoryTest extends AbstractModelMetadataDirectoryTest {
 		}
 	}
 
+	/**
+	 * The configured default model is the one the AI Client reaches first.
+	 *
+	 * The setting has existed since 1.0.0 and nothing read it. Order is how the
+	 * choice has to be expressed: the registry keeps matching models in
+	 * `listModelMetadata()` order, and `PromptBuilder` falls back to "the first
+	 * candidate discovered" when the caller names neither a model nor a
+	 * preference list.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_configured_default_model_is_listed_first(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'default_model' => 'MiniMax-M2.5' ) );
+
+		$ids = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
+
+		$this->assertSame( 'MiniMax-M2.5', $ids[0] );
+	}
+
+	/**
+	 * Choosing a default drops nothing from the catalogue.
+	 *
+	 * Reordering, not filtering: a caller who names another model still gets it.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_choosing_a_default_does_not_hide_other_models(): void {
+		$all = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
+
+		Functions\when( 'get_option' )->justReturn( array( 'default_model' => 'MiniMax-M2.5' ) );
+
+		$reordered = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
+
+		sort( $all );
+		sort( $reordered );
+		$this->assertSame( $all, $reordered );
+	}
+
+	/**
+	 * A default naming a model the catalogue no longer carries costs nothing.
+	 *
+	 * The live list changes under the site, so a stale setting should be
+	 * ignored rather than treated as an error.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	public function test_a_stale_default_leaves_the_order_alone(): void {
+		Functions\when( 'get_option' )->justReturn( array( 'default_model' => 'MiniMax-Retired-99' ) );
+
+		$ids = array_map( static fn( $m ) => $m->getId(), ( new ModelMetadataDirectory() )->listModelMetadata() );
+
+		// The catalogue's own first entry, unpromoted.
+		$this->assertSame( 'MiniMax-M3', $ids[0] );
+		$this->assertNotContains( 'MiniMax-Retired-99', $ids );
+	}
 }
