@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1] - 2026-09-12
+
+### Changed
+
+- Directory listing copy: the readme title, tags and short description now lead with "connector" and name image generation, matching what people search the plugin directory for. No code changes.
+
 ## [1.5.0] - 2026-08-09
 
 ### Added

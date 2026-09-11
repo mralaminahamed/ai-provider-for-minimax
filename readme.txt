@@ -3,7 +3,7 @@ Contributors:      mralaminahamed
 Tags:              connector, minimax, llm, text generation, image generation
 Requires at least: 7.0
 Tested up to:      7.0
-Stable tag:        1.5.0
+Stable tag:        1.5.1
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -215,6 +215,11 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 
 == Changelog ==
 
+= 1.5.1 - 2026-09-12 =
+
+**Changed**
+- Listing copy only: the plugin title, tags and short description now say "connector" and name image generation, which is what people search the directory for. No code changes — the plugin behaves exactly as 1.5.0 did.
+
 = 1.5.0 - 2026-08-09 =
 
 **Added**
@@ -306,6 +311,9 @@ Both renames are internal. No hook, option, setting or model id changes, and not
 * Support for `MINIMAX_API_KEY` environment variable.
 
 == Upgrade Notice ==
+
+= 1.5.1 =
+Directory listing copy only. Nothing to do — the plugin is unchanged from 1.5.0.
 
 = 1.5.0 =
 Adds image generation via image-01, and declares chat-history support. Settings now actually apply to requests — temperature, max tokens and top_p were stored and never read. Adds thinking mode and service tier. Removes the presence and frequency penalty controls, which MiniMax ignores. Internal PHP namespace and class names changed; no database changes and no settings to redo.
