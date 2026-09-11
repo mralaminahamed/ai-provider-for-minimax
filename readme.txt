@@ -3,7 +3,7 @@ Contributors:      mralaminahamed
 Tags:              connector, minimax, llm, text generation, image generation
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag:        1.5.0
+Stable tag:        1.6.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -216,6 +216,26 @@ No data is sent to the MiniMax API until you enter an API key and a WordPress fe
 
 == Changelog ==
 
+= 1.6.0 - 2026-09-12 =
+
+**Added**
+- **Text to speech.** MiniMax's eight `speech-*` models are now offered as text-to-speech models, served from MiniMax's own `/v1/t2a_v2` endpoint. Choose a voice, an output format (MP3, WAV, FLAC or Opus) and inline audio or an expiring URL. Speed, volume, pitch, emotion, sample rate, bitrate and language boost are reachable through custom options or the new `minimax_convert_text_to_speech_params` filter. Only the synchronous endpoint is implemented, so its 10,000-character limit is refused up front rather than reported by MiniMax as an invalid parameter.
+- **A Test connection button** on the settings page. The page used to say "MiniMax is connected" as soon as a key existed anywhere, without ever asking MiniMax — a revoked, mistyped or wrong-account key read as connected, and the first sign of trouble was a generation failing somewhere else. The check asks for the model list, which needs authentication and generates nothing, so it costs neither tokens nor money. A network failure is reported as "could not be checked", not as a bad key. The verdict is cached for five minutes and dropped whenever the key changes.
+- **An uninstall handler.** Deleting the plugin now removes the `minimax_settings` option and the `minimax_models_cache` transient, which it used to leave behind for good. Your API key is deliberately left alone: it belongs to the WordPress Connectors screen and, in the shared case, to every AI provider on the site.
+
+**Changed**
+- The plugin autoloads its own classes and ships no `vendor/` directory. There was never a runtime dependency to justify Composer here.
+- The settings page no longer claims the provider is connected on the strength of a key existing. It says a key is configured, notes that this is not the same as one that works, and offers to check.
+- The default-model dropdown lists text models only. It is labelled "for text generation" but listed everything, so `image-01` was already offered as a text model and the speech models would have added eight more.
+- Declared as tested against WordPress 7.1.
+- Directory listing copy: the title, tags and short description now say "connector" and name image generation, which is what people search for.
+
+**Fixed**
+- **The chosen default model now decides which model is used.** The setting has been stored since 1.0.0 and never read: picking one wrote a row to the database and changed no request that followed. Nothing is filtered, so a caller that names another model still gets it.
+- **Generation requests are now addressed to MiniMax.** The plugin returned a relative path where the AI Client expects an absolute URL, so every text and image request named no host and could not be sent.
+- A copy installed from git no longer activates and silently does nothing. It used to look for Composer's autoloader, find none, and return without registering a provider or saying why.
+- Refreshed the translation template, which still carried the old provider description.
+
 = 1.5.0 - 2026-08-09 =
 
 **Added**
@@ -307,6 +327,9 @@ Both renames are internal. No hook, option, setting or model id changes, and not
 * Support for `MINIMAX_API_KEY` environment variable.
 
 == Upgrade Notice ==
+
+= 1.6.0 =
+Adds text to speech, a Test connection button and an uninstall handler. Fixes two faults that stopped generation outright: requests were sent without a host, and the default model you picked was never used. No database changes and no settings to redo.
 
 = 1.5.0 =
 Adds image generation via image-01, and declares chat-history support. Settings now actually apply to requests — temperature, max tokens and top_p were stored and never read. Adds thinking mode and service tier. Removes the presence and frequency penalty controls, which MiniMax ignores. Internal PHP namespace and class names changed; no database changes and no settings to redo.
